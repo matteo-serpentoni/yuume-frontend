@@ -1,0 +1,29 @@
+.orb-container {
+  position: relative;
+  z-index: 2;
+  transition: width 0.3s, height 0.3s, border-radius 0.3s;
+  box-shadow: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.orb-shiny-text {
+  font-size: 0.85rem;
+  background: linear-gradient(90deg, #fff 20%, #a084ff 40%, #6f6fff 60%, #fff 80%);
+  background-size: 200% auto;
+  color: #fff;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shiny-move 10s linear infinite;
+  display: inline-block;
+}
+
+@keyframes shiny-move {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
