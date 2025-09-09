@@ -8,7 +8,7 @@ function App() {
   const [enlarged, setEnlarged] = useState(false);
 
   return (
-    <Router>
+    <Router basename="/widget">
       <Routes>
         {/* Homepage con l'orb */}
         <Route path="/" element={
