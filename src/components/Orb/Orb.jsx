@@ -363,7 +363,10 @@ export default function Orb({
             right: "60px",
             zIndex: 15
           }}>
-            <CloseButton onClick={() => setEnlarged(false)} />
+            <CloseButton onClick={() => {
+              setEnlarged(false);
+              window.parent.postMessage({ type: 'resize', enlarged: false }, '*');
+            }} />
           </div>
 
           {children}
@@ -410,10 +413,6 @@ export default function Orb({
               backgroundClip: "text",
               textFillColor: "transparent"
             }}
-            onClick={e => {
-              e.stopPropagation();
-              setEnlarged(true);
-            }}
           >
             <div
               style={{
@@ -428,6 +427,7 @@ export default function Orb({
                 onClick={(e) => {
                   e.stopPropagation();
                   setEnlarged(true);
+                  window.parent.postMessage({ type: 'resize', enlarged: true }, '*');
                 }}
               />
             </div>

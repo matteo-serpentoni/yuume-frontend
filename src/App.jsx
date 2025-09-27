@@ -6,16 +6,17 @@ import AppInstalled from './components/AppInstalled/AppInstalled';
 
 function App() {
   const [enlarged, setEnlarged] = useState(false);
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
-    <Router basename="/widget">
+    <Router basename={isDevelopment ? "" : "/widget"}>
       <Routes>
         {/* Homepage con l'orb */}
         <Route path="/" element={
           <div className="App" style={{
             width: '100vw',
             height: '100vh',
-            background: '#232733',
+            background: new URLSearchParams(window.location.search).get('embed') ? 'transparent' : '#232733',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'

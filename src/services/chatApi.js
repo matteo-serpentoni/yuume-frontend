@@ -8,32 +8,15 @@ export class ChatApiError extends Error {
     }
 }
 
-export const sendMessage = async (message, sessionId, meta = {}) => {
+export const sendMessage = async (message, sessionId, shopDomain, meta = {}) => {
     try {
-        const getShopDomain = () => {
-            // Prima prova a prenderlo dai parametri URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const shopFromUrl = urlParams.get('shop');
-
-            if (shopFromUrl) {
-                return shopFromUrl;
-            }
-
-            // Fallback (ma non funzionerà per CORS)
-            try {
-                return window.parent.location.hostname;
-            } catch (error) {
-                return window.location.hostname;
-            }
-        };
-
         const response = await fetch(`${API_BASE_URL}/api/chat`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 message,
                 sessionId,
-                shopDomain: getShopDomain(),
+                shopDomain, // Usa il parametro ricevuto
                 meta: { lang: navigator.language || "it", ...meta }
             })
         });
