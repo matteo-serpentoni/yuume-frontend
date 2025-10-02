@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import MessageChips from "./MessageChips";
 import { formatPrice, truncateText, extractProductName } from "../../utils/messageHelpers";

@@ -1,6 +1,6 @@
-import React from "react";
 import TextMessage from "./TextMessage";
 import ProductCards from "./ProductCards";
+import OrderCards from "./OrderCards";
 
 const MessageRenderer = ({ message, onChipClick }) => {
     if (message.sender === "user") {
@@ -11,10 +11,13 @@ const MessageRenderer = ({ message, onChipClick }) => {
         );
     }
 
-    // Assistant messages - gestisci i nuovi tipi
+    // Assistant messages - gestisci i tre tipi
     switch (message.type) {
         case "product_cards":
             return <ProductCards message={message} onChipClick={onChipClick} />;
+
+        case "order_cards":
+            return <OrderCards message={message} onChipClick={onChipClick} />;
 
         case "text":
         default:
