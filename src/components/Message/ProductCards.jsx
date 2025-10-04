@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import MessageChips from "./MessageChips";
+import AddToCartButton from "./AddToCartButton";
 import { formatPrice, truncateText, extractProductName } from "../../utils/messageHelpers";
 
-const ProductCard = ({ product, index }) => {
+const ProductCard = ({ product, index, onAddToCart }) => {
     const {
+        id,
+        variantId,
         name,
         price,
         image,
@@ -11,19 +14,22 @@ const ProductCard = ({ product, index }) => {
         availability,
         url,
         brand,
-        category
+        category,
+        productUrl
     } = product;
 
     const handleCardClick = () => {
-        if (url) {
-            window.open(url, "_blank");
+        const linkUrl = productUrl || url;
+        if (linkUrl) {
+            window.open(linkUrl, "_blank");
         }
     };
 
-    const handleButtonClick = (e) => {
+    const handleViewClick = (e) => {
         e.stopPropagation();
-        if (url) {
-            window.open(url, "_blank");
+        const linkUrl = productUrl || url;
+        if (linkUrl) {
+            window.open(linkUrl, "_blank");
         }
     };
 
@@ -36,14 +42,14 @@ const ProductCard = ({ product, index }) => {
                 display: "flex",
                 alignItems: "flex-start",
                 gap: 12,
-                padding: 8,
+                padding: 12,
                 border: "1px solid #e5e7eb",
                 borderRadius: 8,
                 background: "#fff",
                 boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
                 transition: "all 0.2s ease",
-                cursor: url ? "pointer" : "default",
-                minHeight: 70
+                cursor: (productUrl || url) ? "pointer" : "default",
+                minHeight: 90
             }}
             whileHover={{
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
@@ -53,8 +59,8 @@ const ProductCard = ({ product, index }) => {
         >
             {/* Product Image */}
             <div style={{
-                width: 60,
-                height: 60,
+                width: 70,
+                height: 70,
                 borderRadius: 6,
                 overflow: "hidden",
                 flexShrink: 0,
@@ -72,7 +78,7 @@ const ProductCard = ({ product, index }) => {
                         onError={(e) => {
                             e.target.style.display = "none";
                             e.target.parentNode.innerHTML = `
-                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:24px;">
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:28px;">
                   📦
                 </div>
               `;
@@ -86,7 +92,7 @@ const ProductCard = ({ product, index }) => {
                         alignItems: "center",
                         justifyContent: "center",
                         color: "#9ca3af",
-                        fontSize: 24
+                        fontSize: 28
                     }}>
                         📦
                     </div>
@@ -98,7 +104,7 @@ const ProductCard = ({ product, index }) => {
                 flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                gap: 4,
+                gap: 6,
                 minWidth: 0
             }}>
                 {/* Product Name */}
@@ -137,16 +143,18 @@ const ProductCard = ({ product, index }) => {
                     </div>
                 )}
 
-                {/* Price & Action Row */}
+                {/* Price & Actions Row */}
                 <div style={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    marginTop: 4
+                    marginTop: 4,
+                    gap: 8,
+                    flexWrap: "wrap"
                 }}>
                     {/* Price */}
                     <div style={{
-                        fontSize: 13,
+                        fontSize: 15,
                         fontWeight: 700,
                         color: "#059669"
                     }}>
@@ -157,32 +165,52 @@ const ProductCard = ({ product, index }) => {
                     {availability && availability !== "unknown" && (
                         <div style={{
                             fontSize: 10,
-                            color: availability === "disponibile" ? "#059669" : "#dc2626",
+                            color: availability === true || availability === "disponibile" ? "#059669" : "#dc2626",
                             fontWeight: 600,
                             textTransform: "uppercase"
                         }}>
-                            {availability}
+                            {availability === true ? "Disponibile" : availability}
+                        </div>
+                    )}
+                </div>
+
+                {/* Action Buttons Row */}
+                <div style={{
+                    display: "flex",
+                    gap: 8,
+                    marginTop: 4
+                }}>
+                    {/* Add to Cart Button */}
+                    {variantId && (
+                        <div onClick={(e) => e.stopPropagation()}>
+                            <AddToCartButton
+                                variantId={variantId}
+                                productName={name}
+                                onAddToCart={onAddToCart}
+                                theme="light"
+                            />
                         </div>
                     )}
 
-                    {/* Action Button */}
-                    {url && (
+                    {/* View Product Button */}
+                    {(productUrl || url) && (
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             style={{
-                                background: "#6366f1",
-                                color: "white",
-                                border: "none",
-                                padding: "4px 8px",
-                                borderRadius: 4,
-                                fontSize: 10,
+                                background: "transparent",
+                                color: "#6366f1",
+                                border: "1px solid #6366f1",
+                                padding: "8px 16px",
+                                borderRadius: 6,
+                                fontSize: 12,
                                 fontWeight: 600,
-                                cursor: "pointer"
+                                cursor: "pointer",
+                                whiteSpace: "nowrap"
                             }}
-                            onClick={handleButtonClick}
+                            onClick={handleViewClick}
                         >
-                            Vedi
+                            Vedi dettagli
                         </motion.button>
                     )}
                 </div>
@@ -191,7 +219,7 @@ const ProductCard = ({ product, index }) => {
     );
 };
 
-const ProductCards = ({ message, onChipClick }) => {
+const ProductCards = ({ message, onChipClick, onAddToCart }) => {
     const { products = [], title, message: displayMessage, total_count } = message;
 
     if (!Array.isArray(products) || products.length === 0) {
@@ -258,13 +286,14 @@ const ProductCards = ({ message, onChipClick }) => {
             <div style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 8
+                gap: 10
             }}>
                 {products.map((product, index) => (
                     <ProductCard
                         key={product.id || index}
                         product={product}
                         index={index}
+                        onAddToCart={onAddToCart}
                     />
                 ))}
             </div>

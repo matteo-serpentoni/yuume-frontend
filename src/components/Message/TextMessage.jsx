@@ -48,7 +48,6 @@ const TextMessage = ({ message, onChipClick }) => {
                     gap: 6,
                     marginBottom: 8
                 }}>
-                    <span>💬</span>
                     {message.title}
                 </div>
             )}
