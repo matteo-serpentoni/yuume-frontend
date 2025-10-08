@@ -1,10 +1,12 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import MessageRenderer from "../Message/MessageRender";
 import TypingIndicator from "./TypingIndicator";
 
-const MessageList = ({ messages, loading, onChipClick }) => {
+const MessageList = ({ messages, loading, onChipClick, shopDomain }) => {
     const messagesEndRef = useRef(null);
+
+    console.log('🟢 MessageList - shopDomain ricevuto:', shopDomain);
 
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -70,14 +72,12 @@ const MessageList = ({ messages, loading, onChipClick }) => {
                                 textAlign: msg.sender === "user" ? "right" : "left"
                             }}
                         >
-                            <MessageRenderer message={msg} onChipClick={onChipClick} />
+                            <MessageRenderer message={msg} onChipClick={onChipClick} shopDomain={shopDomain} />
                         </motion.div>
                     </div>
                 ))}
             </AnimatePresence>
-
             {loading && <TypingIndicator />}
-
             <div ref={messagesEndRef} />
         </div>
     );

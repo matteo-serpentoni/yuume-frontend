@@ -54,6 +54,127 @@
       }, '*');
     }
 
+    // Gestisci add to cart
+    if (event.source === iframe.contentWindow && event.data.type === 'YUUME_ADD_TO_CART') {
+      console.log('📥 Ricevuta richiesta add to cart:', event.data);
+
+      let addDataCache = null;
+      let cartCache = null;
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          items: [{
+            id: event.data.variantId,
+            quantity: event.data.quantity
+          }]
+        })
+      })
+        .then(response => {
+          if (!response.ok) throw new Error('Errore aggiunta al carrello');
+          return response.json();
+        })
+        .then(addData => {
+          addDataCache = addData;
+          console.log('✅ Prodotto aggiunto con successo:', addData);
+          // Fetch del carrello aggiornato
+          return fetch('/cart.js', { credentials: 'same-origin' }).then(r => r.json());
+        })
+        .then(cart => {
+          cartCache = cart;
+          console.log('📊 Carrello completo:', cart);
+
+          // Aggiorna badge numerici se presenti
+          const itemCount = cart.item_count;
+          const cartCountSelectors = [
+            '.cart-count-bubble',
+            '[data-cart-count]',
+            '.cart-count',
+            '.cart__count',
+            '#CartCount',
+            '.header__cart-count',
+            '[id*="cart-count" i]',
+            '[class*="cart-count" i]',
+            '.cart-link__bubble',
+            '[data-header-cart-count]',
+            'span[data-cart-item-count]',
+            '.cart-icon-bubble',
+            '#cart-icon-bubble .cart-count-bubble'
+          ];
+
+          let badgesUpdated = 0;
+          cartCountSelectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(element => {
+              if (element.classList.contains('cart-count-bubble')) {
+                element.innerHTML = `
+              <span aria-hidden="true">${itemCount}</span>
+              <span class="visually-hidden">${itemCount} item${itemCount !== 1 ? 's' : ''}</span>
+            `;
+              } else {
+                element.textContent = itemCount;
+              }
+              if (element.hasAttribute('data-cart-count')) {
+                element.setAttribute('data-cart-count', itemCount);
+              }
+              badgesUpdated++;
+            });
+          });
+          console.log(`✅ ${badgesUpdated} badge(s) del carrello aggiornati`);
+
+          // === NUOVO SISTEMA AUTO-DETECT SECTIONS ===
+          const detectedSections = new Set();
+
+          // 1) Se c'è il bubble, prendi la sua section parent
+          const bubble = document.getElementById('cart-icon-bubble');
+          const parentSection = bubble && bubble.closest('[id^="shopify-section-"]');
+          if (parentSection) detectedSections.add(parentSection.id.replace('shopify-section-', ''));
+
+          // 2) Aggiungi classici se esistono
+          ['cart-icon-bubble', 'cart-drawer', 'cart-notification', 'header'].forEach(id => {
+            if (document.getElementById(`shopify-section-${id}`)) detectedSections.add(id);
+          });
+
+          const ids = Array.from(detectedSections);
+          console.log('🧭 Sections da aggiornare:', ids);
+
+          if (ids.length) {
+            return fetch(`/?sections=${ids.join(',')}`, { credentials: 'same-origin' })
+              .then(r => r.json())
+              .then(json => {
+                ids.forEach(id => {
+                  const el = document.getElementById(`shopify-section-${id}`);
+                  if (el && json[id]) el.innerHTML = json[id];
+                });
+                console.log(`🔄 Sections aggiornate: ${ids.join(', ')}`);
+
+                // Dispatch eventi dopo aggiornamento
+                document.dispatchEvent(new Event('cart:refresh'));
+                document.dispatchEvent(new Event('cart:updated'));
+                document.dispatchEvent(new CustomEvent('yuume:cart-updated', { detail: cart }));
+              })
+              .catch(err => console.warn('Errore aggiornamento sections:', err));
+          }
+        })
+        .then(() => {
+          // Invia risposta al widget
+          iframe.contentWindow.postMessage({
+            type: 'YUUME_ADD_TO_CART_RESPONSE',
+            success: true,
+            data: { addData: addDataCache, cart: cartCache }
+          }, '*');
+        })
+        .catch(error => {
+          console.error('❌ Errore aggiunta al carrello:', error);
+          iframe.contentWindow.postMessage({
+            type: 'YUUME_ADD_TO_CART_RESPONSE',
+            success: false,
+            error: error.message
+          }, '*');
+        });
+    }
+
     // Gestisci resize esistente
     if (event.data.type === 'resize') {
       if (event.data.enlarged) {

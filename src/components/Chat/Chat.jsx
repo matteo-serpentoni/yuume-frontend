@@ -7,7 +7,9 @@ import MessageInput from "./MessageInput";
 
 const Chat = () => {
     const sessionId = useSessionId();
-    const { messages, loading, sendMessage } = useChat(sessionId);
+    const { messages, loading, shopDomain, sendMessage } = useChat(sessionId);
+
+    console.log('🔵 Chat.jsx - shopDomain:', shopDomain);
 
     const handleChipClick = (chipText) => {
         if (!loading) {
@@ -21,6 +23,7 @@ const Chat = () => {
                 messages={messages}
                 loading={loading}
                 onChipClick={handleChipClick}
+                shopDomain={shopDomain}
             />
 
             <MessageInput

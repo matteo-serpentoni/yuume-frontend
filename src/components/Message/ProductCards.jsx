@@ -1,225 +1,174 @@
 import { motion } from "framer-motion";
 import MessageChips from "./MessageChips";
 import AddToCartButton from "./AddToCartButton";
-import { formatPrice, truncateText, extractProductName } from "../../utils/messageHelpers";
 
-const ProductCard = ({ product, index, onAddToCart }) => {
+const ProductCard = ({ product, index, shopDomain }) => {
     const {
-        id,
         variantId,
         name,
         price,
         image,
-        description,
         availability,
-        url,
         brand,
-        category,
-        productUrl
+        category
     } = product;
 
-    const handleCardClick = () => {
-        const linkUrl = productUrl || url;
-        if (linkUrl) {
-            window.open(linkUrl, "_blank");
-        }
+    const extractProductName = (name) => {
+        return name?.split('|')[0]?.trim() || name;
     };
 
-    const handleViewClick = (e) => {
-        e.stopPropagation();
-        const linkUrl = productUrl || url;
-        if (linkUrl) {
-            window.open(linkUrl, "_blank");
-        }
+    const formatPrice = (price) => {
+        if (!price) return '';
+        return price.toString().replace('€', '€');
     };
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.05 }}
             style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 12,
-                padding: 12,
-                border: "1px solid #e5e7eb",
-                borderRadius: 8,
-                background: "#fff",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                transition: "all 0.2s ease",
-                cursor: (productUrl || url) ? "pointer" : "default",
-                minHeight: 90
+                width: '100%',
+                maxWidth: '100%',
+                height: '110px',
+                padding: '12px',
+                border: 'none',
+                borderRadius: '12px',
+                background: '#fff',
+                boxShadow: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
             }}
-            whileHover={{
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                transform: "translateY(-2px)"
-            }}
-            onClick={handleCardClick}
         >
-            {/* Product Image */}
+            {/* Header con immagine e info */}
             <div style={{
-                width: 70,
-                height: 70,
-                borderRadius: 6,
-                overflow: "hidden",
-                flexShrink: 0,
-                background: "#f3f4f6"
+                display: 'flex',
+                gap: '10px',
+                alignItems: 'flex-start'
             }}>
-                {image ? (
-                    <img
-                        src={image}
-                        alt={name}
-                        style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover"
-                        }}
-                        onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.parentNode.innerHTML = `
-                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:28px;">
-                  📦
+                {/* Product Image */}
+                <div style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                    background: '#f3f4f6'
+                }}>
+                    {image ? (
+                        <img
+                            src={image}
+                            alt={name}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                            }}
+                        />
+                    ) : (
+                        <div style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '20px'
+                        }}>
+                            🎁
+                        </div>
+                    )}
                 </div>
-              `;
-                        }}
-                    />
-                ) : (
+
+                {/* Product Info */}
+                <div style={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px'
+                }}>
+                    {/* Product Name */}
                     <div style={{
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#9ca3af",
-                        fontSize: 28
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#111827',
+                        lineHeight: 1.2,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
                     }}>
-                        📦
+                        {extractProductName(name) || "Prodotto"}
                     </div>
-                )}
+
+                    {/* Brand & Category */}
+                    {(brand || category) && (
+                        <div style={{
+                            fontSize: '11px',
+                            color: '#6b7280',
+                            fontWeight: 500,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}>
+                            {brand && category ? `${brand} • ${category}` : brand || category}
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* Product Info */}
+            {/* Footer con prezzo e bottone */}
             <div style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                gap: 6,
-                minWidth: 0
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '10px'
             }}>
-                {/* Product Name */}
+                {/* Price e disponibilità */}
                 <div style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: "#111827",
-                    lineHeight: 1.3
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1px'
                 }}>
-                    {extractProductName(name) || "Prodotto"}
-                </div>
-
-                {/* Brand & Category */}
-                {(brand || category) && (
                     <div style={{
-                        fontSize: 11,
-                        color: "#6b7280",
-                        fontWeight: 500
-                    }}>
-                        {brand && category ? `${brand} • ${category}` : brand || category}
-                    </div>
-                )}
-
-                {/* Description */}
-                {description && (
-                    <div style={{
-                        fontSize: 12,
-                        color: "#6b7280",
-                        lineHeight: 1.4,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden"
-                    }}>
-                        {truncateText(description, 120)}
-                    </div>
-                )}
-
-                {/* Price & Actions Row */}
-                <div style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: 4,
-                    gap: 8,
-                    flexWrap: "wrap"
-                }}>
-                    {/* Price */}
-                    <div style={{
-                        fontSize: 15,
+                        fontSize: '16px',
                         fontWeight: 700,
-                        color: "#059669"
+                        color: '#059669',
+                        lineHeight: 1
                     }}>
                         {formatPrice(price)}
                     </div>
-
-                    {/* Availability */}
-                    {availability && availability !== "unknown" && (
+                    {availability && (
                         <div style={{
-                            fontSize: 10,
-                            color: availability === true || availability === "disponibile" ? "#059669" : "#dc2626",
+                            fontSize: '9px',
+                            color: availability === true || availability === "disponibile" ? '#059669' : '#dc2626',
                             fontWeight: 600,
-                            textTransform: "uppercase"
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.3px'
                         }}>
-                            {availability === true ? "Disponibile" : availability}
+                            {availability === true ? "DISPONIBILE" : availability}
                         </div>
                     )}
                 </div>
 
-                {/* Action Buttons Row */}
-                <div style={{
-                    display: "flex",
-                    gap: 8,
-                    marginTop: 4
-                }}>
-                    {/* Add to Cart Button */}
-                    {variantId && (
-                        <div onClick={(e) => e.stopPropagation()}>
-                            <AddToCartButton
-                                variantId={variantId}
-                                productName={name}
-                                onAddToCart={onAddToCart}
-                                theme="light"
-                            />
-                        </div>
-                    )}
-
-                    {/* View Product Button */}
-                    {(productUrl || url) && (
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            style={{
-                                background: "transparent",
-                                color: "#6366f1",
-                                border: "1px solid #6366f1",
-                                padding: "8px 16px",
-                                borderRadius: 6,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                cursor: "pointer",
-                                whiteSpace: "nowrap"
-                            }}
-                            onClick={handleViewClick}
-                        >
-                            Vedi dettagli
-                        </motion.button>
-                    )}
-                </div>
+                {/* Add to Cart Button */}
+                {variantId && (
+                    <div onClick={(e) => e.stopPropagation()}>
+                        <AddToCartButton
+                            variantId={variantId}
+                            shopDomain={shopDomain}
+                            quantity={1}
+                            onSuccess={(data) => console.log('Aggiunto!', data)}
+                            onError={(error) => console.log('Errore!', error)}
+                        />
+                    </div>
+                )}
             </div>
         </motion.div>
     );
 };
 
-const ProductCards = ({ message, onChipClick, onAddToCart }) => {
+const ProductCards = ({ message, onChipClick, onAddToCart, shopDomain }) => {
     const { products = [], title, message: displayMessage, total_count } = message;
 
     if (!Array.isArray(products) || products.length === 0) {
@@ -294,6 +243,7 @@ const ProductCards = ({ message, onChipClick, onAddToCart }) => {
                         product={product}
                         index={index}
                         onAddToCart={onAddToCart}
+                        shopDomain={shopDomain}
                     />
                 ))}
             </div>

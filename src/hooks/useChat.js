@@ -81,6 +81,7 @@ export const useChat = (sessionId) => {
   return {
     messages,
     loading,
+    shopDomain,
     sendMessage: sendChatMessage
   };
 };
