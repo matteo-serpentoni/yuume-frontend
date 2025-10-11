@@ -16,6 +16,13 @@ function App() {
     return saved === 'true';
   });
 
+  // Notifica subito al parent la misura corretta al primo load dell'iframe
+  useEffect(() => {
+    const saved = sessionStorage.getItem(ORB_STATE_KEY) === 'true';
+    window.parent?.postMessage({ type: 'resize', enlarged: saved }, '*');
+  }, []);
+
+
   // 🔥 Salva in sessionStorage quando cambia
   useEffect(() => {
     console.log('💾 Salvataggio stato orb in App.jsx:', enlarged);
