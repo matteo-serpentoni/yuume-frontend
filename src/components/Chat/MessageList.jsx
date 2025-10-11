@@ -6,8 +6,6 @@ import TypingIndicator from "./TypingIndicator";
 const MessageList = ({ messages, loading, onChipClick, shopDomain }) => {
     const messagesEndRef = useRef(null);
 
-    console.log('🟢 MessageList - shopDomain ricevuto:', shopDomain);
-
     useEffect(() => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });

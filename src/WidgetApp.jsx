@@ -1,17 +1,31 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Orb from './components/Orb/Orb';
 
-export default function WidgetApp() {
-  const [enlarged, setEnlarged] = React.useState(false);
+const ORB_STATE_KEY = 'yuume_orb_enlarged';
 
+export default function WidgetApp() {
+  console.log('🪟 WIDGETAPP.JSX CARICATO');
+
+  const [enlarged, setEnlarged] = useState(() => {
+    const saved = sessionStorage.getItem(ORB_STATE_KEY);
+    console.log('🔵 Stato orb caricato:', saved);
+    return saved === 'true';
+  });
+
+  // 🔥 Salva in sessionStorage ogni volta che enlarged cambia
   useEffect(() => {
-    const dimensions = {
+    console.log('💾 Salvataggio stato orb:', enlarged);
+    sessionStorage.setItem(ORB_STATE_KEY, enlarged.toString());
+    console.log('✅ sessionStorage salvato:', sessionStorage.getItem(ORB_STATE_KEY));
+
+    // Comunica resize al parent
+    window.parent.postMessage({
       type: 'resize',
       enlarged: enlarged
-    };
-
-    window.parent.postMessage(dimensions, '*');
+    }, '*');
   }, [enlarged]);
+
+  console.log('🟡 Stato enlarged attuale:', enlarged);
 
   return (
     <div

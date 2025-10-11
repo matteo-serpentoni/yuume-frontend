@@ -1,11 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Orb from './components/Orb/Orb';
 import AppInstalled from './components/AppInstalled/AppInstalled';
 
+const ORB_STATE_KEY = 'yuume_orb_enlarged';
+
 function App() {
-  const [enlarged, setEnlarged] = useState(false);
+  console.log('📱 APP.JSX CARICATO');
+
+  // 🔥 Aggiungi gestione stato con sessionStorage
+  const [enlarged, setEnlarged] = useState(() => {
+    const saved = sessionStorage.getItem(ORB_STATE_KEY);
+    console.log('🔵 Stato orb caricato in App.jsx:', saved);
+    return saved === 'true';
+  });
+
+  // 🔥 Salva in sessionStorage quando cambia
+  useEffect(() => {
+    console.log('💾 Salvataggio stato orb in App.jsx:', enlarged);
+    sessionStorage.setItem(ORB_STATE_KEY, enlarged.toString());
+    console.log('✅ Verificato sessionStorage:', sessionStorage.getItem(ORB_STATE_KEY));
+  }, [enlarged]);
+
   const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (

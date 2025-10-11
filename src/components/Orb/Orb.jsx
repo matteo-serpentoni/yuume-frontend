@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Renderer, Program, Mesh, Triangle, Vec3 } from "ogl";
 import "./Orb.css";
 import Chat from "../Chat/Chat";
@@ -17,7 +17,6 @@ export default function Orb({
 }) {
   const enlargedRef = useRef(null);
   const defaultRef = useRef(null);
-  // Remove local enlarged state
 
   const vert = /* glsl */ `
     precision highp float;
@@ -225,7 +224,6 @@ export default function Orb({
     window.addEventListener("resize", resize);
     resize();
 
-    // Resize on orb size change
     let prevWidth = container.clientWidth;
     let prevHeight = container.clientHeight;
     const resizeObserver = new window.ResizeObserver(() => {
@@ -296,14 +294,10 @@ export default function Orb({
       container.removeEventListener("mouseleave", handleMouseLeave);
       container.removeChild(gl.canvas);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
-      // --- ADDED: Disconnect observer ---
       resizeObserver.disconnect();
-      // --- END ADDED ---
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hue, hoverIntensity, rotateOnHover, forceHoverState, enlarged]);
 
-  // Orb size and radius
   const orbSize = enlarged ? 600 : 180;
   const orbRadius = enlarged ? 48 : 12;
 

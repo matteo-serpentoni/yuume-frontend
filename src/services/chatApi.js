@@ -16,12 +16,13 @@ export const sendMessage = async (message, sessionId, shopDomain, meta = {}) => 
             body: JSON.stringify({
                 message,
                 sessionId,
-                shopDomain, // Usa il parametro ricevuto
+                shopDomain,
                 meta: { lang: navigator.language || "it", ...meta }
             })
         });
 
         if (!response.ok) {
+            // 🔥 Passa lo status all'errore per gestire 410
             throw new ChatApiError(
                 `Server responded with status ${response.status}`,
                 response.status
