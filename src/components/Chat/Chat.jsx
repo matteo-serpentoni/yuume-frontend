@@ -4,10 +4,19 @@ import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 
 const Chat = () => {
-    const { messages, loading, shopDomain, sessionId, sendMessage, clearChat } = useChat();
+    const {
+        messages,
+        loading,
+        shopDomain,
+        sessionId,
+        sendMessage,
+        clearChat,
+        awaitingFeedback,
+        handleSupportFeedback
+    } = useChat();
 
     const handleChipClick = (chipText) => {
-        if (!loading) {
+        if (!loading && !awaitingFeedback) {
             sendMessage(chipText);
         }
     };
@@ -19,8 +28,8 @@ const Chat = () => {
                 loading={loading}
                 onChipClick={handleChipClick}
                 shopDomain={shopDomain}
+                onSupportFeedback={handleSupportFeedback}
             />
-
             <MessageInput
                 onSend={sendMessage}
                 loading={loading}

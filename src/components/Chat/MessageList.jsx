@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import MessageRenderer from "../Message/MessageRender";
 import TypingIndicator from "./TypingIndicator";
 
-const MessageList = ({ messages, loading, onChipClick, shopDomain }) => {
+const MessageList = ({ messages, loading, onChipClick, shopDomain, onSupportFeedback }) => {
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -70,7 +70,12 @@ const MessageList = ({ messages, loading, onChipClick, shopDomain }) => {
                                 textAlign: msg.sender === "user" ? "right" : "left"
                             }}
                         >
-                            <MessageRenderer message={msg} onChipClick={onChipClick} shopDomain={shopDomain} />
+                            <MessageRenderer
+                                message={msg}
+                                onChipClick={onChipClick}
+                                shopDomain={shopDomain}
+                                onSupportFeedback={onSupportFeedback}
+                            />
                         </motion.div>
                     </div>
                 ))}

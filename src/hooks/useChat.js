@@ -52,10 +52,13 @@ export const useChat = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [awaitingFeedback, setAwaitingFeedback] = useState(false);
 
   const [shopDomain, setShopDomain] = useState(() => {
     return sessionStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) || window.location.hostname;
   });
+
+  const [currentSupportContext, setCurrentSupportContext] = useState(null);
 
   useEffect(() => {
     try {
@@ -115,6 +118,11 @@ export const useChat = () => {
       timestamp: new Date().toISOString(),
       ...data
     };
+
+    if (data.type === "support" && data.ask_feedback) {
+      setAwaitingFeedback(true);
+    }
+
     setMessages(prev => [...prev, assistantMessage]);
     return assistantMessage;
   }, []);
@@ -125,12 +133,21 @@ export const useChat = () => {
     sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
 
     setLoading(true);
-    addUserMessage(text);
+    const userMsg = addUserMessage(text);
 
     try {
       const response = await sendMessage(text, sessionId, shopDomain);
 
       if (response.message) {
+        // Se è una risposta di supporto, salva il context PRIMA
+        if (response.message.type === "support" && response.message.ask_feedback) {
+          setCurrentSupportContext({
+            userQuestion: userMsg.text,
+            botAnswer: response.message.message,
+            timestamp: new Date().toISOString()
+          });
+        }
+
         addAssistantMessage(response.message);
       } else {
         throw new Error("Invalid response format");
@@ -166,9 +183,36 @@ export const useChat = () => {
         chips: ["Riprova", "Supporto"]
       });
     } finally {
-      setLoading(false);  // 🔥 CORRETTO: false invece di true
+      setLoading(false);
     }
   }, [sessionId, loading, shopDomain, addUserMessage, addAssistantMessage]);
+
+  const handleSupportFeedback = useCallback(async (isPositive) => {
+    setAwaitingFeedback(false);
+    setLoading(true);
+
+    try {
+      const response = await sendMessage(
+        JSON.stringify({
+          sender: "system",
+          feedback: isPositive ? "positive" : "negative",
+          context: currentSupportContext // ← AGGIUNGI QUESTO
+        }),
+        sessionId,
+        shopDomain
+      );
+
+      if (response.message) {
+        addAssistantMessage(response.message);
+      }
+
+      setCurrentSupportContext(null); // Reset
+    } catch (error) {
+      console.error("Feedback error:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [sessionId, shopDomain, addAssistantMessage, currentSupportContext]);
 
   const clearChat = useCallback(() => {
     setMessages([]);
@@ -187,6 +231,8 @@ export const useChat = () => {
     shopDomain,
     sessionId,
     sendMessage: sendChatMessage,
-    clearChat
+    clearChat,
+    awaitingFeedback,
+    handleSupportFeedback
   };
 };
