@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Triangle, Vec3 } from "ogl";
 import "./Orb.css";
 import Chat from "../Chat/Chat";
@@ -13,7 +13,7 @@ export default function Orb({
   forceHoverState = false,
   enlarged,
   setEnlarged,
-  children
+  children,
 }) {
   const enlargedRef = useRef(null);
   const defaultRef = useRef(null);
@@ -227,7 +227,10 @@ export default function Orb({
     let prevWidth = container.clientWidth;
     let prevHeight = container.clientHeight;
     const resizeObserver = new window.ResizeObserver(() => {
-      if (container.clientWidth !== prevWidth || container.clientHeight !== prevHeight) {
+      if (
+        container.clientWidth !== prevWidth ||
+        container.clientHeight !== prevHeight
+      ) {
         prevWidth = container.clientWidth;
         prevHeight = container.clientHeight;
         resize();
@@ -276,7 +279,8 @@ export default function Orb({
       program.uniforms.hoverIntensity.value = hoverIntensity;
 
       const effectiveHover = forceHoverState ? 1 : targetHover;
-      program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.1;
+      program.uniforms.hover.value +=
+        (effectiveHover - program.uniforms.hover.value) * 0.1;
 
       if (rotateOnHover && effectiveHover > 0.5) {
         currentRot += dt * rotationSpeed;
@@ -301,6 +305,28 @@ export default function Orb({
   const orbSize = enlarged ? 600 : 180;
   const orbRadius = enlarged ? 48 : 12;
 
+  useEffect(() => {
+    if (enlarged) {
+      // Chat aperta
+      console.log("💬 Chat opened");
+      window.parent.postMessage(
+        {
+          type: "YUUME_CHAT_OPENED",
+        },
+        "*"
+      );
+    } else {
+      // Chat chiusa
+      console.log("🔇 Chat closed");
+      window.parent.postMessage(
+        {
+          type: "YUUME_CHAT_CLOSED",
+        },
+        "*"
+      );
+    }
+  }, [enlarged]);
+
   return (
     <AnimatePresence initial={false}>
       {enlarged && (
@@ -319,7 +345,7 @@ export default function Orb({
             alignItems: "center",
             justifyContent: "center",
             background: "transparent",
-            pointerEvents: 'auto'
+            pointerEvents: "auto",
           }}
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -328,7 +354,7 @@ export default function Orb({
             type: "spring",
             stiffness: 110,
             damping: 28,
-            mass: 0.7
+            mass: 0.7,
           }}
         >
           <div
@@ -344,27 +370,43 @@ export default function Orb({
               justifyContent: "center",
               pointerEvents: "auto",
               background: "transparent",
-              zIndex: 4
+              zIndex: 4,
             }}
           >
             <Chat />
           </div>
 
           {/* Bottone di chiusura */}
-          <div style={{
-            position: "absolute",
-            bottom: "60px",
-            right: "60px",
-            zIndex: 15
-          }}>
-            <CloseButton onClick={() => {
-              setEnlarged(false);
-              window.parent.postMessage({ type: 'resize', enlarged: false }, '*');
-            }} />
+          <div
+            style={{
+              position: "absolute",
+              bottom: "60px",
+              right: "60px",
+              zIndex: 15,
+            }}
+          >
+            <CloseButton
+              onClick={() => {
+                setEnlarged(false);
+                window.parent.postMessage(
+                  { type: "resize", enlarged: false },
+                  "*"
+                );
+              }}
+            />
           </div>
 
           {children}
-          <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} />
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+            }}
+          />
         </motion.div>
       )}
       {!enlarged && (
@@ -381,7 +423,7 @@ export default function Orb({
             borderRadius: orbRadius + "px",
             transition: "width 0.3s, height 0.3s, border-radius 0.3s",
             zIndex: 1000,
-            pointerEvents: 'auto'
+            pointerEvents: "auto",
           }}
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -405,7 +447,7 @@ export default function Orb({
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
-              textFillColor: "transparent"
+              textFillColor: "transparent",
             }}
           >
             <div
@@ -421,13 +463,25 @@ export default function Orb({
                 onClick={(e) => {
                   e.stopPropagation();
                   setEnlarged(true);
-                  window.parent.postMessage({ type: 'resize', enlarged: true }, '*');
+                  window.parent.postMessage(
+                    { type: "resize", enlarged: true },
+                    "*"
+                  );
                 }}
               />
             </div>
           </span>
           {children}
-          <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} />
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+            }}
+          />
         </motion.div>
       )}
     </AnimatePresence>
