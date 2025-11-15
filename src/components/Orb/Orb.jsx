@@ -5,6 +5,7 @@ import Chat from "../Chat/Chat";
 import { AnimatePresence, motion } from "framer-motion";
 import ChatIcon from "./ChatIcon";
 import CloseButton from "./CloseButton";
+import ChatPreview from "../Chat/ChatPreview";
 
 export default function Orb({
   hue = 0,
@@ -14,6 +15,12 @@ export default function Orb({
   enlarged,
   setEnlarged,
   children,
+  previewMode = false,
+  // 🆕 NUOVE PROPS per i colori del tema
+  baseColor1 = [0.611765, 0.262745, 0.996078], // default purple-dream
+  baseColor2 = [0.298039, 0.760784, 0.913725],
+  baseColor3 = [0.062745, 0.078431, 0.6],
+  chatColors = { header: "#667eea", sendButton: "#667eea" }, // 🆕 colori chat
 }) {
   const enlargedRef = useRef(null);
   const defaultRef = useRef(null);
@@ -29,6 +36,7 @@ export default function Orb({
     }
   `;
 
+  // 🆕 SHADER AGGIORNATO - baseColor come uniforms invece di const
   const frag = /* glsl */ `
     precision highp float;
 
@@ -38,6 +46,12 @@ export default function Orb({
     uniform float hover;
     uniform float rot;
     uniform float hoverIntensity;
+    
+    // 🆕 BaseColors come uniforms (non più const hardcoded)
+    uniform vec3 baseColor1;
+    uniform vec3 baseColor2;
+    uniform vec3 baseColor3;
+    
     varying vec2 vUv;
 
     vec3 rgb2yiq(vec3 c) {
@@ -107,9 +121,6 @@ export default function Orb({
       return vec4(colorIn.rgb / (a + 1e-5), a);
     }
 
-    const vec3 baseColor1 = vec3(0.611765, 0.262745, 0.996078);
-    const vec3 baseColor2 = vec3(0.298039, 0.760784, 0.913725);
-    const vec3 baseColor3 = vec3(0.062745, 0.078431, 0.600000);
     const float innerRadius = 0.6;
     const float noiseScale = 0.65;
 
@@ -121,6 +132,7 @@ export default function Orb({
     }
 
     vec4 draw(vec2 uv) {
+      // 🆕 Usa baseColor dalle uniforms invece di const
       vec3 color1 = adjustHue(baseColor1, hue);
       vec3 color2 = adjustHue(baseColor2, hue);
       vec3 color3 = adjustHue(baseColor3, hue);
@@ -202,6 +214,10 @@ export default function Orb({
         hover: { value: 0 },
         rot: { value: 0 },
         hoverIntensity: { value: hoverIntensity },
+        // 🆕 Passa i colori come uniforms
+        baseColor1: { value: new Vec3(...baseColor1) },
+        baseColor2: { value: new Vec3(...baseColor2) },
+        baseColor3: { value: new Vec3(...baseColor3) },
       },
     });
 
@@ -278,6 +294,11 @@ export default function Orb({
       program.uniforms.hue.value = hue;
       program.uniforms.hoverIntensity.value = hoverIntensity;
 
+      // 🆕 Aggiorna i colori se cambiano (per supporto preview live)
+      program.uniforms.baseColor1.value.set(...baseColor1);
+      program.uniforms.baseColor2.value.set(...baseColor2);
+      program.uniforms.baseColor3.value.set(...baseColor3);
+
       const effectiveHover = forceHoverState ? 1 : targetHover;
       program.uniforms.hover.value +=
         (effectiveHover - program.uniforms.hover.value) * 0.1;
@@ -300,14 +321,22 @@ export default function Orb({
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       resizeObserver.disconnect();
     };
-  }, [hue, hoverIntensity, rotateOnHover, forceHoverState, enlarged]);
+  }, [
+    hue,
+    hoverIntensity,
+    rotateOnHover,
+    forceHoverState,
+    enlarged,
+    baseColor1,
+    baseColor2,
+    baseColor3,
+  ]);
 
   const orbSize = enlarged ? 600 : 180;
   const orbRadius = enlarged ? 48 : 12;
 
   useEffect(() => {
     if (enlarged) {
-      // Chat aperta
       console.log("💬 Chat opened");
       window.parent.postMessage(
         {
@@ -316,7 +345,6 @@ export default function Orb({
         "*"
       );
     } else {
-      // Chat chiusa
       console.log("🔇 Chat closed");
       window.parent.postMessage(
         {
@@ -373,7 +401,12 @@ export default function Orb({
               zIndex: 4,
             }}
           >
-            <Chat />
+            {/* 🆕 Passa i colori alla Chat */}
+            {previewMode ? (
+              <ChatPreview chatColors={chatColors} />
+            ) : (
+              <Chat chatColors={chatColors} />
+            )}
           </div>
 
           {/* Bottone di chiusura */}
