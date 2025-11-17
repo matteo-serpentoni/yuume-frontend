@@ -5,10 +5,21 @@ import MessageInput from "./MessageInput";
 /**
  * ChatPreview
  * Versione della Chat per la preview con messaggi mockati
- * Non usa useChat() hook, accetta messaggi come props
+ *
+ * Features:
+ * - Messaggi di esempio per visualizzare i colori
+ * - Input disabilitato (non cliccabile)
+ * - Pulsante Send sempre visibile con il colore del tema
  */
 const ChatPreview = ({
-  chatColors = { header: "#667eea", sendButton: "#667eea" },
+  chatColors = {
+    header: "#667eea",
+    sendButton: "#667eea",
+    userMessage: "#667eea",
+    aiMessage: "#4CC2E9",
+    inputBorder: "#667eea",
+    inputFocus: "#4CC2E9",
+  },
 }) => {
   // 🎭 Messaggi mockati per la preview
   const mockMessages = [
@@ -40,16 +51,21 @@ const ChatPreview = ({
       <MessageList
         messages={mockMessages}
         loading={false}
-        onChipClick={() => {}} // Disabilitato nella preview
+        onChipClick={() => {}}
         shopDomain="preview"
-        onSupportFeedback={() => {}} // Disabilitato nella preview
+        onSupportFeedback={() => {}}
         headerColor={chatColors.header}
+        userMessageColor={chatColors.userMessage}
+        aiMessageColor={chatColors.aiMessage}
       />
       <MessageInput
-        onSend={() => {}} // Disabilitato nella preview
+        onSend={() => {}} // Funzione vuota, non fa nulla
         loading={false}
-        placeholder="Preview - Input disabilitato"
+        placeholder="Scrivi un messaggio…"
         sendButtonColor={chatColors.sendButton}
+        inputBorderColor={chatColors.inputBorder}
+        inputFocusColor={chatColors.inputFocus}
+        previewMode={true} // 🔥 ABILITA MODALITÀ PREVIEW
       />
     </div>
   );

@@ -5,22 +5,39 @@ import { getWidgetConfig } from "../../services/customizationApi";
 /**
  * OrbWithCustomization
  * Wrapper che carica le personalizzazioni dall'API e le passa all'Orb
+ * Supporta anche aggiornamenti live per preview dashboard
  */
 export default function OrbWithCustomization({
   enlarged,
   setEnlarged,
   children,
+  previewMode = false,
 }) {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [shopDomain, setShopDomain] = useState(null);
 
-  // Ascolta messaggi per ricevere shopDomain da embed.js
+  // 🐛 DEBUG: traccia quando config cambia
+  useEffect(() => {
+    console.log("🔄 Config changed to:", config);
+  }, [config]);
+
+  // 🆕 Listener per aggiornamenti live da dashboard (preview)
   useEffect(() => {
     const handleMessage = (event) => {
+      // Ricevi shopDomain
       if (event.data.type === "YUUME_SHOP_DOMAIN") {
         console.log("🏪 Shop domain received:", event.data.shopDomain);
         setShopDomain(event.data.shopDomain);
+      }
+
+      // 🆕 Ricevi aggiornamenti customizzazione (per preview)
+      if (event.data.type === "YUUME_UPDATE_CUSTOMIZATION") {
+        console.log("🎨 Customization update received:", event.data.data);
+        console.log("📦 Current config BEFORE update:", config);
+        setConfig(event.data.data);
+        console.log("✅ setConfig called with:", event.data.data);
+        console.log("📦 Config SHOULD be updated now");
       }
     };
 
@@ -39,7 +56,6 @@ export default function OrbWithCustomization({
     if (!shopDomain) return;
 
     const siteId = "shopify_" + shopDomain.split(".")[0];
-
     console.log("🎨 Loading widget config for siteId:", siteId);
 
     getWidgetConfig(siteId)
@@ -60,8 +76,12 @@ export default function OrbWithCustomization({
             baseColor3: [0.062745, 0.078431, 0.6],
           },
           chatColors: {
-            header: "#667eea",
-            sendButton: "#667eea",
+            header: "#9C43FE",
+            sendButton: "#9C43FE",
+            userMessage: "#9C43FE",
+            aiMessage: "#4CC2E9",
+            inputBorder: "#9C43FE",
+            inputFocus: "#4CC2E9",
           },
         });
         setLoading(false);
@@ -96,6 +116,7 @@ export default function OrbWithCustomization({
       baseColor2={config.orbTheme.baseColor2}
       baseColor3={config.orbTheme.baseColor3}
       chatColors={config.chatColors}
+      previewMode={previewMode}
     >
       {children}
     </Orb>

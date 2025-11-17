@@ -16,11 +16,17 @@ export default function Orb({
   setEnlarged,
   children,
   previewMode = false,
-  // 🆕 NUOVE PROPS per i colori del tema
-  baseColor1 = [0.611765, 0.262745, 0.996078], // default purple-dream
+  baseColor1 = [0.611765, 0.262745, 0.996078],
   baseColor2 = [0.298039, 0.760784, 0.913725],
   baseColor3 = [0.062745, 0.078431, 0.6],
-  chatColors = { header: "#667eea", sendButton: "#667eea" }, // 🆕 colori chat
+  chatColors = {
+    header: "#667eea",
+    sendButton: "#667eea",
+    userMessage: "#667eea",
+    aiMessage: "#4CC2E9",
+    inputBorder: "#667eea",
+    inputFocus: "#4CC2E9",
+  },
 }) {
   const enlargedRef = useRef(null);
   const defaultRef = useRef(null);
@@ -36,7 +42,6 @@ export default function Orb({
     }
   `;
 
-  // 🆕 SHADER AGGIORNATO - baseColor come uniforms invece di const
   const frag = /* glsl */ `
     precision highp float;
 
@@ -47,7 +52,6 @@ export default function Orb({
     uniform float rot;
     uniform float hoverIntensity;
     
-    // 🆕 BaseColors come uniforms (non più const hardcoded)
     uniform vec3 baseColor1;
     uniform vec3 baseColor2;
     uniform vec3 baseColor3;
@@ -132,7 +136,6 @@ export default function Orb({
     }
 
     vec4 draw(vec2 uv) {
-      // 🆕 Usa baseColor dalle uniforms invece di const
       vec3 color1 = adjustHue(baseColor1, hue);
       vec3 color2 = adjustHue(baseColor2, hue);
       vec3 color3 = adjustHue(baseColor3, hue);
@@ -214,7 +217,6 @@ export default function Orb({
         hover: { value: 0 },
         rot: { value: 0 },
         hoverIntensity: { value: hoverIntensity },
-        // 🆕 Passa i colori come uniforms
         baseColor1: { value: new Vec3(...baseColor1) },
         baseColor2: { value: new Vec3(...baseColor2) },
         baseColor3: { value: new Vec3(...baseColor3) },
@@ -294,7 +296,6 @@ export default function Orb({
       program.uniforms.hue.value = hue;
       program.uniforms.hoverIntensity.value = hoverIntensity;
 
-      // 🆕 Aggiorna i colori se cambiano (per supporto preview live)
       program.uniforms.baseColor1.value.set(...baseColor1);
       program.uniforms.baseColor2.value.set(...baseColor2);
       program.uniforms.baseColor3.value.set(...baseColor3);
@@ -335,25 +336,18 @@ export default function Orb({
   const orbSize = enlarged ? 600 : 180;
   const orbRadius = enlarged ? 48 : 12;
 
+  // 🔥 Analytics events - DISABILITATI in preview mode
   useEffect(() => {
+    if (previewMode) return; // ← Skip in preview
+
     if (enlarged) {
       console.log("💬 Chat opened");
-      window.parent.postMessage(
-        {
-          type: "YUUME_CHAT_OPENED",
-        },
-        "*"
-      );
+      window.parent.postMessage({ type: "YUUME_CHAT_OPENED" }, "*");
     } else {
       console.log("🔇 Chat closed");
-      window.parent.postMessage(
-        {
-          type: "YUUME_CHAT_CLOSED",
-        },
-        "*"
-      );
+      window.parent.postMessage({ type: "YUUME_CHAT_CLOSED" }, "*");
     }
-  }, [enlarged]);
+  }, [enlarged, previewMode]);
 
   return (
     <AnimatePresence initial={false}>
@@ -401,7 +395,6 @@ export default function Orb({
               zIndex: 4,
             }}
           >
-            {/* 🆕 Passa i colori alla Chat */}
             {previewMode ? (
               <ChatPreview chatColors={chatColors} />
             ) : (
@@ -409,25 +402,27 @@ export default function Orb({
             )}
           </div>
 
-          {/* Bottone di chiusura */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: "60px",
-              right: "60px",
-              zIndex: 15,
-            }}
-          >
-            <CloseButton
-              onClick={() => {
-                setEnlarged(false);
-                window.parent.postMessage(
-                  { type: "resize", enlarged: false },
-                  "*"
-                );
+          {/* Close button - DISABILITATO in preview mode */}
+          {!previewMode && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "60px",
+                right: "60px",
+                zIndex: 15,
               }}
-            />
-          </div>
+            >
+              <CloseButton
+                onClick={() => {
+                  setEnlarged(false);
+                  window.parent.postMessage(
+                    { type: "resize", enlarged: false },
+                    "*"
+                  );
+                }}
+              />
+            </div>
+          )}
 
           {children}
           <div
@@ -495,6 +490,9 @@ export default function Orb({
               <ChatIcon
                 onClick={(e) => {
                   e.stopPropagation();
+                  // 🔥 DISABILITATO in preview mode
+                  if (previewMode) return;
+
                   setEnlarged(true);
                   window.parent.postMessage(
                     { type: "resize", enlarged: true },

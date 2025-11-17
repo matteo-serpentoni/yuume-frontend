@@ -9,7 +9,9 @@ const MessageList = ({
   onChipClick,
   shopDomain,
   onSupportFeedback,
-  headerColor = "#a259ff", // 🆕 Colore header (opzionale per futuro uso)
+  headerColor = "#a259ff",
+  userMessageColor = "#a259ff",
+  aiMessageColor = "#4CC2E9",
 }) => {
   const messagesEndRef = useRef(null);
 
@@ -18,6 +20,38 @@ const MessageList = ({
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  // Converte hex in rgb
+  const hexToRgb = (hex) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : { r: 162, g: 89, b: 255 };
+  };
+
+  // Crea gradient dinamico dal colore
+  const createGradient = (color) => {
+    const rgb = hexToRgb(color);
+    const lighter = `rgb(${Math.min(255, rgb.r + 20)}, ${Math.min(
+      255,
+      rgb.g + 20
+    )}, ${Math.min(255, rgb.b + 20)})`;
+    const darker = `rgb(${Math.max(0, rgb.r - 20)}, ${Math.max(
+      0,
+      rgb.g - 20
+    )}, ${Math.max(0, rgb.b - 20)})`;
+    return `linear-gradient(135deg, ${lighter} 0%, ${color} 50%, ${darker} 100%)`;
+  };
+
+  // Converte hex in rgba per opacity
+  const hexToRgba = (hex, alpha) => {
+    const rgb = hexToRgb(hex);
+    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+  };
 
   return (
     <div
@@ -29,24 +63,11 @@ const MessageList = ({
         overflowY: "auto",
         marginBottom: 12,
         scrollbarWidth: "thin",
-        scrollbarColor: "#a259ff33 transparent",
+        scrollbarColor: `${hexToRgba(userMessageColor, 0.2)} transparent`,
         paddingRight: 18,
         position: "relative",
       }}
     >
-      {/* 🆕 OPZIONALE: Header Chat (decommenta se vuoi usarlo)
-      <div style={{
-        background: headerColor,
-        color: "#fff",
-        padding: "12px 16px",
-        borderRadius: "12px 12px 0 0",
-        fontWeight: 600,
-        marginBottom: 16
-      }}>
-        Chat con Yuume
-      </div>
-      */}
-
       <AnimatePresence initial={false}>
         {messages.map((msg, idx) => (
           <div
@@ -84,15 +105,23 @@ const MessageList = ({
                     : "8px 24px 24px 24px",
                 background:
                   msg.sender === "user"
-                    ? "linear-gradient(135deg, #a084ff 0%, #6f6fff 50%, #5b4cff 100%)"
+                    ? createGradient(userMessageColor)
                     : "linear-gradient(135deg, #23243a 0%, #3a3b5a 100%)",
-                color: msg.sender === "user" ? "#fff" : "#a084ff",
+                color: msg.sender === "user" ? "#fff" : aiMessageColor,
                 border:
                   msg.sender === "user"
                     ? "1px solid rgba(255, 255, 255, 0.15)"
-                    : "1px solid rgba(162, 89, 255, 0.3)",
+                    : `1px solid ${hexToRgba(aiMessageColor, 0.3)}`,
                 boxShadow:
-                  "0 4px 8px rgba(111, 111, 255, 0.15), 0 8px 20px rgba(91, 76, 255, 0.2), 0 16px 32px rgba(160, 132, 255, 0.1)",
+                  msg.sender === "user"
+                    ? `0 4px 8px ${hexToRgba(
+                        userMessageColor,
+                        0.15
+                      )}, 0 8px 20px ${hexToRgba(userMessageColor, 0.2)}`
+                    : `0 4px 8px ${hexToRgba(
+                        aiMessageColor,
+                        0.15
+                      )}, 0 8px 20px ${hexToRgba(aiMessageColor, 0.2)}`,
                 textAlign: msg.sender === "user" ? "right" : "left",
               }}
             >
@@ -106,7 +135,7 @@ const MessageList = ({
           </div>
         ))}
       </AnimatePresence>
-      {loading && <TypingIndicator />}
+      {loading && <TypingIndicator aiMessageColor={aiMessageColor} />}
       <div ref={messagesEndRef} />
     </div>
   );

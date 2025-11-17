@@ -4,7 +4,14 @@ import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 
 const Chat = ({
-  chatColors = { header: "#667eea", sendButton: "#667eea" },
+  chatColors = {
+    header: "#667eea",
+    sendButton: "#667eea",
+    userMessage: "#667eea",
+    aiMessage: "#4CC2E9",
+    inputBorder: "#667eea",
+    inputFocus: "#4CC2E9",
+  },
 }) => {
   const {
     messages,
@@ -31,13 +38,17 @@ const Chat = ({
         onChipClick={handleChipClick}
         shopDomain={shopDomain}
         onSupportFeedback={handleSupportFeedback}
-        headerColor={chatColors.header} // 🆕 Passa il colore header
+        headerColor={chatColors.header}
+        userMessageColor={chatColors.userMessage}
+        aiMessageColor={chatColors.aiMessage}
       />
       <MessageInput
         onSend={sendMessage}
         loading={loading}
         placeholder="Scrivi un messaggio…"
-        sendButtonColor={chatColors.sendButton} // 🆕 Passa il colore bottone
+        sendButtonColor={chatColors.sendButton}
+        inputBorderColor={chatColors.inputBorder}
+        inputFocusColor={chatColors.inputFocus}
       />
     </div>
   );

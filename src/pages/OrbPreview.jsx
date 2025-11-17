@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
 import Orb from "../components/Orb/Orb";
 
-/**
- * OrbPreview
- * Pagina per la preview dell'orb nella dashboard di customizzazione
- */
 export default function OrbPreview() {
-  // Stato iniziale con tema default
   const [config, setConfig] = useState({
     orbTheme: {
       id: "purple-dream",
@@ -18,26 +13,34 @@ export default function OrbPreview() {
     chatColors: {
       header: "#667eea",
       sendButton: "#667eea",
+      userMessage: "#667eea", // ← Aggiungi
+      aiMessage: "#4CC2E9", // ← Aggiungi
+      inputBorder: "#667eea", // ← Aggiungi
+      inputFocus: "#4CC2E9", // ← Aggiungi
     },
   });
 
-  // Ascolta messaggi dalla dashboard per aggiornamenti LIVE
+  const [updateKey, setUpdateKey] = useState(0);
+
   useEffect(() => {
     const handleMessage = (event) => {
       if (event.data.type === "YUUME_UPDATE_CUSTOMIZATION") {
-        console.log("🔄 Live update from dashboard:", event.data);
+        console.log("🔄 Live update:", event.data);
         const { orbTheme, chatColors } = event.data.data;
 
-        setConfig({
-          orbTheme: orbTheme || config.orbTheme,
-          chatColors: chatColors || config.chatColors,
-        });
+        setConfig((prev) => ({
+          orbTheme: orbTheme || prev.orbTheme,
+          chatColors: chatColors || prev.chatColors,
+        }));
+
+        setUpdateKey((k) => k + 1); // Forza re-render
+        console.log("✅ Updated!");
       }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [config]);
+  }, []); // ← Vuoto! Non mettere config
 
   return (
     <div
@@ -49,8 +52,8 @@ export default function OrbPreview() {
         overflow: "hidden",
       }}
     >
-      {/* Orb enlarged con preview mode */}
       <Orb
+        key={`orb-${updateKey}`}
         baseColor1={config.orbTheme.baseColor1}
         baseColor2={config.orbTheme.baseColor2}
         baseColor3={config.orbTheme.baseColor3}
