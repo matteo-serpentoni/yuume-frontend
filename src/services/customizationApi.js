@@ -4,7 +4,7 @@
  */
 
 // Usa variabile d'ambiente per l'URL del backend
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 /**
  * Recupera la configurazione del widget per un sito

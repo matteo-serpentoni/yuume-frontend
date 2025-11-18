@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import OrbWithCustomization from "./components/Orb/OrbWithCustomization";
+import Orb from "./components/Orb/Orb";
 import AppInstalled from "./components/AppInstalled/AppInstalled";
 import OrbPreview from "./pages/OrbPreview";
 
@@ -33,7 +34,7 @@ function App() {
     );
   }, [enlarged]);
 
-  const isDevelopment = process.env.NODE_ENV === "development";
+  const isDevelopment = import.meta.env.DEV;
 
   return (
     <Router basename={isDevelopment ? "" : "/widget"}>
@@ -57,10 +58,14 @@ function App() {
                 justifyContent: "center",
               }}
             >
-              <OrbWithCustomization
-                enlarged={enlarged}
-                setEnlarged={setEnlarged}
-              />
+              {isDevelopment ? (
+                <Orb enlarged={enlarged} setEnlarged={setEnlarged} />
+              ) : (
+                <OrbWithCustomization
+                  enlarged={enlarged}
+                  setEnlarged={setEnlarged}
+                />
+              )}
             </div>
           }
         />

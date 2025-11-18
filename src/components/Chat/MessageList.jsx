@@ -112,16 +112,7 @@ const MessageList = ({
                   msg.sender === "user"
                     ? "1px solid rgba(255, 255, 255, 0.15)"
                     : `1px solid ${hexToRgba(aiMessageColor, 0.3)}`,
-                boxShadow:
-                  msg.sender === "user"
-                    ? `0 4px 8px ${hexToRgba(
-                        userMessageColor,
-                        0.15
-                      )}, 0 8px 20px ${hexToRgba(userMessageColor, 0.2)}`
-                    : `0 4px 8px ${hexToRgba(
-                        aiMessageColor,
-                        0.15
-                      )}, 0 8px 20px ${hexToRgba(aiMessageColor, 0.2)}`,
+                boxShadow: "none",
                 textAlign: msg.sender === "user" ? "right" : "left",
               }}
             >

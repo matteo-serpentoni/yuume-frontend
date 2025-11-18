@@ -350,133 +350,68 @@ export default function Orb({
   }, [enlarged, previewMode]);
 
   return (
-    <AnimatePresence initial={false}>
-      {enlarged && (
-        <motion.div
-          key="enlarged"
-          ref={enlargedRef}
-          className="orb-container orb-enlarged"
-          style={{
-            position: "absolute",
-            right: 32,
-            bottom: enlarged ? 0 : 32,
-            zIndex: 1000,
-            width: orbSize,
-            height: orbSize,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "transparent",
-            pointerEvents: "auto",
-          }}
-          initial={{ scale: 0.7, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.7, opacity: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 110,
-            damping: 28,
-            mass: 0.7,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "80%",
-              height: "70%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              pointerEvents: "auto",
-              background: "transparent",
-              zIndex: 4,
-            }}
-          >
-            {previewMode ? (
-              <ChatPreview chatColors={chatColors} />
-            ) : (
-              <Chat chatColors={chatColors} />
-            )}
-          </div>
-
-          {/* Close button - DISABILITATO in preview mode */}
-          {!previewMode && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: "60px",
-                right: "60px",
-                zIndex: 15,
-              }}
-            >
-              <CloseButton
-                onClick={() => {
-                  setEnlarged(false);
-                  window.parent.postMessage(
-                    { type: "resize", enlarged: false },
-                    "*"
-                  );
-                }}
-              />
-            </div>
-          )}
-
-          {children}
-          <div
+    <div
+      style={{
+        position: "absolute",
+        right: 32,
+        bottom: enlarged ? 0 : 32,
+        width: orbSize,
+        height: orbSize,
+        zIndex: 1000,
+        pointerEvents: "auto",
+      }}
+    >
+      {/* Orb canvas */}
+      <AnimatePresence initial={false}>
+        {enlarged && (
+          <motion.div
+            key="enlarged"
+            ref={enlargedRef}
+            className="orb-container orb-enlarged"
             style={{
               position: "absolute",
               top: 0,
               left: 0,
               width: "100%",
               height: "100%",
+              zIndex: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "transparent",
               pointerEvents: "none",
             }}
-          />
-        </motion.div>
-      )}
-      {!enlarged && (
-        <motion.div
-          key="default"
-          ref={defaultRef}
-          className="orb-container"
-          style={{
-            position: "absolute",
-            right: "32px",
-            bottom: "32px",
-            width: orbSize + "px",
-            height: orbSize + "px",
-            borderRadius: orbRadius + "px",
-            transition: "width 0.3s, height 0.3s, border-radius 0.3s",
-            zIndex: 1000,
-            pointerEvents: "auto",
-          }}
-          initial={{ scale: 0.7, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.7, opacity: 0 }}
-          transition={{ duration: 0.35, type: "spring" }}
-        >
-          <span
-            className="orb-shiny-text"
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.7, opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 110,
+              damping: 28,
+              mass: 0.7,
+            }}
+          >
+            {children}
+          </motion.div>
+        )}
+        {!enlarged && (
+          <motion.div
+            key="default"
+            ref={defaultRef}
+            className="orb-container"
             style={{
               position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: 10,
-              cursor: "pointer",
-              fontSize: "1.5rem",
-              fontWeight: 600,
-              letterSpacing: "0.04em",
-              userSelect: "none",
-              background: "linear-gradient(90deg, #ff8a00, #e52e71, #6a82fb)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              textFillColor: "transparent",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              borderRadius: orbRadius + "px",
+              pointerEvents: "auto",
             }}
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.7, opacity: 0 }}
+            transition={{ duration: 0.35, type: "spring" }}
           >
             <div
               style={{
@@ -490,9 +425,7 @@ export default function Orb({
               <ChatIcon
                 onClick={(e) => {
                   e.stopPropagation();
-                  // 🔥 DISABILITATO in preview mode
                   if (previewMode) return;
-
                   setEnlarged(true);
                   window.parent.postMessage(
                     { type: "resize", enlarged: true },
@@ -501,20 +434,72 @@ export default function Orb({
                 }}
               />
             </div>
-          </span>
-          {children}
-          <div
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Chat - posizionata relativamente al wrapper */}
+      <AnimatePresence>
+        {enlarged && (
+          <motion.div
+            key="chat-content"
             style={{
               position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
+              top: "15%",
+              left: "10%",
+              right: "10%",
+              bottom: "15%",
+              zIndex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              pointerEvents: "auto",
+              background: "transparent",
             }}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+          >
+            {previewMode ? (
+              <ChatPreview chatColors={chatColors} />
+            ) : (
+              <Chat chatColors={chatColors} />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Close button */}
+      <AnimatePresence>
+        {enlarged && !previewMode && (
+          <motion.div
+            key="close-btn"
+            style={{
+              position: "absolute",
+              bottom: "20%", // 🔥 Distanza dal fondo (regola come vuoi)
+              left: "50%", // 🔥 Centro orizzontale
+              transform: "translateX(-50%)", // 🔥 Centra perfettamente
+              zIndex: 15,
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+          >
+            <CloseButton
+              onClick={() => {
+                setEnlarged(false);
+                window.parent.postMessage(
+                  { type: "resize", enlarged: false },
+                  "*"
+                );
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
