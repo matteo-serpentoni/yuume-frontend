@@ -37,7 +37,7 @@ function App() {
   const isDevelopment = import.meta.env.DEV;
 
   return (
-    <Router basename={isDevelopment ? "" : "/widget"}>
+    <Router basename="/widget">
       <Routes>
         {/* Homepage con l'orb */}
         <Route

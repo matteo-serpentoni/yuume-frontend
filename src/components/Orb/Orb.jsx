@@ -1,19 +1,17 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Renderer, Program, Mesh, Triangle, Vec3 } from "ogl";
-import "./Orb.css";
 import Chat from "../Chat/Chat";
-import { AnimatePresence, motion } from "framer-motion";
-import ChatIcon from "./ChatIcon";
-import CloseButton from "./CloseButton";
 import ChatPreview from "../Chat/ChatPreview";
+import "./Orb.css";
 
 export default function Orb({
   hue = 0,
   hoverIntensity = 0.2,
   rotateOnHover = true,
   forceHoverState = false,
-  enlarged,
-  setEnlarged,
+  // ✅ Nuove props per funzionalità
+  enlarged = false,
+  setEnlarged = () => {},
   children,
   previewMode = false,
   baseColor1 = [0.611765, 0.262745, 0.996078],
@@ -28,8 +26,11 @@ export default function Orb({
     inputFocus: "#4CC2E9",
   },
 }) {
-  const enlargedRef = useRef(null);
-  const defaultRef = useRef(null);
+  const containerRef = useRef(null);
+  const canvasContainerRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
+  // ✅ Usa enlarged dalla prop invece di isMinimized locale
+  const isMinimized = !enlarged;
 
   const vert = /* glsl */ `
     precision highp float;
@@ -52,6 +53,7 @@ export default function Orb({
     uniform float rot;
     uniform float hoverIntensity;
     
+    // ✅ Colori dinamici invece di const
     uniform vec3 baseColor1;
     uniform vec3 baseColor2;
     uniform vec3 baseColor3;
@@ -192,13 +194,14 @@ export default function Orb({
   `;
 
   useEffect(() => {
-    const container = enlarged ? enlargedRef.current : defaultRef.current;
-    if (!container) return;
+    const container = containerRef.current;
+    const canvasContainer = canvasContainerRef.current;
+    if (!container || !canvasContainer) return;
 
     const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 0);
-    container.appendChild(gl.canvas);
+    canvasContainer.appendChild(gl.canvas);
 
     const geometry = new Triangle(gl);
     const program = new Program(gl, {
@@ -217,6 +220,7 @@ export default function Orb({
         hover: { value: 0 },
         rot: { value: 0 },
         hoverIntensity: { value: hoverIntensity },
+        // ✅ Aggiunti uniform per colori dinamici
         baseColor1: { value: new Vec3(...baseColor1) },
         baseColor2: { value: new Vec3(...baseColor2) },
         baseColor3: { value: new Vec3(...baseColor3) },
@@ -241,20 +245,6 @@ export default function Orb({
     }
     window.addEventListener("resize", resize);
     resize();
-
-    let prevWidth = container.clientWidth;
-    let prevHeight = container.clientHeight;
-    const resizeObserver = new window.ResizeObserver(() => {
-      if (
-        container.clientWidth !== prevWidth ||
-        container.clientHeight !== prevHeight
-      ) {
-        prevWidth = container.clientWidth;
-        prevHeight = container.clientHeight;
-        resize();
-      }
-    });
-    resizeObserver.observe(container);
 
     let targetHover = 0;
     let lastTime = 0;
@@ -296,6 +286,7 @@ export default function Orb({
       program.uniforms.hue.value = hue;
       program.uniforms.hoverIntensity.value = hoverIntensity;
 
+      // ✅ Aggiorna i colori dinamicamente
       program.uniforms.baseColor1.value.set(...baseColor1);
       program.uniforms.baseColor2.value.set(...baseColor2);
       program.uniforms.baseColor3.value.set(...baseColor3);
@@ -318,188 +309,77 @@ export default function Orb({
       window.removeEventListener("resize", resize);
       container.removeEventListener("mousemove", handleMouseMove);
       container.removeEventListener("mouseleave", handleMouseLeave);
-      container.removeChild(gl.canvas);
+      canvasContainer.removeChild(gl.canvas);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
-      resizeObserver.disconnect();
     };
+    // ✅ Aggiunte dipendenze per colori dinamici
   }, [
     hue,
     hoverIntensity,
     rotateOnHover,
     forceHoverState,
-    enlarged,
     baseColor1,
     baseColor2,
     baseColor3,
   ]);
 
-  const orbSize = enlarged ? 600 : 180;
-  const orbRadius = enlarged ? 48 : 12;
-
-  // 🔥 Analytics events - DISABILITATI in preview mode
+  // ✅ FUNZIONALITÀ: Analytics events
   useEffect(() => {
-    if (previewMode) return; // ← Skip in preview
+    if (previewMode) return; // Skip in preview mode
 
     if (enlarged) {
       console.log("💬 Chat opened");
-      window.parent.postMessage({ type: "YUUME_CHAT_OPENED" }, "*");
+      window.parent?.postMessage({ type: "YUUME_CHAT_OPENED" }, "*");
     } else {
       console.log("🔇 Chat closed");
-      window.parent.postMessage({ type: "YUUME_CHAT_CLOSED" }, "*");
+      window.parent?.postMessage({ type: "YUUME_CHAT_CLOSED" }, "*");
     }
   }, [enlarged, previewMode]);
 
+  // ✅ FUNZIONALITÀ: Gestione click per espandere
+  const handleExpand = () => {
+    if (isMinimized && !previewMode) {
+      setEnlarged(true);
+      window.parent?.postMessage({ type: "resize", enlarged: true }, "*");
+    }
+  };
+
   return (
     <div
-      style={{
-        position: "absolute",
-        right: 32,
-        bottom: enlarged ? 0 : 32,
-        width: orbSize,
-        height: orbSize,
-        zIndex: 1000,
-        pointerEvents: "auto",
-      }}
+      ref={containerRef}
+      className={`orb-container ${isMinimized ? "minimized" : ""}`}
+      onClick={handleExpand}
     >
-      {/* Orb canvas */}
-      <AnimatePresence initial={false}>
-        {enlarged && (
-          <motion.div
-            key="enlarged"
-            ref={enlargedRef}
-            className="orb-container orb-enlarged"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              zIndex: 2,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "transparent",
-              pointerEvents: "none",
-            }}
-            initial={{ scale: 0.7, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.7, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 110,
-              damping: 28,
-              mass: 0.7,
-            }}
-          >
-            {children}
-          </motion.div>
-        )}
-        {!enlarged && (
-          <motion.div
-            key="default"
-            ref={defaultRef}
-            className="orb-container"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              borderRadius: orbRadius + "px",
-              pointerEvents: "auto",
-            }}
-            initial={{ scale: 0.7, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.7, opacity: 0 }}
-            transition={{ duration: 0.35, type: "spring" }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                zIndex: 10,
-              }}
-            >
-              <ChatIcon
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (previewMode) return;
-                  setEnlarged(true);
-                  window.parent.postMessage(
-                    { type: "resize", enlarged: true },
-                    "*"
-                  );
-                }}
-              />
-            </div>
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Chat - posizionata relativamente al wrapper */}
-      <AnimatePresence>
-        {enlarged && (
-          <motion.div
-            key="chat-content"
-            style={{
-              position: "absolute",
-              top: "15%",
-              left: "10%",
-              right: "10%",
-              bottom: "15%",
-              zIndex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              pointerEvents: "auto",
-              background: "transparent",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-          >
-            {previewMode ? (
-              <ChatPreview chatColors={chatColors} />
-            ) : (
-              <Chat chatColors={chatColors} />
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Close button */}
-      <AnimatePresence>
-        {enlarged && !previewMode && (
-          <motion.div
-            key="close-btn"
-            style={{
-              position: "absolute",
-              bottom: "20%", // 🔥 Distanza dal fondo (regola come vuoi)
-              left: "50%", // 🔥 Centro orizzontale
-              transform: "translateX(-50%)", // 🔥 Centra perfettamente
-              zIndex: 15,
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-          >
-            <CloseButton
-              onClick={() => {
+      {/* Chat Layer - Behind the canvas but interactive */}
+      {!isMinimized && (
+        <div className="orb-chat-layer">
+          {/* ✅ FUNZIONALITÀ: Preview mode o Chat completa */}
+          {previewMode ? (
+            <ChatPreview chatColors={chatColors} />
+          ) : (
+            <Chat
+              chatColors={chatColors}
+              onTyping={setIsTyping}
+              onMinimize={() => {
                 setEnlarged(false);
-                window.parent.postMessage(
+                window.parent?.postMessage(
                   { type: "resize", enlarged: false },
                   "*"
                 );
               }}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </div>
+      )}
+
+      {/* Minimized Text */}
+      {isMinimized && <div className="minimized-text">Ciao...</div>}
+
+      {/* ✅ FUNZIONALITÀ: Children support */}
+      {children}
+
+      {/* WebGL Canvas Layer - On top visually, but pointer-events: none to allow clicks through */}
+      <div ref={canvasContainerRef} className="orb-canvas-layer" />
     </div>
   );
 }

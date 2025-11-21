@@ -1,29 +1,320 @@
-.orb-container {
-  position: relative;
-  z-index: 2;
-  transition: width 0.3s, height 0.3s, border-radius 0.3s;
-  box-shadow: none;
-  background: transparent;
+/* src/styles/Orb.css */
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Inter:wght@400;500&display=swap");
+
+:root {
+  --orb-size: 600px;
+  --orb-minimized-size: 120px;
+  --bg-color: #050505;
+  --user-msg-bg: linear-gradient(135deg, #6366f1, #a855f7);
+  --user-msg-text: white;
+  --bot-msg-bg: rgba(255, 255, 255, 0.08);
+  --bot-msg-text: #f3f4f6;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  font-family: "Outfit", sans-serif;
+  color: white;
   overflow: hidden;
 }
 
-.orb-shiny-text {
-  font-size: 0.85rem;
-  background: linear-gradient(90deg, #fff 20%, #a084ff 40%, #6f6fff 60%, #fff 80%);
-  background-size: 200% auto;
-  color: #fff;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shiny-move 10s linear infinite;
-  display: inline-block;
+/* ORB CONTAINER */
+.orb-container {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: var(--orb-size);
+  height: var(--orb-size);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: default;
+  z-index: 1000;
 }
 
-@keyframes shiny-move {
-  0% {
-    background-position: 200% center;
+.orb-container.minimized {
+  width: var(--orb-minimized-size);
+  height: var(--orb-minimized-size);
+  cursor: pointer;
+}
+
+/* CANVAS LAYER */
+.orb-canvas-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  /* Visually on top */
+  pointer-events: none;
+  /* Let clicks pass through to chat */
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.orb-canvas-layer canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* MINIMIZED TEXT */
+.minimized-text {
+  position: absolute;
+  z-index: 15;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: white;
+  text-align: center;
+  opacity: 0;
+  animation: fadeIn 0.4s 0.3s forwards;
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
   }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* CHAT LAYER */
+.orb-chat-layer {
+  position: absolute;
+  z-index: 5;
+  /* Visually behind canvas */
+  width: 55%;
+  /* Reduced to ensure it stays well within the orb */
+  height: 55%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* Transparent background */
+  background: transparent;
+  border-radius: 30px;
+  border: none;
+
+  pointer-events: auto;
+  /* Interactive */
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.orb-container.minimized .orb-chat-layer {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* CHAT INTERFACE */
+.chat-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.messages-area {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  scrollbar-width: none;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 5%,
+    black 95%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 5%,
+    black 95%,
+    transparent
+  );
+}
+
+.messages-area::-webkit-scrollbar {
+  display: none;
+}
+
+.message-bubble {
+  width: fit-content;
+  max-width: 85%;
+  padding: 10px 16px;
+  border-radius: 18px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  position: relative;
+  word-wrap: break-word;
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.message-bubble.user {
+  align-self: flex-end;
+  margin-left: auto;
+  background: var(--user-msg-bg);
+  color: var(--user-msg-text);
+  border-bottom-right-radius: 4px;
+}
+
+.message-bubble.bot,
+.message-bubble.ai {
+  align-self: flex-start;
+  margin-right: auto;
+  background: var(--bot-msg-bg);
+  color: var(--bot-msg-text);
+  border-bottom-left-radius: 4px;
+}
+
+/* TYPING INDICATOR */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 10px;
+  width: fit-content;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  margin-right: auto;
+}
+
+.typing-indicator span {
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%,
+  80%,
   100% {
-    background-position: -200% center;
+    transform: scale(0);
   }
+
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* INPUT AREA */
+.input-area {
+  display: flex;
+  gap: 8px;
+  padding-top: 15px;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 12px 16px;
+  outline: none;
+  font-size: 0.95rem;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.chat-input:focus {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.send-button {
+  background: var(--user-msg-bg);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.send-button:hover {
+  transform: scale(1.05);
+}
+
+.send-button:disabled {
+  background: #333;
+  cursor: default;
+  transform: none;
+  opacity: 0.5;
+}
+
+/* CLOSE BUTTON */
+.close-button {
+  position: relative;
+  margin: 15px auto 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.close-button svg {
+  width: 20px;
+  height: 20px;
 }

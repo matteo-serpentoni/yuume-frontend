@@ -23,18 +23,16 @@ const TypingIndicator = ({ aiMessageColor = "#a084ff" }) => {
     >
       <div
         style={{
-          background: "linear-gradient(135deg, #23243a 0%, #3a3b5a 100%)",
-          borderRadius: "8px 24px 24px 24px",
-          border: `1px solid ${hexToRgba(aiMessageColor, 0.3)}`,
-          boxShadow: `0 4px 8px ${hexToRgba(
-            aiMessageColor,
-            0.15
-          )}, 0 8px 20px ${hexToRgba(aiMessageColor, 0.2)}`,
-          padding: "16px 24px",
+          background: aiMessageColor,
+          borderRadius: "18px 18px 18px 4px",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          padding: "12px 16px",
           display: "flex",
           alignItems: "center",
           gap: 4,
           backdropFilter: "blur(10px)",
+          width: "fit-content",
+          maxWidth: "85%",
         }}
       >
         <div style={{ display: "flex", gap: 3, alignItems: "center" }}>
@@ -44,7 +42,7 @@ const TypingIndicator = ({ aiMessageColor = "#a084ff" }) => {
               style={{
                 width: 6,
                 height: 6,
-                background: aiMessageColor,
+                background: "white",
                 borderRadius: "50%",
                 animation: `typing-bounce 1.4s ease-in-out infinite`,
                 animationDelay: `${i * 200}ms`,
