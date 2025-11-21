@@ -392,6 +392,9 @@ export default function Orb({
       {/* ✅ FUNZIONALITÀ: Children support */}
       {children}
 
+      {/* Liquid Glass Background - Between chat and canvas */}
+      <div className="orb-glass-layer" />
+
       {/* WebGL Canvas Layer - On top visually, but pointer-events: none to allow clicks through */}
       <div ref={canvasContainerRef} className="orb-canvas-layer" />
     </div>

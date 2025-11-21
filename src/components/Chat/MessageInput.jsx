@@ -52,7 +52,7 @@ const MessageInput = ({
       onSubmit={handleSubmit}
       style={{
         display: "flex",
-        width: "70%",
+        width: "100%",
         margin: "0 auto",
         marginTop: "auto",
         alignItems: "center",

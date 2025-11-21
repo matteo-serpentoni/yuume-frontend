@@ -42,6 +42,16 @@ export default function OrbPreview() {
     return () => window.removeEventListener("message", handleMessage);
   }, []); // ← Vuoto! Non mettere config
 
+  // 🎨 Set transparent background for preview page
+  useEffect(() => {
+    const originalBackground = document.body.style.backgroundColor;
+    document.body.style.backgroundColor = "transparent";
+
+    return () => {
+      document.body.style.backgroundColor = originalBackground;
+    };
+  }, []);
+
   return (
     <div
       style={{

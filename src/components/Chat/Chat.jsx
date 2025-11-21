@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useChat } from "../../hooks/useChat";
 import "../Orb/Orb.css";
 
 import TypingIndicator from "./TypingIndicator";
+import MessageInput from "./MessageInput";
 
 const Chat = ({
   onTyping,
@@ -28,7 +29,6 @@ const Chat = ({
     handleSupportFeedback,
   } = useChat();
 
-  const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -38,23 +38,6 @@ const Chat = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
-
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-    if (onTyping) {
-      onTyping(e.target.value.length > 0);
-    }
-  };
-
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!inputValue.trim() || loading || awaitingFeedback) return;
-
-    // ✅ FUNZIONALITÀ: Usa sendMessage da useChat invece di mock
-    sendMessage(inputValue);
-    setInputValue("");
-    if (onTyping) onTyping(false);
-  };
 
   // ✅ FUNZIONALITÀ: Gestione click sui chips
   const handleChipClick = (chipText) => {
@@ -146,55 +129,20 @@ const Chat = ({
         <div ref={messagesEndRef} />
       </div>
 
-      <form className="input-area" onSubmit={handleSendMessage}>
-        <input
-          type="text"
-          className="chat-input"
-          placeholder="Scrivi qualcosa..."
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={() => onTyping && onTyping(false)}
-          onFocus={(e) => onTyping && onTyping(e.target.value.length > 0)}
-          style={{
-            borderColor: chatColors.inputBorder,
-          }}
-          onFocusCapture={(e) => {
-            e.target.style.borderColor = chatColors.inputFocus;
-          }}
-          disabled={loading || awaitingFeedback}
-        />
-        <button
-          type="submit"
-          className="send-button"
-          disabled={!inputValue.trim() || loading || awaitingFeedback}
-          style={{
-            background: chatColors.sendButton,
-          }}
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M22 2L11 13"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M22 2L15 22L11 13L2 9L22 2Z"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </form>
+      <MessageInput
+        onSend={(text) => {
+          if (!loading && !awaitingFeedback) {
+            sendMessage(text);
+            if (onTyping) onTyping(false);
+          }
+        }}
+        loading={loading || awaitingFeedback}
+        placeholder="Scrivi qualcosa..."
+        sendButtonColor={chatColors.sendButton}
+        inputBorderColor={chatColors.inputBorder}
+        inputFocusColor={chatColors.inputFocus}
+        previewMode={false}
+      />
 
       {/* Close button */}
       <button

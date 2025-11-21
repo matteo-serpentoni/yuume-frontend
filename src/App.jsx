@@ -34,6 +34,19 @@ function App() {
     );
   }, [enlarged]);
 
+  // 🎨 Set transparent background when in embed mode
+  useEffect(() => {
+    const isEmbed = new URLSearchParams(window.location.search).get("embed");
+    if (isEmbed) {
+      const originalBackground = document.body.style.backgroundColor;
+      document.body.style.backgroundColor = "transparent";
+
+      return () => {
+        document.body.style.backgroundColor = originalBackground;
+      };
+    }
+  }, []);
+
   const isDevelopment = import.meta.env.DEV;
 
   return (
