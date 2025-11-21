@@ -193,6 +193,20 @@ export default function Orb({
     }
   `;
 
+  // ✅ Memoize arrays to prevent useEffect re-runs on every render
+  const stableBaseColor1 = React.useMemo(
+    () => baseColor1,
+    [baseColor1[0], baseColor1[1], baseColor1[2]]
+  );
+  const stableBaseColor2 = React.useMemo(
+    () => baseColor2,
+    [baseColor2[0], baseColor2[1], baseColor2[2]]
+  );
+  const stableBaseColor3 = React.useMemo(
+    () => baseColor3,
+    [baseColor3[0], baseColor3[1], baseColor3[2]]
+  );
+
   useEffect(() => {
     const container = containerRef.current;
     const canvasContainer = canvasContainerRef.current;
@@ -221,9 +235,9 @@ export default function Orb({
         rot: { value: 0 },
         hoverIntensity: { value: hoverIntensity },
         // ✅ Aggiunti uniform per colori dinamici
-        baseColor1: { value: new Vec3(...baseColor1) },
-        baseColor2: { value: new Vec3(...baseColor2) },
-        baseColor3: { value: new Vec3(...baseColor3) },
+        baseColor1: { value: new Vec3(...stableBaseColor1) },
+        baseColor2: { value: new Vec3(...stableBaseColor2) },
+        baseColor3: { value: new Vec3(...stableBaseColor3) },
       },
     });
 
@@ -287,9 +301,9 @@ export default function Orb({
       program.uniforms.hoverIntensity.value = hoverIntensity;
 
       // ✅ Aggiorna i colori dinamicamente
-      program.uniforms.baseColor1.value.set(...baseColor1);
-      program.uniforms.baseColor2.value.set(...baseColor2);
-      program.uniforms.baseColor3.value.set(...baseColor3);
+      program.uniforms.baseColor1.value.set(...stableBaseColor1);
+      program.uniforms.baseColor2.value.set(...stableBaseColor2);
+      program.uniforms.baseColor3.value.set(...stableBaseColor3);
 
       const effectiveHover = forceHoverState ? 1 : targetHover;
       program.uniforms.hover.value +=
@@ -318,9 +332,9 @@ export default function Orb({
     hoverIntensity,
     rotateOnHover,
     forceHoverState,
-    baseColor1,
-    baseColor2,
-    baseColor3,
+    stableBaseColor1,
+    stableBaseColor2,
+    stableBaseColor3,
   ]);
 
   // ✅ FUNZIONALITÀ: Analytics events
