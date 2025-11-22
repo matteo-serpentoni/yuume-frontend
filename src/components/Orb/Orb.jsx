@@ -249,14 +249,32 @@ export default function Orb({
 
     const mesh = new Mesh(gl, { geometry, program });
 
+    // ✅ Helper per ottenere la dimensione massima dell'orb dalle variabili CSS
+    const getMaxOrbSize = () => {
+      if (typeof window === "undefined") return 600;
+      const style = getComputedStyle(document.documentElement);
+      const sizeStr = style.getPropertyValue("--orb-size").trim();
+      return parseInt(sizeStr, 10) || 600;
+    };
+
     function resize() {
       if (!container) return;
       const dpr = window.devicePixelRatio || 1;
-      const width = container.clientWidth;
-      const height = container.clientHeight;
+
+      // ✅ Usa sempre la dimensione massima per mantenere la qualità alta
+      // anche quando l'orb è minimizzato. Il CSS scalerà visivamente il canvas.
+      const maxSize = getMaxOrbSize();
+
+      const width = maxSize;
+      const height = maxSize;
+
       renderer.setSize(width * dpr, height * dpr);
+
+      // Non serve impostare style.width/height perché gestito dal CSS (width: 100% !important)
+      // ma lo impostiamo per coerenza con la risoluzione logica
       gl.canvas.style.width = width + "px";
       gl.canvas.style.height = height + "px";
+
       program.uniforms.iResolution.value.set(
         gl.canvas.width,
         gl.canvas.height,
