@@ -382,6 +382,32 @@ export default function Orb({
     }
   };
 
+  // ✅ FUNZIONALITÀ: Adattamento colore testo allo sfondo
+  const [textColorMode, setTextColorMode] = useState("dark"); // default dark bg -> white text
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data.type === "YUUME_BG_LUMINANCE") {
+        // Se lo sfondo è light, vogliamo testo scuro (dark-mode)
+        // Se lo sfondo è dark, vogliamo testo chiaro (default)
+        setTextColorMode(event.data.mode === "light" ? "light" : "dark");
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
+  // ✅ FUNZIONALITÀ: Messaggi a rotazione
+  const messages = ["Ciao! 👋", "Serve\naiuto? 💬", "Chiedimi\ntutto ✨"];
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex((prev) => (prev + 1) % messages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div
       ref={containerRef}
@@ -414,7 +440,37 @@ export default function Orb({
       )}
 
       {/* Minimized Text */}
-      {isMinimized && <div className="minimized-text">Ciao...</div>}
+      {isMinimized && (
+        <div
+          key={currentMessageIndex} // Force re-render to restart animations
+          className="minimized-text"
+          style={{
+            color: textColorMode === "light" ? chatColors.userMessage : "white",
+          }}
+        >
+          {messages[currentMessageIndex].split("\n").map((line, lineIndex) => (
+            <div key={lineIndex} className="minimized-text-line">
+              {Array.from(line).map((char, charIndex) => {
+                // Calculate global index for continuous delay
+                const previousCharsCount = messages[currentMessageIndex]
+                  .split("\n")
+                  .slice(0, lineIndex)
+                  .join("").length;
+                const globalIndex = previousCharsCount + charIndex;
+
+                return (
+                  <span
+                    key={charIndex}
+                    style={{ animationDelay: `${globalIndex * 0.03}s` }}
+                  >
+                    {char === " " ? "\u00A0" : char}
+                  </span>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ✅ FUNZIONALITÀ: Children support */}
       {children}

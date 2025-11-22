@@ -106,6 +106,95 @@
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // BACKGROUND DETECTION
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function getLuminance(r, g, b) {
+    var a = [r, g, b].map(function (v) {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+  }
+
+  function checkBackgroundColor() {
+    if (!iframe) return;
+
+    // Coordinate del centro dell'orb (approssimativamente)
+    // L'iframe è 250x250, l'orb è al centro.
+    // In posizione minimizzata è in basso a destra.
+    var rect = iframe.getBoundingClientRect();
+    var x = rect.left + rect.width / 2;
+    var y = rect.top + rect.height / 2;
+
+    // Nascondi momentaneamente l'iframe per vedere cosa c'è sotto
+    var prevDisplay = iframe.style.display;
+    iframe.style.display = "none";
+
+    var element = document.elementFromPoint(x, y);
+
+    iframe.style.display = prevDisplay;
+
+    if (!element) return;
+
+    // Risali il DOM per trovare un colore di sfondo non trasparente
+    var bgColor = "rgba(0, 0, 0, 0)";
+    while (element) {
+      var style = window.getComputedStyle(element);
+      var color = style.backgroundColor;
+
+      // Check se non è trasparente
+      if (color && color !== "rgba(0, 0, 0, 0)" && color !== "transparent") {
+        bgColor = color;
+        break;
+      }
+      element = element.parentElement;
+    }
+
+    // Parse RGB/RGBA
+    var rgb = bgColor.match(/\d+/g);
+    if (rgb && rgb.length >= 3) {
+      var lum = getLuminance(
+        parseInt(rgb[0]),
+        parseInt(rgb[1]),
+        parseInt(rgb[2])
+      );
+      var mode = lum > 0.5 ? "light" : "dark"; // light background -> dark text
+
+      iframe.contentWindow.postMessage(
+        {
+          type: "YUUME_BG_LUMINANCE",
+          mode: mode,
+        },
+        "*"
+      );
+    }
+  }
+
+  // Throttle helper
+  function throttle(func, limit) {
+    var inThrottle;
+    return function () {
+      var args = arguments;
+      var context = this;
+      if (!inThrottle) {
+        func.apply(context, args);
+        inThrottle = true;
+        setTimeout(function () {
+          inThrottle = false;
+        }, limit);
+      }
+    };
+  }
+
+  // Listeners per aggiornare il colore
+  var throttledCheck = throttle(checkBackgroundColor, 200);
+  window.addEventListener("scroll", throttledCheck);
+  window.addEventListener("resize", throttledCheck);
+
+  // Check iniziale dopo un po' che la pagina è carica
+  setTimeout(checkBackgroundColor, 1000);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // IFRAME SETUP
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   var iframe = document.createElement("iframe");
@@ -113,8 +202,8 @@
   iframe.id = "yuume-orb-iframe";
   iframe.allow = "clipboard-write;";
   iframe.style.position = "fixed";
-  iframe.style.bottom = "32px";
-  iframe.style.right = "32px";
+  iframe.style.bottom = "0px";
+  iframe.style.right = "0px";
   iframe.style.zIndex = "999999";
   iframe.style.background = "transparent";
   iframe.style.border = "none";
@@ -348,8 +437,8 @@
       } else {
         iframe.style.width = "250px";
         iframe.style.height = "250px";
-        iframe.style.bottom = "32px";
-        iframe.style.right = "32px";
+        iframe.style.bottom = "0px";
+        iframe.style.right = "0px";
       }
     }
   });
