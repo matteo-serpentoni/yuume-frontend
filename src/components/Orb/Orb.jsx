@@ -212,7 +212,13 @@ export default function Orb({
     const canvasContainer = canvasContainerRef.current;
     if (!container || !canvasContainer) return;
 
-    const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
+    // Enhanced renderer for high quality (fixes graininess)
+    const renderer = new Renderer({
+      alpha: true,
+      premultipliedAlpha: false,
+      antialias: true,
+      powerPreference: "high-performance",
+    });
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 0);
     canvasContainer.appendChild(gl.canvas);
@@ -376,10 +382,13 @@ export default function Orb({
               onTyping={setIsTyping}
               onMinimize={() => {
                 setEnlarged(false);
-                window.parent?.postMessage(
-                  { type: "resize", enlarged: false },
-                  "*"
-                );
+                // Wait for animation (600ms) before resizing iframe
+                setTimeout(() => {
+                  window.parent?.postMessage(
+                    { type: "resize", enlarged: false },
+                    "*"
+                  );
+                }, 600);
               }}
             />
           )}
@@ -393,7 +402,13 @@ export default function Orb({
       {children}
 
       {/* Liquid Glass Background - Between chat and canvas */}
-      <div className="orb-glass-layer" />
+      <div className="orb-glass-mask-wrapper">
+        <div className="orb-glass-layer">
+          <div className="glass-blobs" />
+          <div className="glass-noise" />
+          <div className="glass-shine" />
+        </div>
+      </div>
 
       {/* WebGL Canvas Layer - On top visually, but pointer-events: none to allow clicks through */}
       <div ref={canvasContainerRef} className="orb-canvas-layer" />
