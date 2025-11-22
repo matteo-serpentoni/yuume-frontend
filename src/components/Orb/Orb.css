@@ -74,13 +74,13 @@ body {
   pointer-events: none;
   border-radius: 50%;
 
-  /* Apply the mask here */
-  mask-image: radial-gradient(circle, black 0%, black 20%, transparent 100%);
+  /* Apply the mask here - Softer fade to avoid hard edge */
+  mask-image: radial-gradient(circle, black 0%, black 30%, transparent 85%);
   -webkit-mask-image: radial-gradient(
     circle,
     black 0%,
-    black 20%,
-    transparent 100%
+    black 30%,
+    transparent 85%
   );
 
   will-change: transform;
@@ -100,6 +100,11 @@ body {
 
   /* No mask here, handled by wrapper */
   border: none;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--orb-theme-color, #6464ff), transparent 40%),
+    transparent 85%
+  );
 }
 
 /* 1. COLOR BLOBS */
@@ -470,7 +475,12 @@ body {
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: white;
+  color: var(--orb-theme-color, white);
+  border-color: color-mix(
+    in srgb,
+    var(--orb-theme-color, white),
+    transparent 80%
+  );
 }
 
 .close-button:hover {

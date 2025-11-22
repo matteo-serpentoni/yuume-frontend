@@ -408,11 +408,20 @@ export default function Orb({
     return () => clearInterval(interval);
   }, []);
 
+  // ✅ Calcola colore tema da baseColor1 (che è il colore principale dell'orb WebGL)
+  // baseColor1 è un array [r, g, b] con valori 0-1
+  const themeColor = `rgb(${baseColor1[0] * 255}, ${baseColor1[1] * 255}, ${
+    baseColor1[2] * 255
+  })`;
+
   return (
     <div
       ref={containerRef}
       className={`orb-container ${isMinimized ? "minimized" : ""}`}
       onClick={handleExpand}
+      style={{
+        "--orb-theme-color": themeColor,
+      }}
     >
       {/* Chat Layer - Behind the canvas but interactive */}
       {!isMinimized && (
