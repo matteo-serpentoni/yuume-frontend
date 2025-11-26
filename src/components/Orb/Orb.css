@@ -302,17 +302,11 @@ body {
   padding-bottom: 10px;
   padding-top: 10px;
   scrollbar-width: none;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 20%,
-    black 95%,
-    transparent 100%
-  );
+  /* Desktop: rimuovere il fade superiore - i messaggi scompariranno sotto l'header */
+  mask-image: linear-gradient(to bottom, black 0%, black 95%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to bottom,
-    transparent 0%,
-    black 20%,
+    black 0%,
     black 95%,
     transparent 100%
   );
@@ -334,6 +328,12 @@ body {
   text-align: left;
   animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   border: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* Layout interno per testo + timestamp */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
 
   /* Subtle shadow for depth */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1),
@@ -367,6 +367,24 @@ body {
   background: var(--bot-msg-bg);
   color: var(--bot-msg-text);
   border-bottom-left-radius: 4px;
+}
+
+/* MESSAGE CONTENT & TIMESTAMP - WhatsApp Style */
+.message-content {
+  flex: 1;
+  min-width: 0; /* Allow text to wrap */
+  padding-right: 4px; /* Spazio per evitare sovrapposizione con timestamp */
+}
+
+.message-time {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  align-self: flex-end;
+  margin-top: 2px;
+  margin-left: auto; /* Allineato a destra */
 }
 
 /* TYPING INDICATOR */
@@ -609,7 +627,12 @@ body {
     /* Slightly smaller radius to nest perfectly */
     border-radius: 20px;
 
-    padding-top: 10px; /* Standard padding */
+    /* RIMOSSO: padding-top: 10px; - sarà gestito dal chat-inner */
+  }
+
+  /* Rimuovere il padding-top dal chat-inner su mobile per far funzionare l'header sticky */
+  .orb-container:not(.minimized) .chat-inner {
+    padding-top: 0;
   }
 
   /* Scale down internal elements for mobile */
@@ -657,12 +680,157 @@ body {
     bottom: 20px;
     right: 20px;
   }
+
+  /* Rimuovere solo il fade superiore, mantenere quello inferiore */
+  .orb-container:not(.minimized) .messages-area {
+    mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 95%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 95%,
+      transparent 100%
+    );
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  /* MOBILE HEADER STYLES */
+  .orb-container:not(.minimized) .chat-mobile-header {
+    display: flex !important; /* Force display on mobile */
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Prevent header from shrinking */
+    height: 60px; /* Fixed height for better look */
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+
+    /* Effetto glass semi-trasparente */
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 20px 20px 0 0;
+
+    /* Sticky positioning per fissare in cima */
+    position: sticky;
+    top: 0; /* Fissato in cima al chat-inner */
+    z-index: 10; /* Sopra i messaggi */
+
+    margin: 0 -20px 0 -20px; /* Espandi orizzontalmente oltre il padding laterale */
+    backdrop-filter: blur(30px) saturate(140%);
+    -webkit-backdrop-filter: blur(30px) saturate(140%);
+  }
+
+  .orb-container:not(.minimized) .header-content {
+    display: flex;
+    flex-direction: column; /* Vertical su mobile */
+    align-items: center;
+    gap: 2px;
+    opacity: 1; /* Opaco su mobile */
+  }
+
+  .orb-container:not(.minimized) .chat-mobile-header h3 {
+    margin: 0;
+    font-size: 1.2rem; /* Più grande su mobile */
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.5px;
+  }
+
+  .orb-container:not(.minimized) .online-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .orb-container:not(.minimized) .status-dot {
+    width: 8px; /* Più grande su mobile */
+    height: 8px;
+    background-color: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulse-green 2s infinite;
+  }
 }
 
-/* DESKTOP SAFEGUARD */
-@media (min-width: 601px) {
-  .orb-container:not(.minimized) .orb-glass-layer,
-  .orb-container:not(.minimized) .orb-glass-mask-wrapper {
-    border-radius: 50% !important;
+/* KEYFRAMES (Global scope to ensure they work) */
+@keyframes pulse-green {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
   }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* DESKTOP HEADER STYLES */
+/* Header ultra-minimale - quasi invisibile */
+.chat-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 24px; /* Ultra sottile */
+  padding: 0;
+
+  /* Quasi invisibile */
+  border: none;
+  background: transparent;
+
+  /* Sticky positioning */
+  position: sticky;
+  top: -20px;
+  z-index: 10;
+
+  margin: -20px -20px 0 -20px;
+  pointer-events: none; /* Non intercetta click */
+}
+
+.header-content {
+  display: flex;
+  flex-direction: row; /* Horizontal layout */
+  align-items: center;
+  gap: 6px;
+  opacity: 0.5; /* Semi-trasparente */
+}
+
+.chat-mobile-header h3 {
+  margin: 0;
+  font-size: 0.9rem; /* Più leggibile */
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.5px;
+}
+
+.online-status {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.75rem; /* Più leggibile */
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-dot {
+  width: 6px; /* Leggermente più grande */
+  height: 6px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulse-green 2s infinite;
 }

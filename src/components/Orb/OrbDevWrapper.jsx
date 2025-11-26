@@ -11,6 +11,10 @@ export default function OrbDevWrapper({ enlarged, setEnlarged, children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 📱 Mobile detection & collapse state
+  const [isMobile, setIsMobile] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   // Configurazione corrente da passare all'Orb
   const [currentConfig, setCurrentConfig] = useState({
     baseColor1: [0.611765, 0.262745, 0.996078],
@@ -25,6 +29,21 @@ export default function OrbDevWrapper({ enlarged, setEnlarged, children }) {
       inputFocus: "#4CC2E9",
     },
   });
+
+  // Rileva mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      const isMobileDevice =
+        /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+          userAgent
+        );
+      setIsMobile(isMobileDevice);
+      // Collassa automaticamente su mobile
+      setIsCollapsed(isMobileDevice);
+    };
+    checkMobile();
+  }, []);
 
   // Helper per convertire HEX a Vec3 (0-1)
   const hexToVec3 = (hex) => {
@@ -98,91 +117,154 @@ export default function OrbDevWrapper({ enlarged, setEnlarged, children }) {
   return (
     <>
       {/* Dev Tools UI */}
-      <div
-        style={{
-          position: "fixed",
-          top: "20px",
-          left: "20px",
-          zIndex: 9999,
-          background: "rgba(0,0,0,0.8)",
-          padding: "15px",
-          borderRadius: "12px",
-          border: "1px solid rgba(255,255,255,0.1)",
-          color: "white",
-          fontFamily: "system-ui, sans-serif",
-          maxWidth: "300px",
-          backdropFilter: "blur(10px)",
-        }}
-      >
-        <h3
+      {isCollapsed ? (
+        // 📱 FAB Button su mobile (collapsed)
+        <button
+          onClick={() => setIsCollapsed(false)}
           style={{
-            margin: "0 0 10px 0",
-            fontSize: "14px",
-            fontWeight: "600",
-            color: "#667eea",
+            position: "fixed",
+            bottom: isMobile ? "80px" : "20px",
+            left: "20px",
+            zIndex: 9999,
+            width: "48px",
+            height: "48px",
+            borderRadius: "50%",
+            background: "rgba(102, 126, 234, 0.9)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            color: "white",
+            fontSize: "20px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(10px)",
+            transition: "all 0.3s ease",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
           }}
         >
-          🛠️ Dev Theme Switcher
-        </h3>
-
-        {loading && <div style={{ fontSize: "12px" }}>Loading themes...</div>}
-        {error && (
-          <div style={{ fontSize: "12px", color: "#ff4444" }}>
-            Error: {error}
-            <br />
-            Make sure API is running on port 5001
-          </div>
-        )}
-
-        {!loading && !error && (
+          🛠️
+        </button>
+      ) : (
+        // 🖥️ Full Panel (expanded)
+        <div
+          style={{
+            position: "fixed",
+            top: isMobile ? "auto" : "20px",
+            bottom: isMobile ? "20px" : "auto",
+            left: "20px",
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.9)",
+            padding: "15px",
+            borderRadius: "12px",
+            border: "1px solid rgba(255,255,255,0.1)",
+            color: "white",
+            fontFamily: "system-ui, sans-serif",
+            maxWidth: isMobile ? "calc(100vw - 40px)" : "300px",
+            maxHeight: isMobile ? "50vh" : "auto",
+            backdropFilter: "blur(10px)",
+          }}
+        >
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              gap: "8px",
-              maxHeight: "400px",
-              overflowY: "auto",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "10px",
             }}
           >
-            {themes.map((theme) => (
+            <h3
+              style={{
+                margin: 0,
+                fontSize: "14px",
+                fontWeight: "600",
+                color: "#667eea",
+              }}
+            >
+              🛠️ Dev Theme Switcher
+            </h3>
+            {isMobile && (
               <button
-                key={theme.id}
-                onClick={() => setSelectedThemeId(theme.id)}
+                onClick={() => setIsCollapsed(true)}
                 style={{
-                  padding: "8px 12px",
-                  background:
-                    selectedThemeId === theme.id
-                      ? "rgba(102, 126, 234, 0.3)"
-                      : "rgba(255,255,255,0.05)",
-                  border:
-                    selectedThemeId === theme.id
-                      ? "1px solid #667eea"
-                      : "1px solid transparent",
-                  borderRadius: "6px",
+                  background: "rgba(255,255,255,0.1)",
+                  border: "none",
+                  borderRadius: "4px",
                   color: "white",
                   cursor: "pointer",
-                  textAlign: "left",
-                  fontSize: "13px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  transition: "all 0.2s",
+                  padding: "4px 8px",
+                  fontSize: "12px",
                 }}
               >
-                <div
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.secondary})`,
-                  }}
-                />
-                {theme.name}
+                ✕
               </button>
-            ))}
+            )}
           </div>
-        )}
-      </div>
+
+          {loading && <div style={{ fontSize: "12px" }}>Loading themes...</div>}
+          {error && (
+            <div style={{ fontSize: "12px", color: "#ff4444" }}>
+              Error: {error}
+              <br />
+              Make sure API is running on port 5001
+            </div>
+          )}
+
+          {!loading && !error && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                maxHeight: isMobile ? "calc(50vh - 80px)" : "400px",
+                overflowY: "auto",
+              }}
+            >
+              {themes.map((theme) => (
+                <button
+                  key={theme.id}
+                  onClick={() => {
+                    setSelectedThemeId(theme.id);
+                    if (isMobile) {
+                      // Auto-chiudi su mobile dopo la selezione
+                      setTimeout(() => setIsCollapsed(true), 300);
+                    }
+                  }}
+                  style={{
+                    padding: "8px 12px",
+                    background:
+                      selectedThemeId === theme.id
+                        ? "rgba(102, 126, 234, 0.3)"
+                        : "rgba(255,255,255,0.05)",
+                    border:
+                      selectedThemeId === theme.id
+                        ? "1px solid #667eea"
+                        : "1px solid transparent",
+                    borderRadius: "6px",
+                    color: "white",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    fontSize: "13px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "12px",
+                      height: "12px",
+                      borderRadius: "50%",
+                      background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.secondary})`,
+                    }}
+                  />
+                  {theme.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Render Actual Orb */}
       <Orb

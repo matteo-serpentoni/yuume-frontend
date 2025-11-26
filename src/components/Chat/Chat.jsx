@@ -46,6 +46,15 @@ const Chat = ({
     }
   };
 
+  // Helper per formattare il timestamp in HH:MM
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
+
   // ✅ FUNZIONALITÀ: Render messaggi con supporto chips e feedback
   const renderMessage = (msg) => {
     // CHIPS TEMPORANEAMENTE DISABILITATI
@@ -78,7 +87,10 @@ const Chat = ({
     if (msg.requiresFeedback) {
       return (
         <>
-          <div className={`message-bubble ${msg.sender}`}>{msg.text}</div>
+          <div className={`message-bubble ${msg.sender}`}>
+            <div className="message-content">{msg.text}</div>
+            <div className="message-time">{formatTime(msg.timestamp)}</div>
+          </div>
           <div className="feedback-buttons">
             <button
               className="feedback-button yes"
@@ -112,13 +124,27 @@ const Chat = ({
             msg.sender === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
         }}
       >
-        {msg.text || msg.error || "Si è verificato un errore. Riprova."}
+        <div className="message-content">
+          {msg.text || msg.error || "Si è verificato un errore. Riprova."}
+        </div>
+        <div className="message-time">{formatTime(msg.timestamp)}</div>
       </div>
     );
   };
 
   return (
     <div className="chat-inner">
+      {/* MOBILE HEADER */}
+      <div className="chat-mobile-header">
+        <div className="header-content">
+          <h3>Yuume</h3>
+          <div className="online-status">
+            <span className="status-dot"></span>
+            <span className="status-text">Online</span>
+          </div>
+        </div>
+      </div>
+
       <div className="messages-area">
         {messages.map((msg) => (
           <div key={msg.id}>{renderMessage(msg)}</div>
