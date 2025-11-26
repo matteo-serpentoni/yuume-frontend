@@ -198,7 +198,11 @@
   // IFRAME SETUP
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   var iframe = document.createElement("iframe");
-  iframe.src = config[env].widgetUrl;
+  // Add timestamp to prevent caching of the widget itself
+  var widgetUrl = config[env].widgetUrl;
+  var separator = widgetUrl.includes("?") ? "&" : "?";
+  iframe.src = widgetUrl + separator + "t=" + Date.now();
+
   iframe.id = "yuume-orb-iframe";
   iframe.allow = "clipboard-write;";
   iframe.style.position = "fixed";
@@ -430,15 +434,36 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === "resize") {
       if (event.data.enlarged) {
-        iframe.style.width = "680px";
-        iframe.style.height = "680px";
-        iframe.style.bottom = "0px";
-        iframe.style.right = "0px";
+        // Robust mobile detection
+        var isMobile = false;
+        if (window.matchMedia) {
+          isMobile = window.matchMedia("(max-width: 768px)").matches;
+        } else {
+          isMobile = window.innerWidth <= 768 || window.screen.width <= 768;
+        }
+
+        if (isMobile) {
+          iframe.style.width = "100%";
+          iframe.style.height = "100%";
+          iframe.style.bottom = "0px";
+          iframe.style.right = "0px";
+          iframe.style.top = "0px";
+          iframe.style.left = "0px";
+        } else {
+          iframe.style.width = "680px";
+          iframe.style.height = "680px";
+          iframe.style.bottom = "0px";
+          iframe.style.right = "0px";
+          iframe.style.top = "auto";
+          iframe.style.left = "auto";
+        }
       } else {
         iframe.style.width = "250px";
         iframe.style.height = "250px";
         iframe.style.bottom = "0px";
         iframe.style.right = "0px";
+        iframe.style.top = "auto";
+        iframe.style.left = "auto";
       }
     }
   });

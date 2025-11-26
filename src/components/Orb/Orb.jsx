@@ -32,6 +32,30 @@ export default function Orb({
   // ✅ Usa enlarged dalla prop invece di isMinimized locale
   const isMinimized = !enlarged;
 
+  // 📱 DEVICE DETECTION
+  // Detect if running on a real mobile device via User Agent
+  // This avoids the issue where desktop iframe width triggers mobile layout
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      // Regex for common mobile devices
+      const isMobile =
+        /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+          userAgent
+        );
+      setIsMobileDevice(isMobile);
+      console.log(
+        "📱 Device Detection:",
+        isMobile ? "Mobile" : "Desktop",
+        userAgent
+      );
+    };
+
+    checkMobile();
+  }, []);
+
   const vert = /* glsl */ `
     precision highp float;
     attribute vec2 position;
@@ -414,11 +438,31 @@ export default function Orb({
     baseColor1[2] * 255
   })`;
 
+  // ✅ FUNZIONALITÀ: Gestione hover per effetti WebGL
+  const handleMouseEnter = () => {
+    if (rotateOnHover) {
+      // Logic to trigger hover effect in shader (if needed)
+    }
+  };
+
+  const handleMouseLeave = () => {
+    // Logic to reset hover effect
+  };
+
+  const handleMouseMove = (e) => {
+    // Logic to track mouse position for shader interaction
+  };
+
   return (
     <div
       ref={containerRef}
-      className={`orb-container ${isMinimized ? "minimized" : ""}`}
+      className={`orb-container ${isMinimized ? "minimized" : ""} ${
+        isMobileDevice ? "mobile-device" : ""
+      }`}
       onClick={handleExpand}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
       style={{
         "--orb-theme-color": themeColor,
       }}

@@ -1,11 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import WidgetApp from './WidgetApp';
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import WidgetApp from "./WidgetApp";
 
-const rootElement = document.getElementById('root');
-const widgetRootElement = document.getElementById('widget-root');
+const rootElement = document.getElementById("root");
+const widgetRootElement = document.getElementById("widget-root");
 
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);

@@ -506,3 +506,163 @@ body {
     opacity: 1;
   }
 }
+
+/* MOBILE RESPONSIVENESS */
+/* MOBILE RESPONSIVENESS */
+/* Use media query with a safe breakpoint (600px) */
+/* The desktop widget is 680px wide, so it will NOT trigger this. */
+/* Mobile devices will have a full-width iframe (e.g. 390px), so they WILL trigger this. */
+@media (max-width: 600px) {
+  .orb-container:not(.minimized) {
+    /* Center on screen */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* Maximized card dimensions with MORE margin */
+    /* Use svh (Small Viewport Height) to avoid browser bars issues */
+    width: 90vw;
+    height: 80svh;
+
+    /* Ensure it doesn't get too crazy tall or wide */
+    max-width: 400px;
+    max-height: 700px;
+
+    /* Card look */
+    border-radius: 24px;
+
+    bottom: auto;
+    right: auto;
+
+    /* Optimize performance */
+    will-change: width, height, top, left, transform, border-radius;
+    /* Use a smoother easing without overshoot for mobile to prevent layout thrashing */
+    /* Reduced duration to 0.4s for snappier feel */
+    transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      top 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-radius 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* Hide WebGL sphere in card mode */
+  .orb-container:not(.minimized) .orb-canvas-layer {
+    display: none;
+  }
+
+  /* Expand glass background to fill card */
+  .orb-container:not(.minimized) .orb-glass-mask-wrapper {
+    width: 100%;
+    height: 100%;
+    border-radius: 24px; /* Match container */
+    mask-image: none;
+    -webkit-mask-image: none;
+    top: 0;
+    left: 0;
+    transform: none;
+  }
+
+  .orb-container:not(.minimized) .orb-glass-layer {
+    border-radius: 24px;
+    /* Boost brightness/saturation for mobile to make it pop */
+    filter: brightness(1.3) saturate(1.2);
+
+    /* PERFORMANCE: Remove backdrop-filter on mobile */
+    /* Animating a large area with blur is very expensive */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+
+    /* Compensate with a slightly darker/stronger background */
+    background: radial-gradient(
+      circle at 50% 50%,
+      color-mix(in srgb, var(--orb-theme-color, #6464ff), transparent 20%),
+      transparent 90%
+    );
+  }
+
+  /* Speed up animation on mobile for more dynamism */
+  .orb-container:not(.minimized) .glass-blobs {
+    animation-duration: 10s;
+  }
+
+  /* Expand chat layer to fill card but with inset for border */
+  .orb-container:not(.minimized) .orb-chat-layer {
+    /* Create the border effect by making this slightly smaller than container */
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    width: auto;
+    height: auto;
+    transform: none; /* Reset center transform */
+
+    /* Semi-transparent background to let glass effect show through */
+    /* This creates a "tinted glass" look for the chat area */
+    background: rgba(0, 0, 0, 0.5);
+
+    /* REMOVED backdrop-filter on mobile for performance */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+
+    /* Slightly smaller radius to nest perfectly */
+    border-radius: 20px;
+
+    padding-top: 10px; /* Standard padding */
+  }
+
+  /* Scale down internal elements for mobile */
+  .orb-container:not(.minimized) .message-bubble {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    border-radius: 16px;
+  }
+
+  .orb-container:not(.minimized) .chat-input {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    height: 40px;
+  }
+
+  .orb-container:not(.minimized) .send-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .orb-container:not(.minimized) .close-button {
+    width: 36px;
+    height: 36px;
+    /* Position close button safely */
+    margin-top: 10px;
+    margin-bottom: 15px; /* Extra bottom margin for safety */
+  }
+
+  .orb-container:not(.minimized) .close-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .orb-container:not(.minimized) .typing-indicator {
+    padding: 10px 12px;
+  }
+
+  .orb-container:not(.minimized) .typing-indicator span {
+    width: 5px;
+    height: 5px;
+  }
+
+  /* Adjust minimized position if needed, or keep default bottom-right */
+  .orb-container.minimized {
+    bottom: 20px;
+    right: 20px;
+  }
+}
+
+/* DESKTOP SAFEGUARD */
+@media (min-width: 601px) {
+  .orb-container:not(.minimized) .orb-glass-layer,
+  .orb-container:not(.minimized) .orb-glass-mask-wrapper {
+    border-radius: 50% !important;
+  }
+}
