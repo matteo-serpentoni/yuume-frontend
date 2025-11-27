@@ -46,7 +46,20 @@ export const useChat = () => {
   const [messages, setMessages] = useState(() => {
     try {
       const saved = sessionStorage.getItem(STORAGE_KEYS.MESSAGES);
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        return JSON.parse(saved);
+      }
+
+      // Default welcome message
+      return [
+        {
+          id: Date.now(),
+          sender: "assistant",
+          text: "Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?",
+          timestamp: new Date().toISOString(),
+          disableFeedback: true, // Disable feedback for welcome message
+        },
+      ];
     } catch (error) {
       console.error("Errore caricamento messaggi:", error);
       return [];
@@ -54,7 +67,6 @@ export const useChat = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [awaitingFeedback, setAwaitingFeedback] = useState(false);
 
   const [shopDomain, setShopDomain] = useState(() => {
     return (
@@ -62,8 +74,6 @@ export const useChat = () => {
       window.location.hostname
     );
   });
-
-  const [currentSupportContext, setCurrentSupportContext] = useState(null);
 
   useEffect(() => {
     try {
@@ -127,10 +137,6 @@ export const useChat = () => {
       ...data,
     };
 
-    if (data.requiresFeedback) {
-      setAwaitingFeedback(true);
-    }
-
     setMessages((prev) => [...prev, assistantMessage]);
     return assistantMessage;
   }, []);
@@ -148,15 +154,6 @@ export const useChat = () => {
         const response = await sendMessage(text, sessionId, shopDomain);
 
         if (response.message) {
-          // Se è una risposta che richiede feedback, salva il context
-          if (response.message.requiresFeedback) {
-            setCurrentSupportContext({
-              userQuestion: userMsg.text,
-              botAnswer: response.message.message,
-              timestamp: new Date().toISOString(),
-            });
-          }
-
           addAssistantMessage(response.message);
         } else {
           throw new Error("Invalid response format");
@@ -201,43 +198,72 @@ export const useChat = () => {
     [sessionId, loading, shopDomain, addUserMessage, addAssistantMessage]
   );
 
-  const handleSupportFeedback = useCallback(
-    async (isPositive) => {
-      setAwaitingFeedback(false);
-      setLoading(true);
+  const sendFeedback = useCallback(
+    async (messageId, rating, aiMessageText) => {
+      // 1. Optimistic UI Update
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId ? { ...msg, feedback: rating } : msg
+        )
+      );
 
-      try {
-        const response = await sendMessage(
-          JSON.stringify({
-            sender: "system",
-            feedback: isPositive ? "positive" : "negative",
-            context: currentSupportContext, // ← AGGIUNGI QUESTO
-          }),
-          sessionId,
-          shopDomain
-        );
+      // 2. Find context (user query)
+      const messageIndex = messages.findIndex((m) => m.id === messageId);
+      let userQuery = "N/A";
 
-        if (response.message) {
-          addAssistantMessage(response.message);
+      if (messageIndex > 0) {
+        const prevMsg = messages[messageIndex - 1];
+        if (prevMsg.sender === "user") {
+          userQuery = prevMsg.text;
         }
+      }
 
-        setCurrentSupportContext(null); // Reset
+      // 3. Send to backend
+      try {
+        await fetch(
+          `${
+            import.meta.env.VITE_API_URL || "http://localhost:3000"
+          }/api/feedback`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              shopDomain,
+              sessionId,
+              messageId, // ✅ Added messageId
+              userQuery,
+              aiResponse: aiMessageText,
+              rating,
+            }),
+          }
+        );
       } catch (error) {
-        console.error("Feedback error:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error sending feedback:", error);
       }
     },
-    [sessionId, shopDomain, addAssistantMessage, currentSupportContext]
+    [messages, shopDomain, sessionId]
   );
 
   const clearChat = useCallback(() => {
-    setMessages([]);
+    // Reset to welcome message instead of empty array
+    const welcomeMsg = {
+      id: Date.now(),
+      sender: "assistant",
+      text: "Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?",
+      timestamp: new Date().toISOString(),
+      disableFeedback: true,
+    };
+
+    setMessages([welcomeMsg]);
     sessionStorage.clear();
 
+    // Save new session with welcome message immediately
     const newSessionId = generateSessionId();
     sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
     sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
+    sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
 
     window.location.reload();
   }, []);
@@ -249,7 +275,6 @@ export const useChat = () => {
     sessionId,
     sendMessage: sendChatMessage,
     clearChat,
-    awaitingFeedback,
-    handleSupportFeedback,
+    sendFeedback,
   };
 };

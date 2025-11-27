@@ -28,8 +28,7 @@ const Chat = ({
     sessionId,
     sendMessage,
     clearChat,
-    awaitingFeedback,
-    handleSupportFeedback,
+    sendFeedback,
   } = useChat();
 
   const messagesEndRef = useRef(null);
@@ -96,53 +95,182 @@ const Chat = ({
       );
     }
 
-    // Se il messaggio richiede feedback supporto
-    if (msg.requiresFeedback) {
-      return (
-        <>
-          <div className={`message-bubble ${msg.sender}`}>
-            <div className="message-content">{msg.text}</div>
-            <div className="message-time">{formatTime(msg.timestamp)}</div>
-          </div>
-          <div className="feedback-buttons">
-            <button
-              className="feedback-button yes"
-              onClick={() => handleSupportFeedback(true)}
-              disabled={!awaitingFeedback}
-            >
-              Sì
-            </button>
-            <button
-              className="feedback-button no"
-              onClick={() => handleSupportFeedback(false)}
-              disabled={!awaitingFeedback}
-            >
-              No
-            </button>
-          </div>
-        </>
-      );
-    }
-
     const msgColor =
       msg.sender === "user" ? chatColors.userMessage : chatColors.aiMessage;
 
     // Messaggio normale
     return (
       <div
-        className={`message-bubble ${msg.sender}`}
         style={{
-          background: msgColor,
-          borderRadius:
-            msg.sender === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: msg.sender === "user" ? "flex-end" : "flex-start",
         }}
       >
-        <div className="message-content">
-          <ReactMarkdown>
-            {msg.text || msg.error || "Si è verificato un errore. Riprova."}
-          </ReactMarkdown>
+        <div
+          className={`message-bubble ${msg.sender}`}
+          style={{
+            background: msgColor,
+            borderRadius:
+              msg.sender === "user"
+                ? "18px 18px 4px 18px"
+                : "18px 18px 18px 4px",
+            position: "relative",
+            marginBottom: msg.sender === "assistant" && !msg.error ? 4 : 0,
+          }}
+        >
+          <div className="message-content">
+            <ReactMarkdown>
+              {msg.text || msg.error || "Si è verificato un errore. Riprova."}
+            </ReactMarkdown>
+          </div>
+          <div
+            className="message-footer"
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: 4,
+            }}
+          >
+            <div className="message-time">{formatTime(msg.timestamp)}</div>
+          </div>
         </div>
-        <div className="message-time">{formatTime(msg.timestamp)}</div>
+
+        {/* Feedback Buttons OUTSIDE the bubble */}
+        {msg.sender === "assistant" && !msg.error && !msg.disableFeedback && (
+          <div
+            className="feedback-actions"
+            style={{
+              display: "flex",
+              gap: 8,
+              paddingLeft: 4,
+              opacity: 0.7,
+            }}
+          >
+            <button
+              onClick={() => sendFeedback(msg.id, "positive", msg.text)}
+              title="Utile"
+              className={msg.feedback === "positive" ? "thumb-animate" : ""}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color:
+                  msg.feedback === "positive"
+                    ? "#FFFFFF"
+                    : "rgba(255, 255, 255, 0.5)", // White or Transparent Gray
+                transition: "all 0.2s",
+                opacity: msg.feedback === "positive" ? 1 : 0.7,
+                filter: "none", // Removed grayscale filter as we control color directly
+              }}
+              onMouseEnter={(e) => {
+                if (msg.feedback !== "positive") {
+                  e.currentTarget.style.color = "#FFFFFF";
+                  e.currentTarget.style.opacity = 1;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (msg.feedback !== "positive") {
+                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
+                  e.currentTarget.style.opacity = 0.7;
+                }
+              }}
+            >
+              {msg.feedback === "positive" ? (
+                // Filled Thumbs Up
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                </svg>
+              ) : (
+                // Outline Thumbs Up
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => sendFeedback(msg.id, "negative", msg.text)}
+              title="Non utile"
+              className={msg.feedback === "negative" ? "thumb-animate" : ""}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color:
+                  msg.feedback === "negative"
+                    ? "#FFFFFF"
+                    : "rgba(255, 255, 255, 0.5)", // White or Transparent Gray
+                transition: "all 0.2s",
+                opacity: msg.feedback === "negative" ? 1 : 0.7,
+                filter: "none",
+              }}
+              onMouseEnter={(e) => {
+                if (msg.feedback !== "negative") {
+                  e.currentTarget.style.color = "#FFFFFF";
+                  e.currentTarget.style.opacity = 1;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (msg.feedback !== "negative") {
+                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
+                  e.currentTarget.style.opacity = 0.7;
+                }
+              }}
+            >
+              {msg.feedback === "negative" ? (
+                // Filled Thumbs Down
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
+                </svg>
+              ) : (
+                // Outline Thumbs Down
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
+                </svg>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     );
   };
@@ -172,18 +300,56 @@ const Chat = ({
 
       <MessageInput
         onSend={(text) => {
-          if (!loading && !awaitingFeedback) {
+          if (!loading) {
             sendMessage(text);
             if (onTyping) onTyping(false);
           }
         }}
-        loading={loading || awaitingFeedback}
+        loading={loading}
         placeholder="Scrivi qualcosa..."
         sendButtonColor={chatColors.sendButton}
         inputBorderColor={chatColors.inputBorder}
         inputFocusColor={chatColors.inputFocus}
         previewMode={false}
       />
+
+      {/* Legal Disclaimer */}
+      <div
+        style={{
+          fontSize: "10px",
+          color: "rgba(255, 255, 255, 0.4)",
+          textAlign: "center",
+          marginTop: "8px",
+          padding: "0 10px",
+          lineHeight: "1.3",
+        }}
+      >
+        Chattando accetti la{" "}
+        <a
+          href="/policies/privacy-policy"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: "rgba(255, 255, 255, 0.6)",
+            textDecoration: "underline",
+          }}
+        >
+          Privacy Policy
+        </a>{" "}
+        e la{" "}
+        <a
+          href="/policies/cookie-policy"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: "rgba(255, 255, 255, 0.6)",
+            textDecoration: "underline",
+          }}
+        >
+          Cookie Policy
+        </a>
+        .
+      </div>
 
       {/* Close button */}
       <button
