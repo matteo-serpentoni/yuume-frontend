@@ -1,9 +1,12 @@
 import React, { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
 import { useChat } from "../../hooks/useChat";
 import "../Orb/Orb.css";
 
 import TypingIndicator from "./TypingIndicator";
 import MessageInput from "./MessageInput";
+import ProductCards from "../Message/ProductCards";
+import OrderCards from "../Message/OrderCards";
 
 const Chat = ({
   onTyping,
@@ -39,13 +42,6 @@ const Chat = ({
     scrollToBottom();
   }, [messages, loading]);
 
-  // ✅ FUNZIONALITÀ: Gestione click sui chips
-  const handleChipClick = (chipText) => {
-    if (!loading && !awaitingFeedback) {
-      sendMessage(chipText);
-    }
-  };
-
   // Helper per formattare il timestamp in HH:MM
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
@@ -55,33 +51,50 @@ const Chat = ({
     return `${hours}:${minutes}`;
   };
 
-  // ✅ FUNZIONALITÀ: Render messaggi con supporto chips e feedback
   const renderMessage = (msg) => {
-    // CHIPS TEMPORANEAMENTE DISABILITATI
-    /*
-    // Se il messaggio ha chips, renderizzali
-    if (msg.chips && msg.chips.length > 0) {
+    // Se il messaggio è di tipo product_cards
+    if (msg.type === "product_cards") {
       return (
-        <>
-          <div className={`message-bubble ${msg.sender}`}>
-            {msg.text}
+        <div
+          className={`message-bubble ${msg.sender} product-cards-bubble`}
+          style={{
+            background: chatColors.aiMessage, // Usa il colore del bot
+            padding: "12px", // Padding standard
+            borderRadius: "18px 18px 18px 4px", // Stesso raggio dei messaggi bot
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            maxWidth: "85%", // Larghezza standard
+            width: "fit-content",
+          }}
+        >
+          <ProductCards message={msg} shopDomain={shopDomain} />
+          <div className="message-time" style={{ marginTop: 4 }}>
+            {formatTime(msg.timestamp)}
           </div>
-          <div className="chips-container">
-            {msg.chips.map((chip, index) => (
-              <button
-                key={index}
-                className="chip-button"
-                onClick={() => handleChipClick(chip)}
-                disabled={loading || awaitingFeedback}
-              >
-                {chip}
-              </button>
-            ))}
-          </div>
-        </>
+        </div>
       );
     }
-    */
+
+    // Se il messaggio è di tipo order_cards
+    if (msg.type === "order_cards") {
+      return (
+        <div
+          className={`message-bubble ${msg.sender} order-cards-bubble`}
+          style={{
+            background: chatColors.aiMessage,
+            padding: "12px",
+            borderRadius: "18px 18px 18px 4px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            maxWidth: "85%",
+            width: "fit-content",
+          }}
+        >
+          <OrderCards message={msg} />
+          <div className="message-time" style={{ marginTop: 4 }}>
+            {formatTime(msg.timestamp)}
+          </div>
+        </div>
+      );
+    }
 
     // Se il messaggio richiede feedback supporto
     if (msg.requiresFeedback) {
@@ -125,7 +138,9 @@ const Chat = ({
         }}
       >
         <div className="message-content">
-          {msg.text || msg.error || "Si è verificato un errore. Riprova."}
+          <ReactMarkdown>
+            {msg.text || msg.error || "Si è verificato un errore. Riprova."}
+          </ReactMarkdown>
         </div>
         <div className="message-time">{formatTime(msg.timestamp)}</div>
       </div>

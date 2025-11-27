@@ -338,6 +338,21 @@ body {
   /* Subtle shadow for depth */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1),
     0 8px 24px rgba(0, 0, 0, 0.05);
+
+  /* Enable text selection */
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+/* SELECTION STYLES */
+.message-bubble *::selection {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.message-bubble.user *::selection {
+  background: rgba(255, 255, 255, 0.4);
 }
 
 @keyframes popIn {
@@ -374,6 +389,30 @@ body {
   flex: 1;
   min-width: 0; /* Allow text to wrap */
   padding-right: 4px; /* Spazio per evitare sovrapposizione con timestamp */
+}
+
+/* MARKDOWN STYLES */
+.message-content p {
+  margin: 0;
+}
+
+.message-content strong {
+  font-weight: 600;
+}
+
+.message-content ul,
+.message-content ol {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.message-content li {
+  margin-bottom: 2px;
+}
+
+.message-content a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .message-time {

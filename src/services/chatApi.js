@@ -15,9 +15,15 @@ export const sendMessage = async (
   meta = {}
 ) => {
   try {
+    const headers = { "Content-Type": "application/json" };
+    const accessToken = import.meta.env.VITE_SHOPIFY_ACCESS_TOKEN;
+    if (accessToken) {
+      headers["X-Shopify-Access-Token"] = accessToken;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         message,
         sessionId,

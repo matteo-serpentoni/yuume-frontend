@@ -1,170 +1,183 @@
 .add-to-cart {
-    --background-default: #17171B;
-    --background-hover: #0A0A0C;
-    --background-scale: 1;
-    --text-color: #fff;
-    --text-o: 1;
-    --text-x: 12px;
-    --cart: #fff;
-    --cart-x: -48px;
-    --cart-y: 0px;
-    --cart-rotate: 0deg;
-    --cart-scale: 0.75;
-    --cart-opacity: 1;
-    --cart-clip: 0px;
-    --cart-clip-x: 0px;
-    --cart-tick-offset: 10px;
-    --cart-tick-color: #FF328B;
-    --package-y: -16px;
-    --package-scale: 0;
-    --package-color: #8B4513;
-    --package-tape: #D2691E;
-    --package-second-y: 24px;
-    --package-second-color: #fff;
-    --package-second-tape: #17171B;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-appearance: none;
-    appearance: none;
-    outline: none;
-    background: none;
-    border: none;
-    padding: 12px 0;
-    width: 164px;
-    margin: 0;
-    cursor: pointer;
-    position: relative;
-    font-family: 'Inter', Arial, sans-serif;
+  --background-default: linear-gradient(135deg, #6366f1, #a855f7);
+  --background-hover: linear-gradient(135deg, #4f46e5, #9333ea);
+  --background-scale: 1;
+  --text-color: #fff;
+  --text-o: 1;
+  --text-x: 12px;
+  --cart: #fff;
+  --cart-x: -48px;
+  --cart-y: 0px;
+  --cart-rotate: 0deg;
+  --cart-scale: 0.75;
+  --cart-opacity: 1;
+  --cart-clip: 0px;
+  --cart-clip-x: 0px;
+  --cart-tick-offset: 10px;
+  --cart-tick-color: #ff328b;
+  --package-y: -16px;
+  --package-scale: 0;
+  --package-color: #8b4513;
+  --package-tape: #d2691e;
+  --package-second-y: 24px;
+  --package-second-color: #fff;
+  --package-second-tape: #17171b;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  background: none;
+  border: none;
+  padding: 10px 0;
+  width: 140px; /* Reduced width */
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  font-family: "Inter", Arial, sans-serif;
+  transform: scale(0.9); /* Slightly smaller overall */
+  transform-origin: right center;
 }
 
 .add-to-cart:before {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    border-radius: 5px;
-    transition: background 0.25s, transform 0.15s;
-    background: #17171B;
-    transform: scaleX(var(--background-scale)) translateZ(0);
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 5px;
+  transition: background 0.25s, transform 0.15s;
+  background: #17171b;
+  transform: scaleX(var(--background-scale)) translateZ(0);
 }
 
 .add-to-cart:not(.active):hover {
-    --background: var(--background-hover);
+  --background: var(--background-hover);
 }
 
 .add-to-cart span {
-    display: block;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 24px;
-    color: var(--text-color);
-    opacity: var(--text-o);
-    transform: translateX(var(--text-x)) translateZ(0);
-    transition: opacity 0.3s, transform 0.25s;
+  display: block;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--text-color);
+  opacity: var(--text-o);
+  transform: translateX(var(--text-x)) translateZ(0);
+  transition: opacity 0.3s, transform 0.25s;
 }
 
 .add-to-cart svg {
-    display: block;
-    width: var(--svg-width, 24px);
-    height: var(--svg-height, 24px);
-    position: var(--svg-position, relative);
-    left: var(--svg-left, 0);
-    top: var(--svg-top, 0);
-    stroke-linecap: round;
-    stroke-linejoin: round;
+  display: block;
+  width: var(--svg-width, 24px);
+  height: var(--svg-height, 24px);
+  position: var(--svg-position, relative);
+  left: var(--svg-left, 0);
+  top: var(--svg-top, 0);
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .add-to-cart svg path {
-    fill: var(--svg-fill, none);
-    stroke: var(--svg-stroke, none);
-    stroke-width: var(--svg-stroke-width, 2);
+  fill: var(--svg-fill, none);
+  stroke: var(--svg-stroke, none);
+  stroke-width: var(--svg-stroke-width, 2);
 }
 
 .morph {
-    --svg-width: 64px;
-    --svg-height: 13px;
-    --svg-left: 50%;
-    --svg-top: -12px;
-    --svg-position: absolute;
-    --svg-fill: #17171B;
-    pointer-events: none;
-    margin-left: -32px;
+  --svg-width: 64px;
+  --svg-height: 13px;
+  --svg-left: 50%;
+  --svg-top: -12px;
+  --svg-position: absolute;
+  --svg-fill: #17171b;
+  pointer-events: none;
+  margin-left: -32px;
 }
 
 .morph path {
-    transition: d 0.25s ease-out;
+  transition: d 0.25s ease-out;
 }
 
 .package,
 .cart {
-    pointer-events: none;
-    position: absolute;
-    left: 50%;
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
 }
 
 .package {
-    margin: -12px 0 0 -12px;
-    top: 0;
-    transform-origin: 50% 100%;
-    transform: translateY(var(--package-y)) scale(var(--package-scale));
-    transition: transform 0.3s;
+  margin: -12px 0 0 -12px;
+  top: 0;
+  transform-origin: 50% 100%;
+  transform: translateY(var(--package-y)) scale(var(--package-scale));
+  transition: transform 0.3s;
 }
 
 .package svg {
-    --svg-fill: var(--package-color);
+  --svg-fill: var(--package-color);
 }
 
 .package svg rect {
-    fill: var(--package-tape);
+  fill: var(--package-tape);
 }
 
 .package svg.second {
-    --svg-fill: var(--package-second-color);
-    --svg-position: absolute;
-    clip-path: polygon(0 var(--package-second-y), 24px var(--package-second-y), 24px 24px, 0 24px);
-    transition: clip-path 0.12s;
+  --svg-fill: var(--package-second-color);
+  --svg-position: absolute;
+  clip-path: polygon(
+    0 var(--package-second-y),
+    24px var(--package-second-y),
+    24px 24px,
+    0 24px
+  );
+  transition: clip-path 0.12s;
 }
 
 .package svg.second rect {
-    fill: var(--package-second-tape);
+  fill: var(--package-second-tape);
 }
 
 .cart {
-    --svg-width: 36px;
-    --svg-height: 26px;
-    --svg-stroke: var(--cart);
-    top: 10px;
-    margin-left: -18px;
-    transform: translate(var(--cart-x), var(--cart-y)) rotate(var(--cart-rotate)) scale(var(--cart-scale)) translateZ(0);
-    transition: transform 0.2s, opacity 0.1s;
-    opacity: var(--cart-opacity);
+  --svg-width: 36px;
+  --svg-height: 26px;
+  --svg-stroke: var(--cart);
+  top: 10px;
+  margin-left: -18px;
+  transform: translate(var(--cart-x), var(--cart-y)) rotate(var(--cart-rotate))
+    scale(var(--cart-scale)) translateZ(0);
+  transition: transform 0.2s, opacity 0.1s;
+  opacity: var(--cart-opacity);
 }
 
 .cart:before {
-    content: '';
-    display: block;
-    width: 22px;
-    height: 12px;
-    position: absolute;
-    left: 7px;
-    top: 7px;
-    background: var(--cart);
-    clip-path: polygon(0 0, 22px 0, calc(22px - var(--cart-clip-x)) var(--cart-clip), var(--cart-clip-x) var(--cart-clip));
-    transition: clip-path 0.1s;
+  content: "";
+  display: block;
+  width: 22px;
+  height: 12px;
+  position: absolute;
+  left: 7px;
+  top: 7px;
+  background: var(--cart);
+  clip-path: polygon(
+    0 0,
+    22px 0,
+    calc(22px - var(--cart-clip-x)) var(--cart-clip),
+    var(--cart-clip-x) var(--cart-clip)
+  );
+  transition: clip-path 0.1s;
 }
 
 .cart path.wheel {
-    --svg-stroke-width: 1.5;
+  --svg-stroke-width: 1.5;
 }
 
 .cart path.tick {
-    --svg-stroke: var(--cart-tick-color);
-    stroke-dasharray: 10px;
-    stroke-dashoffset: var(--cart-tick-offset);
-    transition: stroke-dashoffset 0.2s;
+  --svg-stroke: var(--cart-tick-color);
+  stroke-dasharray: 10px;
+  stroke-dashoffset: var(--cart-tick-offset);
+  transition: stroke-dashoffset 0.2s;
 }
