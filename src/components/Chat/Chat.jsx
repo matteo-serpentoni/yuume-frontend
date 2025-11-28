@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useChat } from "../../hooks/useChat";
 import "../Orb/Orb.css";
@@ -7,6 +7,7 @@ import TypingIndicator from "./TypingIndicator";
 import MessageInput from "./MessageInput";
 import ProductCards from "../Message/ProductCards";
 import OrderCards from "../Message/OrderCards";
+import ProfileView from "./ProfileView"; // ✅ Import
 
 const Chat = ({
   onTyping,
@@ -19,17 +20,20 @@ const Chat = ({
     inputBorder: "#667eea",
     inputFocus: "#4CC2E9",
   },
+  devShopDomain,
 }) => {
-  // ✅ FUNZIONALITÀ: useChat hook per gestione completa chat
+  const [view, setView] = useState("chat"); // 'chat' | 'profile'
+
   const {
     messages,
     loading,
     shopDomain,
     sessionId,
+    sessionStatus, // ✅ Get status
     sendMessage,
     clearChat,
     sendFeedback,
-  } = useChat();
+  } = useChat(devShopDomain);
 
   const messagesEndRef = useRef(null);
 
@@ -38,8 +42,10 @@ const Chat = ({
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, loading]);
+    if (view === "chat") {
+      scrollToBottom();
+    }
+  }, [messages, loading, view]);
 
   // Helper per formattare il timestamp in HH:MM
   const formatTime = (timestamp) => {
@@ -288,93 +294,113 @@ const Chat = ({
         </div>
       </div>
 
-      <div className="messages-area">
-        {messages.map((msg) => (
-          <div key={msg.id}>{renderMessage(msg)}</div>
-        ))}
+      {view === "profile" ? (
+        <ProfileView
+          onBack={() => setView("chat")}
+          sessionId={sessionId}
+          shopDomain={shopDomain}
+          colors={chatColors}
+        />
+      ) : (
+        <>
+          <div className="messages-area">
+            {messages.map((msg) => (
+              <div key={msg.id}>{renderMessage(msg)}</div>
+            ))}
 
-        {/* ✅ FUNZIONALITÀ: Loading usa lo stato dal hook invece di locale */}
-        {loading && <TypingIndicator aiMessageColor={chatColors.aiMessage} />}
-        <div ref={messagesEndRef} />
-      </div>
+            {loading && (
+              <TypingIndicator aiMessageColor={chatColors.aiMessage} />
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-      <MessageInput
-        onSend={(text) => {
-          if (!loading) {
-            sendMessage(text);
-            if (onTyping) onTyping(false);
-          }
-        }}
-        loading={loading}
-        placeholder="Scrivi qualcosa..."
-        sendButtonColor={chatColors.sendButton}
-        inputBorderColor={chatColors.inputBorder}
-        inputFocusColor={chatColors.inputFocus}
-        previewMode={false}
-      />
-
-      {/* Legal Disclaimer */}
-      <div
-        style={{
-          fontSize: "10px",
-          color: "rgba(255, 255, 255, 0.4)",
-          textAlign: "center",
-          marginTop: "8px",
-          padding: "0 10px",
-          lineHeight: "1.3",
-        }}
-      >
-        Chattando accetti la{" "}
-        <a
-          href="/policies/privacy-policy"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            color: "rgba(255, 255, 255, 0.6)",
-            textDecoration: "underline",
-          }}
-        >
-          Privacy Policy
-        </a>{" "}
-        e la{" "}
-        <a
-          href="/policies/cookie-policy"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            color: "rgba(255, 255, 255, 0.6)",
-            textDecoration: "underline",
-          }}
-        >
-          Cookie Policy
-        </a>
-        .
-      </div>
-
-      {/* Close button */}
-      <button
-        className="close-button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onMinimize && onMinimize();
-        }}
-      >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M18 6L6 18M6 6L18 18"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <MessageInput
+            onSend={(text) => {
+              if (!loading) {
+                sendMessage(text);
+                if (onTyping) onTyping(false);
+              }
+            }}
+            loading={loading}
+            placeholder={
+              sessionStatus === "escalated"
+                ? "Attendi l'intervento."
+                : "Scrivi qualcosa..."
+            }
+            disabled={sessionStatus === "escalated"} // ✅ Disable input
+            sendButtonColor={chatColors.sendButton}
+            inputBorderColor={chatColors.inputBorder}
+            inputFocusColor={chatColors.inputFocus}
+            previewMode={false}
+            onProfileClick={() => setView("profile")} // ✅ Passa handler
           />
-        </svg>
-      </button>
+
+          {/* Legal Disclaimer */}
+          <div
+            style={{
+              fontSize: "10px",
+              color: "rgba(255, 255, 255, 0.4)",
+              textAlign: "center",
+              marginTop: "8px",
+              padding: "0 10px",
+              lineHeight: "1.3",
+            }}
+          >
+            Chattando accetti la{" "}
+            <a
+              href="/policies/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "rgba(255, 255, 255, 0.6)",
+                textDecoration: "underline",
+              }}
+            >
+              Privacy Policy
+            </a>{" "}
+            e la{" "}
+            <a
+              href="/policies/cookie-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "rgba(255, 255, 255, 0.6)",
+                textDecoration: "underline",
+              }}
+            >
+              Cookie Policy
+            </a>
+            .
+          </div>
+        </>
+      )}
+
+      {/* Close button - Hidden in profile view */}
+      {view !== "profile" && (
+        <button
+          className="close-button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onMinimize && onMinimize();
+          }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };

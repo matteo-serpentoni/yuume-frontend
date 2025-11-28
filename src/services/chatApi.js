@@ -28,6 +28,7 @@ export const sendMessage = async (
         message,
         sessionId,
         shopDomain,
+        customer: meta.customer, // ✅ Passa info customer se presenti nei meta
         meta: { lang: navigator.language || "it", ...meta },
       }),
     });
@@ -47,5 +48,44 @@ export const sendMessage = async (
       throw error;
     }
     throw new ChatApiError("Network error or server unavailable", 0);
+  }
+};
+
+export const getProfile = async (sessionId, shopDomain) => {
+  try {
+    const headers = { "Content-Type": "application/json" };
+    const accessToken = import.meta.env.VITE_SHOPIFY_ACCESS_TOKEN;
+    if (accessToken) headers["X-Shopify-Access-Token"] = accessToken;
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/chat/profile?sessionId=${sessionId}&shopDomain=${shopDomain}`,
+      { headers }
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch profile");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    return null;
+  }
+};
+
+export const updateProfile = async (sessionId, shopDomain, data) => {
+  try {
+    const headers = { "Content-Type": "application/json" };
+    const accessToken = import.meta.env.VITE_SHOPIFY_ACCESS_TOKEN;
+    if (accessToken) headers["X-Shopify-Access-Token"] = accessToken;
+
+    const response = await fetch(`${API_BASE_URL}/api/chat/profile`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ sessionId, shopDomain, ...data }),
+    });
+
+    if (!response.ok) throw new Error("Failed to update profile");
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    throw error;
   }
 };

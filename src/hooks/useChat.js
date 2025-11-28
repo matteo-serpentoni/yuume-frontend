@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   MESSAGES: "yuume_messages",
   SHOP_DOMAIN: "yuume_shop_domain",
   SESSION_TIME: "yuume_session_time",
+  SESSION_STATUS: "yuume_session_status", // ✅ New key
 };
 
 const SESSION_TIMEOUT = 30 * 60 * 1000;
@@ -14,7 +15,7 @@ const generateSessionId = () => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
-export const useChat = () => {
+export const useChat = (devShopDomain, customer) => {
   const [sessionId] = useState(() => {
     let id = sessionStorage.getItem(STORAGE_KEYS.SESSION_ID);
     const savedTime = sessionStorage.getItem(STORAGE_KEYS.SESSION_TIME);
@@ -66,14 +67,30 @@ export const useChat = () => {
     }
   });
 
+  // ✅ Session Status State
+  const [sessionStatus, setSessionStatus] = useState(() => {
+    return sessionStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || "active";
+  });
+
   const [loading, setLoading] = useState(false);
 
   const [shopDomain, setShopDomain] = useState(() => {
+    // ✅ Priorità a devShopDomain se presente
+    if (devShopDomain) return devShopDomain;
+
     return (
       sessionStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) ||
       window.location.hostname
     );
   });
+
+  // ✅ Aggiorna shopDomain se cambia devShopDomain
+  useEffect(() => {
+    if (devShopDomain) {
+      setShopDomain(devShopDomain);
+      sessionStorage.setItem(STORAGE_KEYS.SHOP_DOMAIN, devShopDomain);
+    }
+  }, [devShopDomain]);
 
   useEffect(() => {
     try {
@@ -82,6 +99,11 @@ export const useChat = () => {
       console.error("Errore salvataggio messaggi:", error);
     }
   }, [messages]);
+
+  // ✅ Persist session status
+  useEffect(() => {
+    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, sessionStatus);
+  }, [sessionStatus]);
 
   useEffect(() => {
     const handleMessage = (event) => {
@@ -151,10 +173,17 @@ export const useChat = () => {
       const userMsg = addUserMessage(text);
 
       try {
-        const response = await sendMessage(text, sessionId, shopDomain);
+        const response = await sendMessage(text, sessionId, shopDomain, {
+          customer,
+        });
 
         if (response.message) {
           addAssistantMessage(response.message);
+
+          // ✅ Update status from response
+          if (response.status) {
+            setSessionStatus(response.status);
+          }
         } else {
           throw new Error("Invalid response format");
         }
@@ -195,7 +224,14 @@ export const useChat = () => {
         setLoading(false);
       }
     },
-    [sessionId, loading, shopDomain, addUserMessage, addAssistantMessage]
+    [
+      sessionId,
+      loading,
+      shopDomain,
+      addUserMessage,
+      addAssistantMessage,
+      customer,
+    ]
   );
 
   const sendFeedback = useCallback(
@@ -257,6 +293,7 @@ export const useChat = () => {
     };
 
     setMessages([welcomeMsg]);
+    setSessionStatus("active"); // ✅ Reset status
     sessionStorage.clear();
 
     // Save new session with welcome message immediately
@@ -264,6 +301,7 @@ export const useChat = () => {
     sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
     sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
     sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
+    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, "active"); // ✅ Save status
 
     window.location.reload();
   }, []);
@@ -273,6 +311,7 @@ export const useChat = () => {
     loading,
     shopDomain,
     sessionId,
+    sessionStatus, // ✅ Return status
     sendMessage: sendChatMessage,
     clearChat,
     sendFeedback,

@@ -8,13 +8,15 @@ const MessageInput = ({
   inputBorderColor = "#a259ff",
   inputFocusColor = "#4CC2E9",
   previewMode = false,
+  onProfileClick,
+  disabled = false, // ✅ New prop
 }) => {
   const [input, setInput] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (previewMode) return;
+    if (previewMode || disabled) return; // ✅ Check disabled
     if (!input.trim() || loading) return;
     onSend(input.trim());
     setInput("");
@@ -45,7 +47,7 @@ const MessageInput = ({
     return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
   };
 
-  const shouldShowButton = input.trim() && !loading;
+  const shouldShowButton = input.trim() && !loading && !disabled; // ✅ Check disabled
 
   return (
     <form
@@ -65,7 +67,8 @@ const MessageInput = ({
       <div
         style={{
           position: "relative",
-          width: "100%",
+          flex: 1,
+          minWidth: 0, // ✅ Fix for Safari flexbox shrinking
           display: "flex",
           alignItems: "center",
         }}
@@ -77,12 +80,14 @@ const MessageInput = ({
           onFocus={() => !previewMode && setIsFocused(true)}
           onBlur={() => !previewMode && setIsFocused(false)}
           placeholder={loading ? "Attendere risposta…" : placeholder}
-          disabled={loading || previewMode}
+          disabled={loading || previewMode || disabled} // ✅ Check disabled
           maxLength={2000}
           style={{
-            width: "100%",
+            boxSizing: "border-box", // ✅ Prevent padding from expanding width
+            flex: 1,
+            minWidth: 0, // ✅ Allow input to shrink below content size (fixes overflow)
             padding: "12px 18px",
-            paddingRight: shouldShowButton ? "56px" : "18px", // Spazio per il pulsante
+            paddingRight: "56px", // ✅ Fixed padding to prevent layout shift
             borderRadius: 24,
             border: `2px solid ${
               isFocused
@@ -92,17 +97,18 @@ const MessageInput = ({
             outline: "none",
             background: "rgba(35, 36, 58, 0.9)",
             backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)", // ✅ Safari support
+            WebkitAppearance: "none", // ✅ Remove default Safari styles
             color: "#fff",
             fontSize: "0.95rem",
             fontFamily: "inherit",
             transition: "all 0.3s ease",
             boxShadow:
               "0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(35, 36, 58, 0.2)",
-            cursor: previewMode ? "not-allowed" : "text",
-            opacity: previewMode ? 0.8 : 1,
+            cursor: previewMode || disabled ? "not-allowed" : "text", // ✅ Check disabled
+            opacity: previewMode || disabled ? 0.6 : 1, // ✅ Check disabled (0.6 opacity)
           }}
         />
-
         {/* Pulsante dentro l'input - appare solo con testo */}
         {shouldShowButton && (
           <button
@@ -153,6 +159,66 @@ const MessageInput = ({
           </button>
         )}
       </div>
+
+      {/* Pulsante Profilo (Destra) - Spostato fuori dal container relativo */}
+      {/* Pulsante Profilo (Destra) - Spostato fuori dal container relativo */}
+      {onProfileClick && !previewMode && (
+        <button
+          type="button"
+          onClick={onProfileClick}
+          title="Profilo"
+          className="profile-button-gradient-border" // ✅ Use CSS class for border animation
+          style={{
+            // Stile circolare simile alla X di chiusura
+            width: "36px",
+            height: "36px",
+            minWidth: "36px", // ✅ Prevent shrinking
+            minHeight: "36px", // ✅ Prevent shrinking
+            flexShrink: 0, // ✅ Prevent shrinking
+            borderRadius: "50%",
+            position: "relative",
+            overflow: "hidden",
+            // background: "rgba(255, 255, 255, 0.1)", // ✅ Handled by CSS class
+            // border: "1px solid rgba(255, 255, 255, 0.2)", // ✅ Handled by CSS class
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            marginLeft: "10px",
+            marginRight: "8px",
+            color: "white",
+            transition: "all 0.3s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+        >
+          {/* ✅ CSS Gradient Animation Masked to Icon */}
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              // ✅ Elegant gradient with Yuume colors
+              background:
+                "linear-gradient(270deg, #ff00cc, #3333ff, #00ccff, #ff00cc)",
+              backgroundSize: "300% 300%",
+              animation: "gradient-flow 4s ease infinite", // ✅ Smooth infinite animation
+              // ✅ Masking logic
+              WebkitMaskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' /%3E%3Ccircle cx='12' cy='7' r='4' /%3E%3C/svg%3E")`,
+              maskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' /%3E%3Ccircle cx='12' cy='7' r='4' /%3E%3C/svg%3E")`,
+              WebkitMaskSize: "contain",
+              maskSize: "contain",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskPosition: "center",
+              maskPosition: "center",
+            }}
+          />
+        </button>
+      )}
 
       <style>{`
         @keyframes slideIn {

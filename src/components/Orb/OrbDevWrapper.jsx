@@ -7,7 +7,9 @@ import Orb from "./Orb";
  */
 export default function OrbDevWrapper({ enlarged, setEnlarged, children }) {
   const [themes, setThemes] = useState([]);
+  const [sites, setSites] = useState([]);
   const [selectedThemeId, setSelectedThemeId] = useState("purple-dream");
+  const [selectedSiteDomain, setSelectedSiteDomain] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -60,41 +62,58 @@ export default function OrbDevWrapper({ enlarged, setEnlarged, children }) {
     ];
   };
 
-  // Carica i temi all'avvio
+  // Carica i temi e i siti all'avvio
   useEffect(() => {
-    const fetchThemes = async () => {
+    const fetchData = async () => {
       try {
         // Usa l'API locale di default o quella configurata
         const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
-        // Usa un siteId di test
+        // Usa un siteId di test per i temi
         const siteId = "shopify_test";
 
-        console.log(`🎨 Fetching themes from ${API_URL}...`);
-        const response = await fetch(
-          `${API_URL}/api/customization/themes/all?siteId=${siteId}`
-        );
+        console.log(`🎨 Fetching data from ${API_URL}...`);
 
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+        // Fetch Themes & Sites in parallel
+        const [themesRes, sitesRes] = await Promise.all([
+          fetch(`${API_URL}/api/customization/themes/all?siteId=${siteId}`),
+          fetch(`${API_URL}/api/customization/sites`),
+        ]);
+
+        if (!themesRes.ok)
+          throw new Error(`Themes API error: ${themesRes.status}`);
+        // Sites API might fail in prod, handle gracefully?
+        // For now assume dev env.
+
+        const themesResult = await themesRes.json();
+        const sitesResult = sitesRes.ok
+          ? await sitesRes.json()
+          : { success: false, data: [] };
+
+        if (!themesResult.success) {
+          throw new Error(themesResult.message || "Failed to fetch themes");
         }
 
-        const result = await response.json();
-        if (!result.success) {
-          throw new Error(result.message || "Failed to fetch themes");
-        }
-
-        const allThemes = [...result.data.available, ...result.data.locked];
+        const allThemes = [
+          ...themesResult.data.available,
+          ...themesResult.data.locked,
+        ];
         console.log("✅ Loaded themes:", allThemes);
         setThemes(allThemes);
+
+        if (sitesResult.success) {
+          console.log("✅ Loaded sites:", sitesResult.data);
+          setSites(sitesResult.data);
+        }
+
         setLoading(false);
       } catch (err) {
-        console.error("❌ Error loading themes:", err);
+        console.error("❌ Error loading data:", err);
         setError(err.message);
         setLoading(false);
       }
     };
 
-    fetchThemes();
+    fetchData();
   }, []);
 
   // Aggiorna la config quando cambia il tema selezionato
@@ -214,53 +233,103 @@ export default function OrbDevWrapper({ enlarged, setEnlarged, children }) {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: "8px",
+                gap: "16px",
                 maxHeight: isMobile ? "calc(50vh - 80px)" : "400px",
                 overflowY: "auto",
               }}
             >
-              {themes.map((theme) => (
-                <button
-                  key={theme.id}
-                  onClick={() => {
-                    setSelectedThemeId(theme.id);
-                    if (isMobile) {
-                      // Auto-chiudi su mobile dopo la selezione
-                      setTimeout(() => setIsCollapsed(true), 300);
-                    }
-                  }}
+              {/* Site Selector */}
+              <div>
+                <label
                   style={{
-                    padding: "8px 12px",
-                    background:
-                      selectedThemeId === theme.id
-                        ? "rgba(102, 126, 234, 0.3)"
-                        : "rgba(255,255,255,0.05)",
-                    border:
-                      selectedThemeId === theme.id
-                        ? "1px solid #667eea"
-                        : "1px solid transparent",
-                    borderRadius: "6px",
-                    color: "white",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    fontSize: "13px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    transition: "all 0.2s",
+                    display: "block",
+                    fontSize: "12px",
+                    color: "#8b92a7",
+                    marginBottom: "6px",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "12px",
-                      height: "12px",
-                      borderRadius: "50%",
-                      background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.secondary})`,
+                  Select Site (Dev Mode)
+                </label>
+                <select
+                  value={selectedSiteDomain}
+                  onChange={(e) => setSelectedSiteDomain(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "6px",
+                    color: "white",
+                    fontSize: "13px",
+                    outline: "none",
+                  }}
+                >
+                  <option value="">Localhost (Default)</option>
+                  {sites.map((site) => (
+                    <option key={site._id} value={site.domain}>
+                      {site.domain} ({site.shop || "No Name"})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Theme List */}
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "12px",
+                    color: "#8b92a7",
+                    marginBottom: "2px",
+                  }}
+                >
+                  Select Theme
+                </label>
+                {themes.map((theme) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => {
+                      setSelectedThemeId(theme.id);
+                      if (isMobile) {
+                        // Auto-chiudi su mobile dopo la selezione
+                        setTimeout(() => setIsCollapsed(true), 300);
+                      }
                     }}
-                  />
-                  {theme.name}
-                </button>
-              ))}
+                    style={{
+                      padding: "8px 12px",
+                      background:
+                        selectedThemeId === theme.id
+                          ? "rgba(102, 126, 234, 0.3)"
+                          : "rgba(255,255,255,0.05)",
+                      border:
+                        selectedThemeId === theme.id
+                          ? "1px solid #667eea"
+                          : "1px solid transparent",
+                      borderRadius: "6px",
+                      color: "white",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      fontSize: "13px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.secondary})`,
+                      }}
+                    />
+                    {theme.name}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -274,6 +343,7 @@ export default function OrbDevWrapper({ enlarged, setEnlarged, children }) {
         baseColor2={currentConfig.baseColor2}
         baseColor3={currentConfig.baseColor3}
         chatColors={currentConfig.chatColors}
+        devShopDomain={selectedSiteDomain}
       >
         {children}
       </Orb>

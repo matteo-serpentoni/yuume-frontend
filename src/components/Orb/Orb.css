@@ -518,6 +518,47 @@ body {
   opacity: 0.5;
 }
 
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.profile-button-gradient-border {
+  position: relative !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  background-clip: padding-box !important; /* Keep bg inside border */
+  border: 1px solid transparent !important; /* Match close button 1px */
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  z-index: 1; /* Create stacking context */
+}
+
+.profile-button-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px; /* Cover the 1px border area */
+  border-radius: 50%;
+  padding: 1px; /* 1px thickness */
+  background: linear-gradient(270deg, #ff00cc, #3333ff, #00ccff, #ff00cc);
+  background-size: 300% 300%;
+  animation: gradient-flow 4s ease infinite;
+  z-index: -1; /* Place behind the button */
+
+  /* Mask to create the ring */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  pointer-events: none;
+}
 /* CLOSE BUTTON */
 .close-button {
   position: relative;

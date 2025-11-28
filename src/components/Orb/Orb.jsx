@@ -25,6 +25,7 @@ export default function Orb({
     inputBorder: "#667eea",
     inputFocus: "#4CC2E9",
   },
+  devShopDomain, // ✅ Nuova prop per sviluppo locale
 }) {
   const containerRef = useRef(null);
   const canvasContainerRef = useRef(null);
@@ -476,6 +477,7 @@ export default function Orb({
           ) : (
             <Chat
               chatColors={chatColors}
+              devShopDomain={devShopDomain}
               onTyping={setIsTyping}
               onMinimize={() => {
                 setEnlarged(false);
