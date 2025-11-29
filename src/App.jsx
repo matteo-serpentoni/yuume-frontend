@@ -48,6 +48,32 @@ function App() {
     }
   }, []);
 
+  // 🔥 Handle explicit leave signal
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const sessionId = sessionStorage.getItem("yuume_session_id");
+      if (sessionId) {
+        const data = new Blob([JSON.stringify({ sessionId })], {
+          type: "application/json",
+        });
+        // Use sendBeacon for reliable delivery on unload
+        // Note: URL must be absolute or relative to the page origin
+        // Assuming widget is hosted on same domain or proxy handles it.
+        // If widget is on different domain, we need full URL.
+        // Since we are in dev/prod, let's try to infer or use env.
+        // For now, assuming relative path works if proxied, or we need the API URL.
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+        navigator.sendBeacon(`${apiUrl}/api/chat/leave`, data);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   const isDevelopment = import.meta.env.DEV;
 
   return (

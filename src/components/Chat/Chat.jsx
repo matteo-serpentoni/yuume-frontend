@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { useChat } from "../../hooks/useChat";
 import "../Orb/Orb.css";
 
@@ -7,7 +6,9 @@ import TypingIndicator from "./TypingIndicator";
 import MessageInput from "./MessageInput";
 import ProductCards from "../Message/ProductCards";
 import OrderCards from "../Message/OrderCards";
+import TextMessage from "../Message/TextMessage"; // ✅ Import
 import ProfileView from "./ProfileView"; // ✅ Import
+import StarRating from "./StarRating"; // ✅ Import
 
 const Chat = ({
   onTyping,
@@ -30,6 +31,7 @@ const Chat = ({
     shopDomain,
     sessionId,
     sessionStatus, // ✅ Get status
+    assignedTo, // ✅ Get assignedTo
     sendMessage,
     clearChat,
     sendFeedback,
@@ -126,9 +128,7 @@ const Chat = ({
           }}
         >
           <div className="message-content">
-            <ReactMarkdown>
-              {msg.text || msg.error || "Si è verificato un errore. Riprova."}
-            </ReactMarkdown>
+            <TextMessage message={msg} />
           </div>
           <div
             className="message-footer"
@@ -311,6 +311,48 @@ const Chat = ({
             {loading && (
               <TypingIndicator aiMessageColor={chatColors.aiMessage} />
             )}
+
+            {/* Conversation Ended Separator & Rating */}
+            {sessionStatus === "completed" && (
+              <div style={{ padding: "0 16px 24px 16px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    margin: "24px 0",
+                    color: "rgba(255, 255, 255, 0.4)",
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                  }}
+                >
+                  <div
+                    style={{
+                      flex: 1,
+                      height: "1px",
+                      background: "rgba(255, 255, 255, 0.1)",
+                    }}
+                  />
+                  <span style={{ padding: "0 12px" }}>
+                    Conversazione Terminata
+                  </span>
+                  <div
+                    style={{
+                      flex: 1,
+                      height: "1px",
+                      background: "rgba(255, 255, 255, 0.1)",
+                    }}
+                  />
+                </div>
+
+                <StarRating
+                  onRate={(rating) =>
+                    sendFeedback(null, rating, null, "conversation")
+                  }
+                />
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -323,11 +365,11 @@ const Chat = ({
             }}
             loading={loading}
             placeholder={
-              sessionStatus === "escalated"
+              sessionStatus === "escalated" && !assignedTo
                 ? "Attendi l'intervento."
                 : "Scrivi qualcosa..."
             }
-            disabled={sessionStatus === "escalated"} // ✅ Disable input
+            disabled={sessionStatus === "escalated" && !assignedTo} // ✅ Enable if assigned
             sendButtonColor={chatColors.sendButton}
             inputBorderColor={chatColors.inputBorder}
             inputFocusColor={chatColors.inputFocus}

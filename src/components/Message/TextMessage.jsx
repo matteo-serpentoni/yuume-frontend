@@ -1,42 +1,27 @@
 import React from "react";
-import { parseMessageFormat } from "../../utils/messageHelpers";
 
 const TextMessage = ({ message }) => {
-  const { content, hasMarkdown, hasHTML } = parseMessageFormat(message.message);
+  const rawContent = message.message || message.text || "";
 
-  const renderContent = () => {
-    if (hasHTML) {
-      return (
-        <div
-          style={{ lineHeight: 1.6 }}
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
-      );
-    }
+  console.log("TextMessage rendering content:", rawContent);
 
-    if (hasMarkdown) {
-      // Semplice parsing markdown per bold, italic, code
-      let parsed = content
-        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*(.*?)\*/g, "<em>$1</em>")
-        .replace(
-          /`(.*?)`/g,
-          '<code style="background:#f1f5f9;padding:2px 4px;border-radius:3px;font-size:0.9em;">$1</code>'
-        )
-        .replace(/\n/g, "<br/>");
+  // 1. Replace URLs with links
+  let processed = rawContent.replace(
+    /(https?:\/\/[^\s]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; font-weight: 500; pointer-events: auto;">$1</a>'
+  );
 
-      return (
-        <div
-          style={{ lineHeight: 1.6 }}
-          dangerouslySetInnerHTML={{ __html: parsed }}
-        />
-      );
-    }
-
-    return (
-      <div style={{ lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{content}</div>
+  // 2. Basic Markdown
+  processed = processed
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(
+      /`(.*?)`/g,
+      '<code style="background:rgba(255,255,255,0.1);padding:2px 4px;border-radius:3px;font-size:0.9em;">$1</code>'
     );
-  };
+
+  // 3. Newlines
+  processed = processed.replace(/\n/g, "<br/>");
 
   return (
     <>
@@ -53,8 +38,10 @@ const TextMessage = ({ message }) => {
           {message.title}
         </div>
       )}
-
-      {renderContent()}
+      <div
+        style={{ lineHeight: 1.6, wordBreak: "break-word" }}
+        dangerouslySetInnerHTML={{ __html: processed }}
+      />
     </>
   );
 };

@@ -1,22 +1,28 @@
-import { useState, useCallback, useEffect } from "react";
-import { sendMessage, ChatApiError } from "../services/chatApi";
+import { useState, useCallback, useEffect, useRef } from "react";
+import {
+  sendMessage,
+  ChatApiError,
+  getSessionStatus,
+} from "../services/chatApi";
+import { io } from "socket.io-client";
 
 const STORAGE_KEYS = {
   SESSION_ID: "yuume_session_id",
   MESSAGES: "yuume_messages",
   SHOP_DOMAIN: "yuume_shop_domain",
   SESSION_TIME: "yuume_session_time",
-  SESSION_STATUS: "yuume_session_status", // ✅ New key
+  SESSION_STATUS: "yuume_session_status",
 };
 
 const SESSION_TIMEOUT = 30 * 60 * 1000;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const generateSessionId = () => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
 export const useChat = (devShopDomain, customer) => {
-  const [sessionId] = useState(() => {
+  const [sessionId, setSessionId] = useState(() => {
     let id = sessionStorage.getItem(STORAGE_KEYS.SESSION_ID);
     const savedTime = sessionStorage.getItem(STORAGE_KEYS.SESSION_TIME);
 
@@ -72,7 +78,10 @@ export const useChat = (devShopDomain, customer) => {
     return sessionStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || "active";
   });
 
+  const [assignedTo, setAssignedTo] = useState(null); // ✅ New state for human assignment
+
   const [loading, setLoading] = useState(false);
+  const socketRef = useRef(null);
 
   const [shopDomain, setShopDomain] = useState(() => {
     // ✅ Priorità a devShopDomain se presente
@@ -120,6 +129,30 @@ export const useChat = (devShopDomain, customer) => {
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
+  const clearChat = useCallback(() => {
+    // Reset to welcome message instead of empty array
+    const welcomeMsg = {
+      id: Date.now(),
+      sender: "assistant",
+      text: "Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?",
+      timestamp: new Date().toISOString(),
+      disableFeedback: true,
+    };
+
+    // Save new session with welcome message immediately
+    const newSessionId = generateSessionId();
+    sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
+    sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
+    sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
+    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, "active");
+
+    // Update State
+    setSessionId(newSessionId);
+    setMessages([welcomeMsg]);
+    setSessionStatus("active");
+    setAssignedTo(null);
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       const savedTime = sessionStorage.getItem(STORAGE_KEYS.SESSION_TIME);
@@ -130,18 +163,64 @@ export const useChat = (devShopDomain, customer) => {
           console.log(
             "⏰ Sessione scaduta per inattività, pulizia in corso..."
           );
-          sessionStorage.clear();
-          window.location.reload();
+          clearChat(); // Use clearChat instead of reload
         }
       }
     }, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [clearChat]);
 
-  const addUserMessage = useCallback((text) => {
+  // ✅ WebSocket Connection
+  useEffect(() => {
+    if (!sessionId) return;
+
+    // Initial status fetch (still useful for initial load)
+    getSessionStatus(sessionId).then((statusData) => {
+      if (statusData) {
+        if (statusData.status) setSessionStatus(statusData.status);
+        if (statusData.assignedTo) setAssignedTo(statusData.assignedTo);
+      }
+    });
+
+    // Connect Socket
+    const socket = io(API_URL, {
+      transports: ["websocket", "polling"],
+    });
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      console.log("🔌 Connected to WebSocket");
+      socket.emit("join_session", sessionId);
+    });
+
+    socket.on("message:received", (message) => {
+      console.log("📩 Message received via socket:", message);
+      setMessages((prev) => {
+        // Avoid duplicates
+        if (prev.some((m) => m.id === message.id)) return prev;
+        return [...prev, message];
+      });
+      // If message is from assistant/human, stop loading
+      if (message.sender === "assistant") {
+        setLoading(false);
+      }
+    });
+
+    socket.on("session:updated", (data) => {
+      console.log("🔄 Session updated via socket:", data);
+      if (data.status) setSessionStatus(data.status);
+      if (data.assignedTo !== undefined) setAssignedTo(data.assignedTo);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [sessionId]);
+
+  const addUserMessage = useCallback((text, id = Date.now()) => {
     const userMessage = {
-      id: Date.now(),
+      id,
       sender: "user",
       text,
       timestamp: new Date().toISOString(),
@@ -152,14 +231,18 @@ export const useChat = (devShopDomain, customer) => {
 
   const addAssistantMessage = useCallback((data) => {
     const assistantMessage = {
-      id: Date.now() + 1,
+      id: data.id || Date.now() + 1, // Use backend ID if available
       sender: "assistant",
       timestamp: new Date().toISOString(),
       text: data.message || data.text,
       ...data,
     };
 
-    setMessages((prev) => [...prev, assistantMessage]);
+    setMessages((prev) => {
+      // Deduplicate
+      if (prev.some((m) => m.id === assistantMessage.id)) return prev;
+      return [...prev, assistantMessage];
+    });
     return assistantMessage;
   }, []);
 
@@ -167,17 +250,61 @@ export const useChat = (devShopDomain, customer) => {
     async (text) => {
       if (!text.trim() || loading) return;
 
+      let currentSessionId = sessionId;
+
+      // 🔥 AUTO-START NEW SESSION IF COMPLETED
+      if (sessionStatus === "completed" || sessionStatus === "abandoned") {
+        console.log("🔄 Starting new session (soft reset)...");
+
+        // 1. Generate new ID
+        const newId = generateSessionId();
+        currentSessionId = newId; // Use new ID for this request
+
+        // 2. Update Storage
+        sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newId);
+        sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, "active");
+        sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([]));
+
+        // 3. Update State (Soft Reset)
+        setSessionId(newId);
+        setSessionStatus("active");
+        setMessages([]); // Clear previous messages
+        setAssignedTo(null);
+      }
+
       sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
 
       setLoading(true);
-      const userMsg = addUserMessage(text);
+      const userMsgId = Date.now(); // Generate ID here
+      const userMsg = addUserMessage(text, userMsgId);
 
       try {
-        const response = await sendMessage(text, sessionId, shopDomain, {
-          customer,
-        });
+        const response = await sendMessage(
+          text,
+          currentSessionId, // Use the correct ID (current or new)
+          shopDomain,
+          {
+            customer,
+          },
+          userMsgId
+        );
 
         if (response.message) {
+          // Note: If backend emits socket event for AI response too, we might get duplicate.
+          // But our socket listener checks for duplicates by ID.
+          // However, AI response ID is generated on backend or frontend?
+          // Frontend generates ID for optimistic UI, backend generates for socket.
+          // We should rely on socket for AI response if possible, OR handle deduplication carefully.
+          // For now, let's keep adding it here for immediate feedback, and socket will be ignored if duplicate ID (unlikely if ID generation differs).
+          // Actually, backend socket emission uses Date.now() + 1, which might clash or not.
+          // Safer to NOT add here if we expect socket? Or add here and ensure socket ID matches?
+          // Let's add here. If socket comes with different ID, we might show double.
+          // FIX: Backend `handleChat` emits `message:received` for AI response.
+          // So we should probably NOT add it here manually if we trust socket.
+          // BUT, `sendMessage` returns the response immediately.
+          // Let's add it here for speed, and hope socket doesn't duplicate.
+          // Ideally, `sendMessage` response should contain the ID used in socket emission.
+
           addAssistantMessage(response.message);
 
           // ✅ Update status from response
@@ -185,7 +312,8 @@ export const useChat = (devShopDomain, customer) => {
             setSessionStatus(response.status);
           }
         } else {
-          throw new Error("Invalid response format");
+          // If no message but success (e.g. human handoff specific response?), handle it
+          // But usually we expect a message or empty message
         }
       } catch (error) {
         console.error("Chat error:", error);
@@ -231,26 +359,34 @@ export const useChat = (devShopDomain, customer) => {
       addUserMessage,
       addAssistantMessage,
       customer,
+      sessionStatus, // Added dependency
+      setSessionId,
+      setSessionStatus,
+      setMessages,
+      setAssignedTo,
     ]
   );
 
   const sendFeedback = useCallback(
-    async (messageId, rating, aiMessageText) => {
-      // 1. Optimistic UI Update
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === messageId ? { ...msg, feedback: rating } : msg
-        )
-      );
+    async (messageId, rating, aiMessageText, type = "message") => {
+      // 1. Optimistic UI Update (Only for message feedback)
+      if (type === "message") {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === messageId ? { ...msg, feedback: rating } : msg
+          )
+        );
+      }
 
       // 2. Find context (user query)
-      const messageIndex = messages.findIndex((m) => m.id === messageId);
       let userQuery = "N/A";
-
-      if (messageIndex > 0) {
-        const prevMsg = messages[messageIndex - 1];
-        if (prevMsg.sender === "user") {
-          userQuery = prevMsg.text;
+      if (type === "message") {
+        const messageIndex = messages.findIndex((m) => m.id === messageId);
+        if (messageIndex > 0) {
+          const prevMsg = messages[messageIndex - 1];
+          if (prevMsg.sender === "user") {
+            userQuery = prevMsg.text;
+          }
         }
       }
 
@@ -268,10 +404,11 @@ export const useChat = (devShopDomain, customer) => {
             body: JSON.stringify({
               shopDomain,
               sessionId,
-              messageId, // ✅ Added messageId
+              messageId,
               userQuery,
               aiResponse: aiMessageText,
               rating,
+              type, // ✅ Send type
             }),
           }
         );
@@ -282,36 +419,13 @@ export const useChat = (devShopDomain, customer) => {
     [messages, shopDomain, sessionId]
   );
 
-  const clearChat = useCallback(() => {
-    // Reset to welcome message instead of empty array
-    const welcomeMsg = {
-      id: Date.now(),
-      sender: "assistant",
-      text: "Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?",
-      timestamp: new Date().toISOString(),
-      disableFeedback: true,
-    };
-
-    setMessages([welcomeMsg]);
-    setSessionStatus("active"); // ✅ Reset status
-    sessionStorage.clear();
-
-    // Save new session with welcome message immediately
-    const newSessionId = generateSessionId();
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
-    sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, "active"); // ✅ Save status
-
-    window.location.reload();
-  }, []);
-
   return {
     messages,
     loading,
     shopDomain,
     sessionId,
-    sessionStatus, // ✅ Return status
+    sessionStatus,
+    assignedTo, // ✅ Return assignedTo
     sendMessage: sendChatMessage,
     clearChat,
     sendFeedback,

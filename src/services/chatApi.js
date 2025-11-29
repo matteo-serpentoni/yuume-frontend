@@ -12,7 +12,8 @@ export const sendMessage = async (
   message,
   sessionId,
   shopDomain,
-  meta = {}
+  meta = {},
+  clientMessageId = null
 ) => {
   try {
     const headers = { "Content-Type": "application/json" };
@@ -30,6 +31,7 @@ export const sendMessage = async (
         shopDomain,
         customer: meta.customer, // ✅ Passa info customer se presenti nei meta
         meta: { lang: navigator.language || "it", ...meta },
+        clientMessageId, // ✅ Send client ID
       }),
     });
 
@@ -87,5 +89,26 @@ export const updateProfile = async (sessionId, shopDomain, data) => {
   } catch (error) {
     console.error("Error updating profile:", error);
     throw error;
+  }
+};
+
+export const getSessionStatus = async (sessionId) => {
+  try {
+    const headers = { "Content-Type": "application/json" };
+    const accessToken = import.meta.env.VITE_SHOPIFY_ACCESS_TOKEN;
+    if (accessToken) headers["X-Shopify-Access-Token"] = accessToken;
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/chat/session/${sessionId}`,
+      {
+        headers,
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch session status");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching session status:", error);
+    return null;
   }
 };
