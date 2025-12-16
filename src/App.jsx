@@ -77,8 +77,20 @@ function App() {
   const isDevelopment = import.meta.env.DEV;
 
   return (
-    <Router basename="/widget">
+    <Router basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       <Routes>
+        {/* Debug Route for catch-all */}
+        <Route
+          path="*"
+          element={
+            <div style={{ color: "white", padding: 20 }}>
+              <h1>404 Not Found</h1>
+              <p>Current Path: {window.location.pathname}</p>
+              <p>Basename: {import.meta.env.BASE_URL}</p>
+            </div>
+          }
+        />
+
         {/* Homepage con l'orb */}
         <Route
           path="/"
@@ -114,8 +126,9 @@ function App() {
         {/* Pagina installazione app */}
         <Route path="/app/installed" element={<AppInstalled />} />
 
-        {/* Pagina preview orb */}
+        {/* Pagina preview orb - FAILSAFE: Add both path variants */}
         <Route path="/orb-preview" element={<OrbPreview />} />
+        <Route path="/widget/orb-preview" element={<OrbPreview />} />
       </Routes>
     </Router>
   );

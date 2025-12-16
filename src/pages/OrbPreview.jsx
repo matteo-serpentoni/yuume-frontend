@@ -18,29 +18,35 @@ export default function OrbPreview() {
       inputBorder: "#667eea", // ← Aggiungi
       inputFocus: "#4CC2E9", // ← Aggiungi
     },
+    enlarged: true, // Default to true (open chat)
+    mobileMode: false, // Default to desktop view
   });
 
   const [updateKey, setUpdateKey] = useState(0);
 
+  // ⚡️ OPTIMIZED UPDATE LOGIC
+  // We only force a full re-mount (updateKey) when THEME or COLORS change.
+  // We DO NOT re-mount when just toggling Desktop/Mobile view.
   useEffect(() => {
     const handleMessage = (event) => {
       if (event.data.type === "YUUME_UPDATE_CUSTOMIZATION") {
         console.log("🔄 Live update:", event.data);
-        const { orbTheme, chatColors } = event.data.data;
+        const { orbTheme, chatColors, enlarged, mobileMode } = event.data.data;
 
-        setConfig((prev) => ({
-          orbTheme: orbTheme || prev.orbTheme,
-          chatColors: chatColors || prev.chatColors,
-        }));
-
-        setUpdateKey((k) => k + 1); // Forza re-render
-        console.log("✅ Updated!");
+        setConfig((prev) => {
+          return {
+            orbTheme: orbTheme || prev.orbTheme,
+            chatColors: chatColors || prev.chatColors,
+            enlarged: enlarged !== undefined ? enlarged : prev.enlarged,
+            mobileMode: mobileMode !== undefined ? mobileMode : prev.mobileMode,
+          };
+        });
       }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []); // ← Vuoto! Non mettere config
+  }, []);
 
   // 🎨 Set transparent background for preview page
   useEffect(() => {
@@ -62,16 +68,53 @@ export default function OrbPreview() {
         overflow: "hidden",
       }}
     >
-      <Orb
-        key={`orb-${updateKey}`}
-        baseColor1={config.orbTheme.baseColor1}
-        baseColor2={config.orbTheme.baseColor2}
-        baseColor3={config.orbTheme.baseColor3}
-        chatColors={config.chatColors}
-        enlarged={true}
-        setEnlarged={() => {}}
-        previewMode={true}
-      />
+      {/* 
+        DUAL INSTANCE STRATEGY for ZERO LAG 
+        Both Desktop and Mobile instances are kept alive.
+        We just toggle their visibility via CSS.
+      */}
+
+      {/* 🖥️ DESKTOP INSTANCE (Large Orb) */}
+      <div
+        style={{
+          display: config.mobileMode ? "none" : "block", // Hide if mobile mode is active
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <Orb
+          key="orb-desktop"
+          baseColor1={config.orbTheme.baseColor1}
+          baseColor2={config.orbTheme.baseColor2}
+          baseColor3={config.orbTheme.baseColor3}
+          chatColors={config.chatColors}
+          enlarged={true} // Always open/large based on recent request
+          setEnlarged={() => {}}
+          previewMode={true}
+          mobileOverride={false} // Force Desktop Mode
+        />
+      </div>
+
+      {/* 📱 MOBILE INSTANCE (Card) */}
+      <div
+        style={{
+          display: config.mobileMode ? "block" : "none", // Show ONLY if mobile mode is active
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <Orb
+          key="orb-mobile"
+          baseColor1={config.orbTheme.baseColor1}
+          baseColor2={config.orbTheme.baseColor2}
+          baseColor3={config.orbTheme.baseColor3}
+          chatColors={config.chatColors}
+          enlarged={true} // Always open
+          setEnlarged={() => {}}
+          previewMode={true}
+          mobileOverride={true} // Force Mobile Mode
+        />
+      </div>
     </div>
   );
 }

@@ -26,6 +26,7 @@ export default function Orb({
     inputFocus: "#4CC2E9",
   },
   devShopDomain, // ✅ Nuova prop per sviluppo locale
+  mobileOverride = false, // ✅ Nuova prop per forzare mobile view in preview
 }) {
   const containerRef = useRef(null);
   const canvasContainerRef = useRef(null);
@@ -40,6 +41,12 @@ export default function Orb({
 
   useEffect(() => {
     const checkMobile = () => {
+      if (mobileOverride) {
+        setIsMobileDevice(true);
+        console.log("📱 Device Detection: Forced to Mobile by Override");
+        return;
+      }
+
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
       // Regex for common mobile devices
       const isMobile =
@@ -55,7 +62,7 @@ export default function Orb({
     };
 
     checkMobile();
-  }, []);
+  }, [mobileOverride]);
 
   const vert = /* glsl */ `
     precision highp float;
@@ -218,19 +225,16 @@ export default function Orb({
     }
   `;
 
-  // ✅ Memoize arrays to prevent useEffect re-runs on every render
-  const stableBaseColor1 = React.useMemo(
-    () => baseColor1,
-    [baseColor1[0], baseColor1[1], baseColor1[2]]
-  );
-  const stableBaseColor2 = React.useMemo(
-    () => baseColor2,
-    [baseColor2[0], baseColor2[1], baseColor2[2]]
-  );
-  const stableBaseColor3 = React.useMemo(
-    () => baseColor3,
-    [baseColor3[0], baseColor3[1], baseColor3[2]]
-  );
+  // ✅ Use refs for colors to avoid re-creating WebGL context on change
+  const color1Ref = useRef(baseColor1);
+  const color2Ref = useRef(baseColor2);
+  const color3Ref = useRef(baseColor3);
+
+  useEffect(() => {
+    color1Ref.current = baseColor1;
+    color2Ref.current = baseColor2;
+    color3Ref.current = baseColor3;
+  }, [baseColor1, baseColor2, baseColor3]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -266,9 +270,9 @@ export default function Orb({
         rot: { value: 0 },
         hoverIntensity: { value: hoverIntensity },
         // ✅ Aggiunti uniform per colori dinamici
-        baseColor1: { value: new Vec3(...stableBaseColor1) },
-        baseColor2: { value: new Vec3(...stableBaseColor2) },
-        baseColor3: { value: new Vec3(...stableBaseColor3) },
+        baseColor1: { value: new Vec3(...color1Ref.current) },
+        baseColor2: { value: new Vec3(...color2Ref.current) },
+        baseColor3: { value: new Vec3(...color3Ref.current) },
       },
     });
 
@@ -349,10 +353,10 @@ export default function Orb({
       program.uniforms.hue.value = hue;
       program.uniforms.hoverIntensity.value = hoverIntensity;
 
-      // ✅ Aggiorna i colori dinamicamente
-      program.uniforms.baseColor1.value.set(...stableBaseColor1);
-      program.uniforms.baseColor2.value.set(...stableBaseColor2);
-      program.uniforms.baseColor3.value.set(...stableBaseColor3);
+      // ✅ Aggiorna i colori dinamicamente dai ref
+      program.uniforms.baseColor1.value.set(...color1Ref.current);
+      program.uniforms.baseColor2.value.set(...color2Ref.current);
+      program.uniforms.baseColor3.value.set(...color3Ref.current);
 
       const effectiveHover = forceHoverState ? 1 : targetHover;
       program.uniforms.hover.value +=
@@ -376,15 +380,7 @@ export default function Orb({
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
     // ✅ Aggiunte dipendenze per colori dinamici
-  }, [
-    hue,
-    hoverIntensity,
-    rotateOnHover,
-    forceHoverState,
-    stableBaseColor1,
-    stableBaseColor2,
-    stableBaseColor3,
-  ]);
+  }, [hue, hoverIntensity, rotateOnHover, forceHoverState]);
 
   // ✅ FUNZIONALITÀ: Analytics events
   useEffect(() => {
@@ -468,6 +464,12 @@ export default function Orb({
         "--orb-theme-color": themeColor,
       }}
     >
+      {/* DEBUG LOG */}
+      {console.log(
+        `🎨 Orb [${mobileOverride ? "MOBILE" : "DESKTOP"}] Color:`,
+        themeColor
+      )}
+
       {/* Chat Layer - Behind the canvas but interactive */}
       {!isMinimized && (
         <div className="orb-chat-layer">
