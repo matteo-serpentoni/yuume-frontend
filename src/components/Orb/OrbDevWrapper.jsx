@@ -66,29 +66,31 @@ export default function OrbDevWrapper({ enlarged, setEnlarged, children }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Usa l'API locale di default o quella configurata
         const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
-        // Usa un siteId di test per i temi
-        const siteId = "shopify_test";
-
         console.log(`🎨 Fetching data from ${API_URL}...`);
 
-        // Fetch Themes & Sites in parallel
-        const [themesRes, sitesRes] = await Promise.all([
-          fetch(`${API_URL}/api/customization/themes/all?siteId=${siteId}`),
-          fetch(`${API_URL}/api/customization/sites`),
-        ]);
+        // 1. Fetch Sites first (DEV ONLY)
+        const sitesRes = await fetch(`${API_URL}/api/customization/sites`);
+        if (!sitesRes.ok)
+          throw new Error(`Sites API error: ${sitesRes.status}`);
 
+        const sitesResult = await sitesRes.json();
+        let dynamicSiteId = "shopify_test"; // Fallback
+
+        if (sitesResult.success && sitesResult.data.length > 0) {
+          console.log("✅ Loaded sites:", sitesResult.data);
+          setSites(sitesResult.data);
+          dynamicSiteId = sitesResult.data[0].siteId;
+        }
+
+        // 2. Fetch Themes using a valid siteId
+        const themesRes = await fetch(
+          `${API_URL}/api/customization/themes/all?siteId=${dynamicSiteId}`
+        );
         if (!themesRes.ok)
           throw new Error(`Themes API error: ${themesRes.status}`);
-        // Sites API might fail in prod, handle gracefully?
-        // For now assume dev env.
 
         const themesResult = await themesRes.json();
-        const sitesResult = sitesRes.ok
-          ? await sitesRes.json()
-          : { success: false, data: [] };
-
         if (!themesResult.success) {
           throw new Error(themesResult.message || "Failed to fetch themes");
         }
@@ -99,12 +101,6 @@ export default function OrbDevWrapper({ enlarged, setEnlarged, children }) {
         ];
         console.log("✅ Loaded themes:", allThemes);
         setThemes(allThemes);
-
-        if (sitesResult.success) {
-          console.log("✅ Loaded sites:", sitesResult.data);
-          setSites(sitesResult.data);
-        }
-
         setLoading(false);
       } catch (err) {
         console.error("❌ Error loading data:", err);
