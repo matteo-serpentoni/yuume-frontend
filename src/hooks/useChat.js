@@ -175,13 +175,37 @@ export const useChat = (devShopDomain, customer) => {
   useEffect(() => {
     if (!sessionId) return;
 
-    // Initial status fetch (still useful for initial load)
-    getSessionStatus(sessionId).then((statusData) => {
-      if (statusData) {
-        if (statusData.status) setSessionStatus(statusData.status);
-        if (statusData.assignedTo) setAssignedTo(statusData.assignedTo);
-      }
-    });
+    // Initial status fetch (sync status, assignment and history)
+    getSessionStatus(sessionId)
+      .then((statusData) => {
+        if (statusData) {
+          if (statusData.status) setSessionStatus(statusData.status);
+          if (statusData.assignedTo) setAssignedTo(statusData.assignedTo);
+
+          // Sync message history if available
+          if (statusData.messages && statusData.messages.length > 0) {
+            setMessages((prev) => {
+              // Keep welcome message if it was the only one
+              const hasWelcome = prev.length === 1 && prev[0].disableFeedback;
+
+              // Build new list, ensuring we don't have duplicates
+              const newMessages = [...statusData.messages];
+
+              // If we had local messages that aren't in the synced list (unlikely but possible)
+              // we could merge them, but syncing with server is safer.
+              // For now, let's just use server messages but keep the welcome if it's the very first session
+              if (newMessages.length === 0 && hasWelcome) return prev;
+
+              return newMessages;
+            });
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(
+          "No existing session on server yet (New session or expired)"
+        );
+      });
 
     // Connect Socket
     const socket = io(API_URL, {
