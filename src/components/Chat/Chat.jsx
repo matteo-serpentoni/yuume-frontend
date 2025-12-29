@@ -6,6 +6,7 @@ import TypingIndicator from "./TypingIndicator";
 import MessageInput from "./MessageInput";
 import ProductCards from "../Message/ProductCards";
 import OrderCards from "../Message/OrderCards";
+import CategoryCards from "../Message/CategoryCards";
 import TextMessage from "../Message/TextMessage"; // ✅ Import
 import ProfileView from "./ProfileView"; // ✅ Import
 import StarRating from "./StarRating"; // ✅ Import
@@ -59,6 +60,38 @@ const Chat = ({
   };
 
   const renderMessage = (msg) => {
+    // Se il messaggio è di tipo category_cards o CATEGORY_RESPONSE
+    if (msg.type === "category_cards" || msg.type === "CATEGORY_RESPONSE") {
+      return (
+        <div
+          className={`message-bubble ${msg.sender} category-cards-bubble`}
+          style={{
+            background: chatColors.aiMessage,
+            padding: "12px",
+            borderRadius: "18px 18px 18px 4px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            maxWidth: "100%",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "stretch",
+            boxSizing: "border-box",
+            overflow: "hidden",
+          }}
+        >
+          <CategoryCards
+            message={msg}
+            onCategoryClick={(title) =>
+              sendMessage(`Mostrami i prodotti della categoria ${title}`)
+            }
+          />
+          <div className="message-time" style={{ marginTop: 4 }}>
+            {formatTime(msg.timestamp)}
+          </div>
+        </div>
+      );
+    }
+
     // Se il messaggio è di tipo product_cards
     if (msg.type === "product_cards") {
       return (

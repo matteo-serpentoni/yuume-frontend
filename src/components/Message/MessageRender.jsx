@@ -1,6 +1,7 @@
 import TextMessage from "./TextMessage";
 import ProductCards from "./ProductCards";
 import OrderCards from "./OrderCards";
+import CategoryCards from "./CategoryCards";
 import SupportMessage from "./SupportMessage";
 
 const MessageRenderer = ({
@@ -14,6 +15,17 @@ const MessageRenderer = ({
   }
 
   switch (message.type) {
+    case "category_cards":
+    case "CATEGORY_RESPONSE":
+      return (
+        <CategoryCards
+          message={message}
+          onCategoryClick={(title) =>
+            onChipClick &&
+            onChipClick(`Mostrami i prodotti della categoria ${title}`)
+          }
+        />
+      );
     case "product_cards":
       return (
         <ProductCards
