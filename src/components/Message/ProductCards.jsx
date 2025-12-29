@@ -1,263 +1,337 @@
-import { motion } from "framer-motion";
+import React, { memo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import AddToCartButton from "./AddToCartButton";
+import Drawer from "../ui/Drawer";
+import "./ProductCards.css";
 
-const handleAddToCartSuccess = (data) => console.log("Aggiunto!", data);
-const handleAddToCartError = (error) => console.log("Errore!", error);
+const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
+  const {
+    name,
+    price,
+    currency = "EUR",
+    images: rawImages = [],
+    image: fallbackImage,
+    available: initialAvailable,
+    availability: fallbackAvailable,
+    variants = [],
+  } = product;
 
-const ProductCard = ({ product, index, shopDomain }) => {
-  const { variantId, name, price, image, availability, brand, category } =
-    product;
+  // Normalize image
+  const image = (Array.isArray(rawImages) && rawImages[0]) || fallbackImage;
 
-  const extractProductName = (name) => {
-    return name?.split("|")[0]?.trim() || name;
-  };
+  // Normalize availability
+  const isAvailable =
+    initialAvailable !== undefined ? initialAvailable : fallbackAvailable;
 
-  const formatPrice = (price) => {
-    if (!price) return "";
-    return price.toString().replace("€", "€");
+  // Determine if there are real variants to customize
+  const hasVariants = (product.options || []).some(
+    (opt) =>
+      !(
+        opt.name === "Title" &&
+        opt.values.length === 1 &&
+        opt.values[0] === "Default Title"
+      )
+  );
+
+  const formatPrice = (amount, curr) => {
+    const formatter = new Intl.NumberFormat("it-IT", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    const symbol = curr === "EUR" ? "€" : curr;
+    return `${symbol} ${formatter.format(amount)}`;
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 5 }}
+      className={`yuume-product-card-minimal clickable`}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
       transition={{ delay: index * 0.1 }}
-      style={{
-        width: "100%",
-        padding: "12px",
-        borderRadius: "14px",
-        background: "#ffffff", // White card
-        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        color: "#1f2937", // Dark text
-        boxSizing: "border-box",
-      }}
+      onClick={hasVariants ? () => onOpen(product) : undefined}
     >
-      {/* Header con immagine e info */}
-      <div
-        style={{
-          display: "flex",
-          gap: "12px",
-          alignItems: "center",
-        }}
-      >
-        {/* Product Image */}
-        <div
-          style={{
-            width: "56px",
-            height: "56px",
-            borderRadius: "10px",
-            overflow: "hidden",
-            flexShrink: 0,
-            background: "#f3f4f6",
-            border: "1px solid #e5e7eb",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+      <div className="yuume-product-card-main-row">
+        <div className="yuume-product-image-container">
           {image ? (
-            <img
-              src={image}
-              alt={name}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
+            <img src={image.url || image} alt={name} />
           ) : (
-            <div style={{ fontSize: "24px" }}>🎁</div>
+            <div className="yuume-product-placeholder">🎁</div>
           )}
         </div>
 
-        {/* Product Info */}
-        <div
-          style={{
-            flex: 1,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
-          }}
-        >
-          {/* Product Name */}
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#111827", // Dark gray
-              lineHeight: 1.3,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-            }}
-          >
-            {extractProductName(name) || "Prodotto"}
-          </div>
-
-          {/* Brand & Category */}
-          {(brand || category) && (
+        <div className="yuume-product-info-column">
+          <h3 className="yuume-product-name">{name}</h3>
+          <div className="yuume-product-meta-stack">
             <div
-              style={{
-                fontSize: "11px",
-                color: "#6b7280", // Medium gray
-                fontWeight: 500,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+              className={`yuume-availability-status ${
+                isAvailable ? "available" : "unavailable"
+              }`}
             >
-              {brand && category ? `${brand} • ${category}` : brand || category}
+              <span className="yuume-status-dot"></span>
+              {isAvailable ? "Disponibile" : "Esaurito"}
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Footer con prezzo e bottone */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "8px",
-          marginTop: "2px",
-        }}
-      >
-        {/* Price e disponibilità */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "#111827", // Dark
-              lineHeight: 1,
-            }}
-          >
-            {formatPrice(price)}
+            <span className="yuume-current-price">
+              {formatPrice(price, currency)}
+            </span>
           </div>
-          {availability && (
-            <div
-              style={{
-                fontSize: "10px",
-                color:
-                  availability === true || availability === "disponibile"
-                    ? "#059669" // Green
-                    : "#dc2626", // Red
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              {availability === true ? "DISPONIBILE" : availability}
-            </div>
-          )}
         </div>
 
-        {/* Add to Cart Button */}
-        {variantId && (
-          <div onClick={(e) => e.stopPropagation()}>
-            <AddToCartButton
-              variantId={variantId}
-              shopDomain={shopDomain}
-              quantity={1}
-              onSuccess={handleAddToCartSuccess}
-              onError={handleAddToCartError}
-            />
+        {hasVariants && (
+          <div className="yuume-product-action-arrow">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
           </div>
         )}
       </div>
+
+      {isAvailable && (variants[0] || product.variantId) && (
+        <div
+          className="yuume-product-card-footer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {hasVariants && (
+            <button
+              className="yuume-options-btn"
+              onClick={(e) => {
+                e.stopPropagation(); // Essential to prevent card onClick from firing
+                e.preventDefault();
+                console.log(
+                  "🛠 [ProductCard] Clicked Opzioni for:",
+                  product.name
+                );
+                onOpen(product);
+              }}
+            >
+              Opzioni
+            </button>
+          )}
+          <AddToCartButton
+            variantId={variants[0]?.id || product.variantId}
+            shopDomain={shopDomain}
+            quantity={1}
+            compact={true}
+          />
+        </div>
+      )}
     </motion.div>
   );
-};
+});
 
-const ProductCards = ({ message, onAddToCart, shopDomain }) => {
+export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
+  React.useEffect(() => {
+    console.log("🟢 [ProductDrawer] MOUNTED for:", product.name);
+    return () => console.log("🔴 [ProductDrawer] UNMOUNTED for:", product.name);
+  }, [product.name]);
   const {
-    products = [],
-    title,
-    message: displayMessage,
-    total_count,
-  } = message;
+    name,
+    description,
+    price: initialPrice,
+    currency = "EUR",
+    images: rawImages = [],
+    image: fallbackImage,
+    variants = [],
+    options = [],
+    available: initialAvailable,
+    availability: fallbackAvailable,
+  } = product;
+
+  // Normalize images
+  const images =
+    Array.isArray(rawImages) && rawImages.length > 0
+      ? rawImages
+      : fallbackImage
+      ? [fallbackImage]
+      : [];
+
+  const [selectedOptions, setSelectedOptions] = React.useState(() => {
+    const initial = {};
+    if (variants.length > 0 && variants[0].selectedOptions) {
+      variants[0].selectedOptions.forEach((opt) => {
+        initial[opt.name] = opt.value;
+      });
+    }
+    return initial;
+  });
+
+  const [currentVariant, setCurrentVariant] = React.useState(
+    variants[0] || null
+  );
+
+  React.useEffect(() => {
+    const found = variants.find(
+      (v) =>
+        v.selectedOptions &&
+        v.selectedOptions.every(
+          (opt) => selectedOptions[opt.name] === opt.value
+        )
+    );
+    if (found) setCurrentVariant(found);
+  }, [selectedOptions, variants]);
+
+  const handleOptionChange = (name, value) => {
+    setSelectedOptions((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const isAvailable = currentVariant
+    ? currentVariant.available
+    : initialAvailable !== undefined
+    ? initialAvailable
+    : fallbackAvailable;
+
+  const formatPrice = (amount, curr) => {
+    const formatter = new Intl.NumberFormat("it-IT", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    const symbol = curr === "EUR" ? "€" : curr;
+    return `${symbol} ${formatter.format(amount)}`;
+  };
+
+  const currentPrice = currentVariant?.price || initialPrice;
+
+  const footer = (
+    <>
+      {isAvailable && (currentVariant || variants[0]) ? (
+        <AddToCartButton
+          variantId={currentVariant?.id || variants[0].id}
+          shopDomain={shopDomain}
+          quantity={1}
+          onAnimationComplete={onClose}
+        />
+      ) : (
+        <button className="yuume-add-to-cart-btn disabled" disabled>
+          Prodotto Esaurito
+        </button>
+      )}
+    </>
+  );
+
+  return (
+    <Drawer isOpen={!!product} onClose={onClose} footer={footer}>
+      {options.filter(
+        (opt) =>
+          !(
+            opt.name === "Title" &&
+            opt.values.length === 1 &&
+            opt.values[0] === "Default Title"
+          )
+      ).length > 0 && (
+        <div className="yuume-drawer-variants">
+          {options
+            .filter(
+              (opt) =>
+                !(
+                  opt.name === "Title" &&
+                  opt.values.length === 1 &&
+                  opt.values[0] === "Default Title"
+                )
+            )
+            .map((opt) => (
+              <div key={opt.name} className="yuume-variant-group">
+                <span className="yuume-variant-label">{opt.name}</span>
+                <div className="yuume-variant-options">
+                  {opt.values.length <= 4 ? (
+                    <div className="yuume-pills-container">
+                      {opt.values.map((val) => (
+                        <button
+                          key={val}
+                          className={`yuume-pill ${
+                            selectedOptions[opt.name] === val ? "active" : ""
+                          }`}
+                          onClick={() => handleOptionChange(opt.name, val)}
+                        >
+                          {val}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <select
+                      className="yuume-variant-select"
+                      value={selectedOptions[opt.name] || ""}
+                      onChange={(e) =>
+                        handleOptionChange(opt.name, e.target.value)
+                      }
+                    >
+                      {opt.values.map((val) => (
+                        <option key={val} value={val}>
+                          {val}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
+    </Drawer>
+  );
+});
+
+const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
+  const { products = [], message: displayMessage, meta = {} } = message;
+
+  React.useEffect(() => {
+    if (activeProduct) {
+      console.log(
+        "📦 [ProductCards] activeProduct changed to:",
+        activeProduct.name
+      );
+    } else {
+      console.log("📦 [ProductCards] activeProduct is now null");
+    }
+  }, [activeProduct]);
 
   if (!Array.isArray(products) || products.length === 0) {
     return (
-      <div style={{ color: "white", fontSize: "14px" }}>
-        Nessun prodotto trovato.
+      <div style={{ color: "white", fontSize: "14px", padding: "10px" }}>
+        Non ho trovato prodotti che corrispondono alla tua ricerca.
       </div>
     );
   }
 
   return (
-    <div style={{ width: "100%", minWidth: "240px" }}>
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 10,
-          paddingBottom: 8,
-          borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
-        }}
-      >
-        <span style={{ fontSize: 16 }}>🛍️</span>
-        <span style={{ fontWeight: 600, fontSize: 14, color: "white" }}>
-          {title ||
-            `${products.length} prodotto${
-              products.length > 1 ? "i" : ""
-            } trovato${products.length > 1 ? "i" : ""}`}
-        </span>
-        {total_count && total_count !== products.length && (
-          <span style={{ fontSize: 11, color: "rgba(255, 255, 255, 0.7)" }}>
-            (di {total_count})
-          </span>
-        )}
-      </div>
-
-      {/* Display Message */}
+    <div className="yuume-products-container">
       {displayMessage && (
-        <div
-          style={{
-            fontSize: 13,
-            color: "white",
-            marginBottom: 12,
-            lineHeight: 1.4,
-          }}
-        >
-          {displayMessage}
-        </div>
+        <div className="yuume-products-header-message">{displayMessage}</div>
       )}
 
-      {/* Product Cards */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-        }}
-      >
+      <div className="yuume-products-list">
         {products.map((product, index) => (
           <ProductCard
             key={product.id || index}
             product={product}
             index={index}
-            onAddToCart={onAddToCart}
+            onOpen={onOpen}
             shopDomain={shopDomain}
           />
         ))}
       </div>
+
+      {meta.totalCount > meta.displayCount && (
+        <div className="yuume-products-footer-link">
+          <a
+            href={`https://${shopDomain}/search?q=${encodeURIComponent(
+              displayMessage || ""
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Vedi tutti i {meta.totalCount} risultati su {shopDomain}
+          </a>
+        </div>
+      )}
     </div>
   );
-};
+});
 
 export default ProductCards;

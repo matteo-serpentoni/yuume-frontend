@@ -1,9 +1,9 @@
-import React from "react";
+import React, { memo } from "react";
 
-const TextMessage = ({ message }) => {
+const TextMessage = memo(({ message }) => {
   const rawContent = message.message || message.text || "";
 
-  console.log("TextMessage rendering content:", rawContent);
+  // console.log("TextMessage rendering content:", rawContent);
 
   // 1. Replace URLs with links
   let processed = rawContent.replace(
@@ -44,6 +44,6 @@ const TextMessage = ({ message }) => {
       />
     </>
   );
-};
+});
 
 export default TextMessage;

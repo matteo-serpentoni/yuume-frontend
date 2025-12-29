@@ -1,0 +1,243 @@
+.yuume-products-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.yuume-products-header-message {
+  font-size: 14px;
+  color: white;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 0 4px;
+}
+
+.yuume-products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* --- MINIMAL CARD (IN CHAT) --- */
+.yuume-product-card-minimal {
+  width: 100%;
+  padding: 12px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #1f2937;
+  box-sizing: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.yuume-product-card-minimal.clickable {
+  cursor: pointer;
+}
+
+.yuume-product-card-minimal.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.yuume-product-card-main-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.yuume-product-card-footer {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.yuume-options-btn {
+  flex: 1;
+  height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yuume-options-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.yuume-product-card-footer .yuume-add-to-cart-wrapper {
+  flex: 1.2;
+}
+
+.yuume-product-card-minimal .yuume-product-image-container {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yuume-product-card-minimal .yuume-product-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.yuume-product-card-minimal .yuume-product-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.yuume-product-card-minimal .yuume-current-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #000;
+}
+
+.yuume-product-action-arrow {
+  margin-left: auto;
+  color: #94a3b8;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.yuume-product-card-minimal:hover .yuume-product-action-arrow {
+  transform: translateX(4px);
+  color: #0f172a;
+}
+
+/* --- DRAWER (BOTTOM SHEET) --- */
+
+/* --- DRAWER CONTENT (PRODUCT SPECIFIC) --- */
+
+.yuume-drawer-variants {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.yuume-variant-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.yuume-variant-label {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.yuume-add-to-cart-btn {
+  height: 36px;
+  font-size: 12px;
+}
+
+/* --- COMMON UTILS --- */
+.yuume-availability-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yuume-status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.yuume-availability-status.available .yuume-status-dot {
+  background: #10b981;
+}
+
+.yuume-availability-status.unavailable .yuume-status-dot {
+  background: #ef4444;
+}
+
+.yuume-pills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.yuume-pill {
+  padding: 7px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.yuume-pill:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.yuume-pill.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.yuume-variant-select {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1.5px solid #f1f5f9;
+  background: #f8fafc;
+  font-size: 10px;
+  font-weight: 700;
+  height: 34px;
+}
+
+.yuume-products-footer-link {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.yuume-products-footer-link a {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+  text-decoration: underline;
+}

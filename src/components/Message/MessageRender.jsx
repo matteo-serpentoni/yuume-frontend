@@ -27,6 +27,7 @@ const MessageRenderer = ({
         />
       );
     case "product_cards":
+    case "PRODUCT_RESPONSE":
       return (
         <ProductCards
           message={message}

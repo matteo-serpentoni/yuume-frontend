@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { useChat } from "../../hooks/useChat";
 import "../Orb/Orb.css";
 
+import { AnimatePresence } from "framer-motion";
 import TypingIndicator from "./TypingIndicator";
 import MessageInput from "./MessageInput";
-import ProductCards from "../Message/ProductCards";
+import ProductCards, { ProductDrawer } from "../Message/ProductCards";
 import OrderCards from "../Message/OrderCards";
 import CategoryCards from "../Message/CategoryCards";
 import TextMessage from "../Message/TextMessage"; // ✅ Import
@@ -25,6 +26,7 @@ const Chat = ({
   devShopDomain,
 }) => {
   const [view, setView] = useState("chat"); // 'chat' | 'profile'
+  const [activeProduct, setActiveProduct] = useState(null);
 
   const {
     messages,
@@ -92,8 +94,8 @@ const Chat = ({
       );
     }
 
-    // Se il messaggio è di tipo product_cards
-    if (msg.type === "product_cards") {
+    // Se il messaggio è di tipo product_cards o PRODUCT_RESPONSE
+    if (msg.type === "product_cards" || msg.type === "PRODUCT_RESPONSE") {
       return (
         <div
           className={`message-bubble ${msg.sender} product-cards-bubble`}
@@ -106,7 +108,12 @@ const Chat = ({
             width: "fit-content",
           }}
         >
-          <ProductCards message={msg} shopDomain={shopDomain} />
+          <ProductCards
+            message={msg}
+            shopDomain={shopDomain}
+            onOpen={setActiveProduct}
+            activeProduct={activeProduct}
+          />
           <div className="message-time" style={{ marginTop: 4 }}>
             {formatTime(msg.timestamp)}
           </div>
@@ -336,116 +343,143 @@ const Chat = ({
         />
       ) : (
         <>
-          <div className="messages-area">
-            {messages.map((msg) => (
-              <div key={msg.id}>{renderMessage(msg)}</div>
-            ))}
-
-            {loading && (
-              <TypingIndicator aiMessageColor={chatColors.aiMessage} />
-            )}
-
-            {/* Conversation Ended Separator & Rating */}
-            {sessionStatus === "completed" && (
-              <div style={{ padding: "0 16px 24px 16px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    margin: "24px 0",
-                    color: "rgba(255, 255, 255, 0.4)",
-                    fontSize: "12px",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  <div
-                    style={{
-                      flex: 1,
-                      height: "1px",
-                      background: "rgba(255, 255, 255, 0.1)",
-                    }}
-                  />
-                  <span style={{ padding: "0 12px" }}>
-                    Conversazione Terminata
-                  </span>
-                  <div
-                    style={{
-                      flex: 1,
-                      height: "1px",
-                      background: "rgba(255, 255, 255, 0.1)",
-                    }}
-                  />
-                </div>
-
-                <StarRating
-                  onRate={(rating) =>
-                    sendFeedback(null, rating, null, "conversation")
-                  }
-                />
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          <MessageInput
-            onSend={(text) => {
-              if (!loading) {
-                sendMessage(text);
-                if (onTyping) onTyping(false);
-              }
-            }}
-            loading={loading}
-            placeholder={
-              sessionStatus === "escalated" && !assignedTo
-                ? "Attendi l'intervento."
-                : "Scrivi qualcosa..."
-            }
-            disabled={sessionStatus === "escalated" && !assignedTo} // ✅ Enable if assigned
-            sendButtonColor={chatColors.sendButton}
-            inputBorderColor={chatColors.inputBorder}
-            inputFocusColor={chatColors.inputFocus}
-            previewMode={false}
-            onProfileClick={() => setView("profile")} // ✅ Passa handler
-          />
-
-          {/* Legal Disclaimer */}
+          {/* Unified container for messages and input, clipping the drawer at the very bottom edge */}
           <div
             style={{
-              fontSize: "10px",
-              color: "rgba(255, 255, 255, 0.4)",
-              textAlign: "center",
-              marginTop: "8px",
-              padding: "0 10px",
-              lineHeight: "1.3",
+              position: "relative",
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
             }}
           >
-            Chattando accetti la{" "}
-            <a
-              href="/policies/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
+            <div
+              className={`messages-area ${
+                activeProduct ? "yuume-drawer-active" : ""
+              }`}
+            >
+              {messages.map((msg) => (
+                <div key={msg.id}>{renderMessage(msg)}</div>
+              ))}
+
+              {loading && (
+                <TypingIndicator aiMessageColor={chatColors.aiMessage} />
+              )}
+
+              {/* Conversation Ended Separator & Rating */}
+              {sessionStatus === "completed" && (
+                <div style={{ padding: "0 16px 24px 16px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      margin: "24px 0",
+                      color: "rgba(255, 255, 255, 0.4)",
+                      fontSize: "12px",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        height: "1px",
+                        background: "rgba(255, 255, 255, 0.1)",
+                      }}
+                    />
+                    <span style={{ padding: "0 12px" }}>
+                      Conversazione Terminata
+                    </span>
+                    <div
+                      style={{
+                        flex: 1,
+                        height: "1px",
+                        background: "rgba(255, 255, 255, 0.1)",
+                      }}
+                    />
+                  </div>
+
+                  <StarRating
+                    onRate={(rating) =>
+                      sendFeedback(null, rating, null, "conversation")
+                    }
+                  />
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            <MessageInput
+              onSend={(text) => {
+                if (!loading) {
+                  sendMessage(text);
+                  if (onTyping) onTyping(false);
+                }
+              }}
+              loading={loading}
+              placeholder={
+                sessionStatus === "escalated" && !assignedTo
+                  ? "Attendi l'intervento."
+                  : "Scrivi qualcosa..."
+              }
+              disabled={sessionStatus === "escalated" && !assignedTo} // ✅ Enable if assigned
+              sendButtonColor={chatColors.sendButton}
+              inputBorderColor={chatColors.inputBorder}
+              inputFocusColor={chatColors.inputFocus}
+              previewMode={false}
+              onProfileClick={() => setView("profile")} // ✅ Passa handler
+            />
+
+            {/* Legal Disclaimer */}
+            <div
               style={{
-                color: "rgba(255, 255, 255, 0.6)",
-                textDecoration: "underline",
+                fontSize: "10px",
+                color: "rgba(255, 255, 255, 0.4)",
+                textAlign: "center",
+                marginTop: "8px",
+                padding: "0 10px",
+                lineHeight: "1.3",
+                marginBottom: "8px",
               }}
             >
-              Privacy Policy
-            </a>{" "}
-            e la{" "}
-            <a
-              href="/policies/cookie-policy"
-              target="_blank"
-              rel="noopener noreferrer"
+              Chattando accetti la{" "}
+              <a
+                href="/policies/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: "rgba(255, 255, 255, 0.6)",
+                  textDecoration: "underline",
+                }}
+              >
+                Privacy Policy
+              </a>{" "}
+              e la{" "}
+              <a
+                href="/policies/cookie-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: "rgba(255, 255, 255, 0.6)",
+                  textDecoration: "underline",
+                }}
+              >
+                Cookie Policy
+              </a>
+              .
+            </div>
+
+            {/* ✅ Portaled Drawer now sits on top of MessageInput because it's a sibling inside the relative wrapper */}
+            <div
+              id="yuume-drawer-portal"
               style={{
-                color: "rgba(255, 255, 255, 0.6)",
-                textDecoration: "underline",
+                position: "absolute",
+                inset: 0,
+                pointerEvents: "none",
+                zIndex: 1000,
               }}
-            >
-              Cookie Policy
-            </a>
-            .
+            />
           </div>
         </>
       )}
@@ -476,6 +510,16 @@ const Chat = ({
           </svg>
         </button>
       )}
+
+      <AnimatePresence>
+        {activeProduct && (
+          <ProductDrawer
+            product={activeProduct}
+            onClose={() => setActiveProduct(null)}
+            shopDomain={shopDomain}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

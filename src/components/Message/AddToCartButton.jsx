@@ -2,7 +2,14 @@ import React, { useRef, useEffect, memo } from "react";
 import "./AddToCartButton.css";
 
 const AddToCartButton = memo(
-  ({ variantId, shopDomain, quantity = 1, onSuccess, onError }) => {
+  ({
+    variantId,
+    shopDomain,
+    quantity = 1,
+    onSuccess,
+    onError,
+    onAnimationComplete,
+  }) => {
     const buttonRef = useRef(null);
 
     const addToCart = async () => {
@@ -218,6 +225,9 @@ const AddToCartButton = memo(
           button.style.setProperty("--text-x", "12px");
           button.style.overflow = "";
           button.classList.remove("active");
+
+          // ✅ Signal animation completion
+          if (onAnimationComplete) onAnimationComplete();
         }, 1820);
       };
 
