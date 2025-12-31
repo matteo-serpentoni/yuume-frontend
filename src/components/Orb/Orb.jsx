@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Renderer, Program, Mesh, Triangle, Vec3 } from "ogl";
 import Chat from "../Chat/Chat";
 import ChatPreview from "../Chat/ChatPreview";
@@ -396,12 +396,23 @@ export default function Orb({
   }, [enlarged, previewMode]);
 
   // ✅ FUNZIONALITÀ: Gestione click per espandere
-  const handleExpand = () => {
+  const handleExpand = useCallback(() => {
     if (isMinimized && !previewMode) {
       setEnlarged(true);
       window.parent?.postMessage({ type: "resize", enlarged: true }, "*");
     }
-  };
+  }, [isMinimized, previewMode, setEnlarged]);
+
+  const handleKeyDown = useCallback(
+    (e) => {
+      // Only intercept Enter/Space if the orb is minimized (acting as a button)
+      if (isMinimized && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        handleExpand();
+      }
+    },
+    [handleExpand, isMinimized]
+  );
 
   // ✅ FUNZIONALITÀ: Adattamento colore testo allo sfondo
   const [textColorMode, setTextColorMode] = useState("dark"); // default dark bg -> white text
@@ -453,10 +464,14 @@ export default function Orb({
   return (
     <div
       ref={containerRef}
+      role="button"
+      tabIndex={0}
+      aria-label={isMinimized ? "Apri assistente Yuume" : "Widget Yuume attivo"}
       className={`orb-container ${isMinimized ? "minimized" : ""} ${
         isMobileDevice ? "mobile-device" : ""
       }`}
       onClick={handleExpand}
+      onKeyDown={handleKeyDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseMove={handleMouseMove}

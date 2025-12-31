@@ -1,7 +1,8 @@
 import React, { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AddToCartButton from "./AddToCartButton";
-import Drawer from "../ui/Drawer";
+import Drawer from "../UI/Drawer";
+import { formatPrice } from "../../utils/messageHelpers";
 import "./ProductCards.css";
 
 const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
@@ -33,23 +34,23 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
       )
   );
 
-  const formatPrice = (amount, curr) => {
-    const formatter = new Intl.NumberFormat("it-IT", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    const symbol = curr === "EUR" ? "€" : curr;
-    return `${symbol} ${formatter.format(amount)}`;
-  };
-
   return (
     <motion.div
       className={`yuume-product-card-minimal clickable`}
+      role="button"
+      tabIndex={0}
+      aria-label={`Visualizza dettagli per ${name}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       transition={{ delay: index * 0.1 }}
       onClick={hasVariants ? () => onOpen(product) : undefined}
+      onKeyDown={(e) => {
+        if (hasVariants && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onOpen(product);
+        }
+      }}
     >
       <div className="yuume-product-card-main-row">
         <div className="yuume-product-image-container">
@@ -101,6 +102,7 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
           {hasVariants && (
             <button
               className="yuume-options-btn"
+              aria-label={`Seleziona opzioni per ${product.name}`}
               onClick={(e) => {
                 e.stopPropagation(); // Essential to prevent card onClick from firing
                 e.preventDefault();
@@ -186,15 +188,6 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
     : initialAvailable !== undefined
     ? initialAvailable
     : fallbackAvailable;
-
-  const formatPrice = (amount, curr) => {
-    const formatter = new Intl.NumberFormat("it-IT", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    const symbol = curr === "EUR" ? "€" : curr;
-    return `${symbol} ${formatter.format(amount)}`;
-  };
 
   const currentPrice = currentVariant?.price || initialPrice;
 

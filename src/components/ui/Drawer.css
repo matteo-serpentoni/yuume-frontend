@@ -104,4 +104,7 @@
   background: transparent;
   border-top: 1px solid rgba(0, 0, 0, 0.03);
   flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

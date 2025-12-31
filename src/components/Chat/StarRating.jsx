@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 
-const StarRating = ({ onRate, disabled = false }) => {
+const StarRating = memo(({ onRate, disabled = false }) => {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -56,11 +56,16 @@ const StarRating = ({ onRate, disabled = false }) => {
       >
         Come valuti questa conversazione?
       </div>
-      <div style={{ display: "flex", gap: "8px" }}>
+      <div
+        style={{ display: "flex", gap: "8px" }}
+        role="group"
+        aria-label="Valutazione stelline"
+      >
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
             type="button"
+            aria-label={`Valuta ${star} stelle su 5`}
             style={{
               background: "none",
               border: "none",
@@ -84,6 +89,6 @@ const StarRating = ({ onRate, disabled = false }) => {
       </div>
     </div>
   );
-};
+});
 
 export default StarRating;

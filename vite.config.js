@@ -5,6 +5,12 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   base: "/widget/",
+  build: {
+    minify: "esbuild",
+  },
+  esbuild: {
+    drop: ["console", "debugger"],
+  },
   server: {
     host: true,
     allowedHosts: [

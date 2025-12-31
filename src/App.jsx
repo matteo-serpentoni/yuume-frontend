@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "./App.css";
 import OrbWithCustomization from "./components/Orb/OrbWithCustomization";
 import OrbDevWrapper from "./components/Orb/OrbDevWrapper";
 import Orb from "./components/Orb/Orb";

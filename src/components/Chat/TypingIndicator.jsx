@@ -1,4 +1,6 @@
-const TypingIndicator = ({ aiMessageColor = "#a084ff" }) => {
+import React, { memo } from "react";
+
+const TypingIndicator = memo(({ aiMessageColor = "#a084ff" }) => {
   // Converte hex in rgba
   const hexToRgba = (hex, alpha) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -35,7 +37,10 @@ const TypingIndicator = ({ aiMessageColor = "#a084ff" }) => {
           maxWidth: "85%",
         }}
       >
-        <div style={{ display: "flex", gap: 3, alignItems: "center" }}>
+        <div
+          style={{ display: "flex", gap: 3, alignItems: "center" }}
+          aria-label="L'assistente sta scrivendo"
+        >
           {[0, 1, 2].map((i) => (
             <div
               key={i}
@@ -53,6 +58,6 @@ const TypingIndicator = ({ aiMessageColor = "#a084ff" }) => {
       </div>
     </div>
   );
-};
+});
 
 export default TypingIndicator;

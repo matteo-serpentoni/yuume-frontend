@@ -7,12 +7,13 @@ import TypingIndicator from "./TypingIndicator";
 import MessageInput from "./MessageInput";
 import ProductCards, { ProductDrawer } from "../Message/ProductCards";
 import OrderCards, { OrderDetailCard } from "../Message/OrderCards";
-import Drawer from "../ui/Drawer";
+import Drawer from "../UI/Drawer";
 import CategoryCards from "../Message/CategoryCards";
 import OrderLookupForm from "../Message/OrderLookupForm"; // ✅ Import
 import TextMessage from "../Message/TextMessage"; // ✅ Import
 import ProfileView from "./ProfileView"; // ✅ Import
 import StarRating from "./StarRating"; // ✅ Import
+import { formatTime } from "../../utils/messageHelpers"; // ✅ Import
 
 const Chat = ({
   onTyping,
@@ -120,15 +121,6 @@ const Chat = ({
       setActiveOrder(lastMessage.order);
     }
   }, [messages]);
-
-  // Helper per formattare il timestamp in HH:MM
-  const formatTime = (timestamp) => {
-    if (!timestamp) return "";
-    const date = new Date(timestamp);
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    return `${hours}:${minutes}`;
-  };
 
   const renderMessage = (msg) => {
     // Se il messaggio è di tipo category_cards o CATEGORY_RESPONSE
@@ -361,6 +353,7 @@ const Chat = ({
             <button
               onClick={() => sendFeedback(msg.id, "positive", msg.text)}
               title="Utile"
+              aria-label="Feedback positivo"
               className={msg.feedback === "positive" ? "thumb-animate" : ""}
               style={{
                 background: "none",
@@ -422,6 +415,7 @@ const Chat = ({
             <button
               onClick={() => sendFeedback(msg.id, "negative", msg.text)}
               title="Non utile"
+              aria-label="Feedback negativo"
               className={msg.feedback === "negative" ? "thumb-animate" : ""}
               style={{
                 background: "none",
@@ -653,6 +647,7 @@ const Chat = ({
       {view !== "profile" && (
         <button
           className="close-button"
+          aria-label="Riduci chat"
           onClick={(e) => {
             e.stopPropagation();
             onMinimize && onMinimize();

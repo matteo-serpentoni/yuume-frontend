@@ -35,7 +35,7 @@
   position: relative;
   font-family: "Inter", Arial, sans-serif;
   transform: scale(0.9); /* Slightly smaller overall */
-  transform-origin: right center;
+  transform-origin: center center;
 }
 
 .add-to-cart:before {
