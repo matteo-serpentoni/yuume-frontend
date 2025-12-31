@@ -5,6 +5,7 @@ import "../Orb/Orb.css";
 import { AnimatePresence, motion } from "framer-motion";
 import TypingIndicator from "./TypingIndicator";
 import MessageInput from "./MessageInput";
+import ChatHeader from "./ChatHeader";
 import ProductCards, { ProductDrawer } from "../Message/ProductCards";
 import OrderCards, { OrderDetailCard } from "../Message/OrderCards";
 import Drawer from "../UI/Drawer";
@@ -481,17 +482,11 @@ const Chat = ({
   };
 
   return (
-    <div className="chat-inner">
-      {/* MOBILE HEADER */}
-      <div className="chat-mobile-header">
-        <div className="header-content">
-          <h3>Yuume</h3>
-          <div className="online-status">
-            <span className="status-dot"></span>
-            <span className="status-text">Online</span>
-          </div>
-        </div>
-      </div>
+    <div
+      className="chat-inner"
+      style={{ "--chat-header-color": chatColors.header }}
+    >
+      <ChatHeader />
 
       {view === "profile" ? (
         <ProfileView

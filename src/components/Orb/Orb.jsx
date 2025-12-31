@@ -1,70 +1,48 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 import { Renderer, Program, Mesh, Triangle, Vec3 } from "ogl";
 import Chat from "../Chat/Chat";
 import ChatPreview from "../Chat/ChatPreview";
+import DevTools from "./DevTools";
+import { useOrb } from "../../hooks/useOrb";
 import "./Orb.css";
 
-export default function Orb({
-  hue = 0,
-  hoverIntensity = 0.2,
-  rotateOnHover = true,
-  forceHoverState = false,
-  // ✅ Nuove props per funzionalità
-  enlarged = false,
-  setEnlarged = () => {},
-  children,
-  previewMode = false,
-  baseColor1 = [0.611765, 0.262745, 0.996078],
-  baseColor2 = [0.298039, 0.760784, 0.913725],
-  baseColor3 = [0.062745, 0.078431, 0.6],
-  chatColors = {
-    header: "#667eea",
-    sendButton: "#667eea",
-    userMessage: "#667eea",
-    aiMessage: "#4CC2E9",
-    inputBorder: "#667eea",
-    inputFocus: "#4CC2E9",
-  },
-  devShopDomain, // ✅ Nuova prop per sviluppo locale
-  mobileOverride = false, // ✅ Nuova prop per forzare mobile view in preview
-}) {
-  const containerRef = useRef(null);
-  const canvasContainerRef = useRef(null);
-  const [isTyping, setIsTyping] = useState(false);
-  // ✅ Usa enlarged dalla prop invece di isMinimized locale
-  const isMinimized = !enlarged;
+const Orb = memo(
+  ({
+    hue = 0,
+    hoverIntensity = 0.2,
+    rotateOnHover = true,
+    forceHoverState = false,
+    enlarged = false,
+    setEnlarged = () => {},
+    children,
+    mode: modeOverride = null,
+    mobileOverride = false,
+  }) => {
+    const {
+      config,
+      loading,
+      mode,
+      isMobile,
+      isPreviewMobile,
+      setConfig,
+      setShopDomain,
+    } = useOrb(modeOverride);
 
-  // 📱 DEVICE DETECTION
-  // Detect if running on a real mobile device via User Agent
-  // This avoids the issue where desktop iframe width triggers mobile layout
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
+    const containerRef = useRef(null);
+    const canvasContainerRef = useRef(null);
+    const [isTyping, setIsTyping] = useState(false);
+    const [forcedMobile, setForcedMobile] = useState(false);
+    const isMinimized = !enlarged;
 
-  useEffect(() => {
-    const checkMobile = () => {
-      if (mobileOverride) {
-        setIsMobileDevice(true);
-        console.log("📱 Device Detection: Forced to Mobile by Override");
-        return;
-      }
+    // Actual mobile state (UA detection + potential override)
+    const isMobileView =
+      mobileOverride || forcedMobile || isPreviewMobile || isMobile;
 
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      // Regex for common mobile devices
-      const isMobile =
-        /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-          userAgent
-        );
-      setIsMobileDevice(isMobile);
-      console.log(
-        "📱 Device Detection:",
-        isMobile ? "Mobile" : "Desktop",
-        userAgent
-      );
-    };
+    // Extracted from config for easier access
+    const { orbTheme, chatColors } = config;
+    const { baseColor1, baseColor2, baseColor3 } = orbTheme;
 
-    checkMobile();
-  }, [mobileOverride]);
-
-  const vert = /* glsl */ `
+    const vert = /* glsl */ `
     precision highp float;
     attribute vec2 position;
     attribute vec2 uv;
@@ -75,7 +53,7 @@ export default function Orb({
     }
   `;
 
-  const frag = /* glsl */ `
+    const frag = /* glsl */ `
     precision highp float;
 
     uniform float iTime;
@@ -225,339 +203,361 @@ export default function Orb({
     }
   `;
 
-  // ✅ Use refs for colors to avoid re-creating WebGL context on change
-  const color1Ref = useRef(baseColor1);
-  const color2Ref = useRef(baseColor2);
-  const color3Ref = useRef(baseColor3);
+    // ✅ Use refs for colors to avoid re-creating WebGL context on change
+    const color1Ref = useRef(baseColor1);
+    const color2Ref = useRef(baseColor2);
+    const color3Ref = useRef(baseColor3);
 
-  useEffect(() => {
-    color1Ref.current = baseColor1;
-    color2Ref.current = baseColor2;
-    color3Ref.current = baseColor3;
-  }, [baseColor1, baseColor2, baseColor3]);
+    useEffect(() => {
+      color1Ref.current = baseColor1;
+      color2Ref.current = baseColor2;
+      color3Ref.current = baseColor3;
+    }, [baseColor1, baseColor2, baseColor3]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    const canvasContainer = canvasContainerRef.current;
-    if (!container || !canvasContainer) return;
+    useEffect(() => {
+      const container = containerRef.current;
+      const canvasContainer = canvasContainerRef.current;
+      if (!container || !canvasContainer) return;
 
-    // Enhanced renderer for high quality (fixes graininess)
-    const renderer = new Renderer({
-      alpha: true,
-      premultipliedAlpha: false,
-      antialias: true,
-      powerPreference: "high-performance",
-    });
-    const gl = renderer.gl;
-    gl.clearColor(0, 0, 0, 0);
-    canvasContainer.appendChild(gl.canvas);
+      // Enhanced renderer for high quality (fixes graininess)
+      const renderer = new Renderer({
+        alpha: true,
+        premultipliedAlpha: false,
+        antialias: true,
+        powerPreference: "high-performance",
+      });
+      const gl = renderer.gl;
+      gl.clearColor(0, 0, 0, 0);
+      canvasContainer.appendChild(gl.canvas);
 
-    const geometry = new Triangle(gl);
-    const program = new Program(gl, {
-      vertex: vert,
-      fragment: frag,
-      uniforms: {
-        iTime: { value: 0 },
-        iResolution: {
-          value: new Vec3(
-            gl.canvas.width,
-            gl.canvas.height,
-            gl.canvas.width / gl.canvas.height
-          ),
+      const geometry = new Triangle(gl);
+      const program = new Program(gl, {
+        vertex: vert,
+        fragment: frag,
+        uniforms: {
+          iTime: { value: 0 },
+          iResolution: {
+            value: new Vec3(
+              gl.canvas.width,
+              gl.canvas.height,
+              gl.canvas.width / gl.canvas.height
+            ),
+          },
+          hue: { value: hue },
+          hover: { value: 0 },
+          rot: { value: 0 },
+          hoverIntensity: { value: hoverIntensity },
+          // ✅ Aggiunti uniform per colori dinamici
+          baseColor1: { value: new Vec3(...color1Ref.current) },
+          baseColor2: { value: new Vec3(...color2Ref.current) },
+          baseColor3: { value: new Vec3(...color3Ref.current) },
         },
-        hue: { value: hue },
-        hover: { value: 0 },
-        rot: { value: 0 },
-        hoverIntensity: { value: hoverIntensity },
-        // ✅ Aggiunti uniform per colori dinamici
-        baseColor1: { value: new Vec3(...color1Ref.current) },
-        baseColor2: { value: new Vec3(...color2Ref.current) },
-        baseColor3: { value: new Vec3(...color3Ref.current) },
-      },
-    });
+      });
 
-    const mesh = new Mesh(gl, { geometry, program });
+      const mesh = new Mesh(gl, { geometry, program });
 
-    // ✅ Helper per ottenere la dimensione massima dell'orb dalle variabili CSS
-    const getMaxOrbSize = () => {
-      if (typeof window === "undefined") return 600;
-      const style = getComputedStyle(document.documentElement);
-      const sizeStr = style.getPropertyValue("--orb-size").trim();
-      return parseInt(sizeStr, 10) || 600;
-    };
+      // ✅ Helper per ottenere la dimensione massima dell'orb dalle variabili CSS
+      const getMaxOrbSize = () => {
+        if (typeof window === "undefined") return 600;
+        const style = getComputedStyle(document.documentElement);
+        const sizeStr = style.getPropertyValue("--orb-size").trim();
+        return parseInt(sizeStr, 10) || 600;
+      };
 
-    function resize() {
-      if (!container) return;
-      const dpr = window.devicePixelRatio || 1;
+      function resize() {
+        if (!container) return;
+        const dpr = window.devicePixelRatio || 1;
 
-      // ✅ Usa sempre la dimensione massima per mantenere la qualità alta
-      // anche quando l'orb è minimizzato. Il CSS scalerà visivamente il canvas.
-      const maxSize = getMaxOrbSize();
+        // ✅ Usa sempre la dimensione massima per mantenere la qualità alta
+        // anche quando l'orb è minimizzato. Il CSS scalerà visivamente il canvas.
+        const maxSize = getMaxOrbSize();
 
-      const width = maxSize;
-      const height = maxSize;
+        const width = maxSize;
+        const height = maxSize;
 
-      renderer.setSize(width * dpr, height * dpr);
+        renderer.setSize(width * dpr, height * dpr);
 
-      // Non serve impostare style.width/height perché gestito dal CSS (width: 100% !important)
-      // ma lo impostiamo per coerenza con la risoluzione logica
-      gl.canvas.style.width = width + "px";
-      gl.canvas.style.height = height + "px";
+        // Non serve impostare style.width/height perché gestito dal CSS (width: 100% !important)
+        // ma lo impostiamo per coerenza con la risoluzione logica
+        gl.canvas.style.width = width + "px";
+        gl.canvas.style.height = height + "px";
 
-      program.uniforms.iResolution.value.set(
-        gl.canvas.width,
-        gl.canvas.height,
-        gl.canvas.width / gl.canvas.height
-      );
-    }
-    window.addEventListener("resize", resize);
-    resize();
+        program.uniforms.iResolution.value.set(
+          gl.canvas.width,
+          gl.canvas.height,
+          gl.canvas.width / gl.canvas.height
+        );
+      }
+      window.addEventListener("resize", resize);
+      resize();
 
-    let targetHover = 0;
-    let lastTime = 0;
-    let currentRot = 0;
-    const rotationSpeed = 0.3;
+      let targetHover = 0;
+      let lastTime = 0;
+      let currentRot = 0;
+      const rotationSpeed = 0.3;
 
-    const handleMouseMove = (e) => {
-      const rect = container.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const width = rect.width;
-      const height = rect.height;
-      const size = Math.min(width, height);
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const uvX = ((x - centerX) / size) * 2.0;
-      const uvY = ((y - centerY) / size) * 2.0;
+      const handleMouseMove = (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const width = rect.width;
+        const height = rect.height;
+        const size = Math.min(width, height);
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const uvX = ((x - centerX) / size) * 2.0;
+        const uvY = ((y - centerY) / size) * 2.0;
 
-      if (Math.sqrt(uvX * uvX + uvY * uvY) < 0.8) {
-        targetHover = 1;
-      } else {
+        if (Math.sqrt(uvX * uvX + uvY * uvY) < 0.8) {
+          targetHover = 1;
+        } else {
+          targetHover = 0;
+        }
+      };
+
+      const handleMouseLeave = () => {
         targetHover = 0;
+      };
+
+      container.addEventListener("mousemove", handleMouseMove);
+      container.addEventListener("mouseleave", handleMouseLeave);
+
+      let rafId;
+      const update = (t) => {
+        rafId = requestAnimationFrame(update);
+        const dt = (t - lastTime) * 0.001;
+        lastTime = t;
+        program.uniforms.iTime.value = t * 0.001;
+        program.uniforms.hue.value = hue;
+        program.uniforms.hoverIntensity.value = hoverIntensity;
+
+        // ✅ Aggiorna i colori dinamicamente dai ref
+        program.uniforms.baseColor1.value.set(...color1Ref.current);
+        program.uniforms.baseColor2.value.set(...color2Ref.current);
+        program.uniforms.baseColor3.value.set(...color3Ref.current);
+
+        const effectiveHover = forceHoverState ? 1 : targetHover;
+        program.uniforms.hover.value +=
+          (effectiveHover - program.uniforms.hover.value) * 0.1;
+
+        if (rotateOnHover && effectiveHover > 0.5) {
+          currentRot += dt * rotationSpeed;
+        }
+        program.uniforms.rot.value = currentRot;
+
+        renderer.render({ scene: mesh });
+      };
+      rafId = requestAnimationFrame(update);
+
+      return () => {
+        cancelAnimationFrame(rafId);
+        window.removeEventListener("resize", resize);
+        container.removeEventListener("mousemove", handleMouseMove);
+        container.removeEventListener("mouseleave", handleMouseLeave);
+        canvasContainer.removeChild(gl.canvas);
+        gl.getExtension("WEBGL_lose_context")?.loseContext();
+      };
+      // ✅ Aggiunte dipendenze per colori dinamici
+    }, [hue, hoverIntensity, rotateOnHover, forceHoverState]);
+
+    // ✅ FUNZIONALITÀ: Analytics events
+    useEffect(() => {
+      if (mode === "preview") return; // Skip in preview mode
+
+      if (enlarged) {
+        window.parent?.postMessage({ type: "YUUME_CHAT_OPENED" }, "*");
+      } else {
+        window.parent?.postMessage({ type: "YUUME_CHAT_CLOSED" }, "*");
+      }
+    }, [enlarged, mode]);
+
+    // ✅ FUNZIONALITÀ: Gestione click per espandere
+    const handleExpand = useCallback(() => {
+      if (isMinimized && mode !== "preview") {
+        setEnlarged(true);
+        window.parent?.postMessage({ type: "resize", enlarged: true }, "*");
+      }
+    }, [isMinimized, mode, setEnlarged]);
+
+    const handleKeyDown = useCallback(
+      (e) => {
+        // Only intercept Enter/Space if the orb is minimized (acting as a button)
+        if (isMinimized && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          handleExpand();
+        }
+      },
+      [handleExpand, isMinimized]
+    );
+
+    // ✅ FUNZIONALITÀ: Adattamento colore testo allo sfondo
+    const [textColorMode, setTextColorMode] = useState("dark"); // default dark bg -> white text
+
+    useEffect(() => {
+      const handleMessage = (event) => {
+        if (event.data.type === "YUUME_BG_LUMINANCE") {
+          // Se lo sfondo è light, vogliamo testo scuro (dark-mode)
+          // Se lo sfondo è dark, vogliamo testo chiaro (default)
+          setTextColorMode(event.data.mode === "light" ? "light" : "dark");
+        }
+      };
+      window.addEventListener("message", handleMessage);
+      return () => window.removeEventListener("message", handleMessage);
+    }, []);
+
+    // ✅ FUNZIONALITÀ: Messaggi a rotazione
+    const messages = ["Ciao! 👋", "Serve\naiuto? 💬", "Chiedimi\ntutto ✨"];
+    const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentMessageIndex((prev) => (prev + 1) % messages.length);
+      }, 4000);
+      return () => clearInterval(interval);
+    }, []);
+
+    // ✅ Calcola colore tema da baseColor1 (che è il colore principale dell'orb WebGL)
+    // baseColor1 è un array [r, g, b] con valori 0-1
+    const themeColor = `rgb(${baseColor1[0] * 255}, ${baseColor1[1] * 255}, ${
+      baseColor1[2] * 255
+    })`;
+
+    // ✅ FUNZIONALITÀ: Gestione hover per effetti WebGL
+    const handleMouseEnter = () => {
+      if (rotateOnHover) {
+        // Logic to trigger hover effect in shader (if needed)
       }
     };
 
     const handleMouseLeave = () => {
-      targetHover = 0;
+      // Logic to reset hover effect
     };
 
-    container.addEventListener("mousemove", handleMouseMove);
-    container.addEventListener("mouseleave", handleMouseLeave);
-
-    let rafId;
-    const update = (t) => {
-      rafId = requestAnimationFrame(update);
-      const dt = (t - lastTime) * 0.001;
-      lastTime = t;
-      program.uniforms.iTime.value = t * 0.001;
-      program.uniforms.hue.value = hue;
-      program.uniforms.hoverIntensity.value = hoverIntensity;
-
-      // ✅ Aggiorna i colori dinamicamente dai ref
-      program.uniforms.baseColor1.value.set(...color1Ref.current);
-      program.uniforms.baseColor2.value.set(...color2Ref.current);
-      program.uniforms.baseColor3.value.set(...color3Ref.current);
-
-      const effectiveHover = forceHoverState ? 1 : targetHover;
-      program.uniforms.hover.value +=
-        (effectiveHover - program.uniforms.hover.value) * 0.1;
-
-      if (rotateOnHover && effectiveHover > 0.5) {
-        currentRot += dt * rotationSpeed;
-      }
-      program.uniforms.rot.value = currentRot;
-
-      renderer.render({ scene: mesh });
+    const handleMouseMove = (e) => {
+      // Logic to track mouse position for shader interaction
     };
-    rafId = requestAnimationFrame(update);
 
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", resize);
-      container.removeEventListener("mousemove", handleMouseMove);
-      container.removeEventListener("mouseleave", handleMouseLeave);
-      canvasContainer.removeChild(gl.canvas);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
-    };
-    // ✅ Aggiunte dipendenze per colori dinamici
-  }, [hue, hoverIntensity, rotateOnHover, forceHoverState]);
+    return (
+      <div
+        ref={containerRef}
+        role="button"
+        tabIndex={0}
+        aria-label={
+          isMinimized ? "Apri assistente Yuume" : "Widget Yuume attivo"
+        }
+        className={`orb-container ${isMinimized ? "minimized" : ""} ${
+          isMobileView ? "mobile-device" : ""
+        } ${mode === "preview" ? "preview-mode" : ""}`}
+        onClick={handleExpand}
+        onKeyDown={handleKeyDown}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onMouseMove={handleMouseMove}
+        style={{
+          "--orb-theme-color": themeColor,
+          opacity: loading ? 0.6 : 1,
+        }}
+      >
+        {/* Loading Placeholder */}
+        {loading && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.05)",
+              animation: "pulse 2s infinite",
+            }}
+          />
+        )}
 
-  // ✅ FUNZIONALITÀ: Analytics events
-  useEffect(() => {
-    if (previewMode) return; // Skip in preview mode
+        {/* Chat Layer - Rendered once loaded, visibility handled by CSS classes */}
+        {!loading && (
+          <div className="orb-chat-layer">
+            {mode === "preview" ? (
+              <ChatPreview chatColors={chatColors} />
+            ) : (
+              <Chat
+                chatColors={chatColors}
+                onTyping={setIsTyping}
+                onMinimize={() => {
+                  setEnlarged(false);
+                  // Wait for animation (600ms) before resizing iframe
+                  setTimeout(() => {
+                    window.parent?.postMessage(
+                      { type: "resize", enlarged: false },
+                      "*"
+                    );
+                  }, 600);
+                }}
+              />
+            )}
+          </div>
+        )}
 
-    if (enlarged) {
-      console.log("💬 Chat opened");
-      window.parent?.postMessage({ type: "YUUME_CHAT_OPENED" }, "*");
-    } else {
-      console.log("🔇 Chat closed");
-      window.parent?.postMessage({ type: "YUUME_CHAT_CLOSED" }, "*");
-    }
-  }, [enlarged, previewMode]);
+        {/* Minimized Text */}
+        {isMinimized && (
+          <div
+            key={currentMessageIndex} // Force re-render to restart animations
+            className="minimized-text"
+            style={{
+              color:
+                textColorMode === "light" ? chatColors.userMessage : "white",
+            }}
+          >
+            {messages[currentMessageIndex]
+              .split("\n")
+              .map((line, lineIndex) => (
+                <div key={lineIndex} className="minimized-text-line">
+                  {Array.from(line).map((char, charIndex) => {
+                    // Calculate global index for continuous delay
+                    const previousCharsCount = messages[currentMessageIndex]
+                      .split("\n")
+                      .slice(0, lineIndex)
+                      .join("").length;
+                    const globalIndex = previousCharsCount + charIndex;
 
-  // ✅ FUNZIONALITÀ: Gestione click per espandere
-  const handleExpand = useCallback(() => {
-    if (isMinimized && !previewMode) {
-      setEnlarged(true);
-      window.parent?.postMessage({ type: "resize", enlarged: true }, "*");
-    }
-  }, [isMinimized, previewMode, setEnlarged]);
+                    return (
+                      <span
+                        key={charIndex}
+                        style={{ animationDelay: `${globalIndex * 0.03}s` }}
+                      >
+                        {char === " " ? "\u00A0" : char}
+                      </span>
+                    );
+                  })}
+                </div>
+              ))}
+          </div>
+        )}
 
-  const handleKeyDown = useCallback(
-    (e) => {
-      // Only intercept Enter/Space if the orb is minimized (acting as a button)
-      if (isMinimized && (e.key === "Enter" || e.key === " ")) {
-        e.preventDefault();
-        handleExpand();
-      }
-    },
-    [handleExpand, isMinimized]
-  );
+        {/* ✅ FUNZIONALITÀ: Children support */}
+        {children}
 
-  // ✅ FUNZIONALITÀ: Adattamento colore testo allo sfondo
-  const [textColorMode, setTextColorMode] = useState("dark"); // default dark bg -> white text
+        {/* ✅ FUNZIONALITÀ: Dev Tools (Solo in sviluppo locale e non preview) */}
+        {mode === "development" && (
+          <DevTools
+            currentConfig={config}
+            onConfigChange={setConfig}
+            onSiteChange={setShopDomain}
+            onMobileToggle={setForcedMobile}
+          />
+        )}
 
-  useEffect(() => {
-    const handleMessage = (event) => {
-      if (event.data.type === "YUUME_BG_LUMINANCE") {
-        // Se lo sfondo è light, vogliamo testo scuro (dark-mode)
-        // Se lo sfondo è dark, vogliamo testo chiaro (default)
-        setTextColorMode(event.data.mode === "light" ? "light" : "dark");
-      }
-    };
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
-
-  // ✅ FUNZIONALITÀ: Messaggi a rotazione
-  const messages = ["Ciao! 👋", "Serve\naiuto? 💬", "Chiedimi\ntutto ✨"];
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentMessageIndex((prev) => (prev + 1) % messages.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // ✅ Calcola colore tema da baseColor1 (che è il colore principale dell'orb WebGL)
-  // baseColor1 è un array [r, g, b] con valori 0-1
-  const themeColor = `rgb(${baseColor1[0] * 255}, ${baseColor1[1] * 255}, ${
-    baseColor1[2] * 255
-  })`;
-
-  // ✅ FUNZIONALITÀ: Gestione hover per effetti WebGL
-  const handleMouseEnter = () => {
-    if (rotateOnHover) {
-      // Logic to trigger hover effect in shader (if needed)
-    }
-  };
-
-  const handleMouseLeave = () => {
-    // Logic to reset hover effect
-  };
-
-  const handleMouseMove = (e) => {
-    // Logic to track mouse position for shader interaction
-  };
-
-  return (
-    <div
-      ref={containerRef}
-      role="button"
-      tabIndex={0}
-      aria-label={isMinimized ? "Apri assistente Yuume" : "Widget Yuume attivo"}
-      className={`orb-container ${isMinimized ? "minimized" : ""} ${
-        isMobileDevice ? "mobile-device" : ""
-      }`}
-      onClick={handleExpand}
-      onKeyDown={handleKeyDown}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
-      style={{
-        "--orb-theme-color": themeColor,
-      }}
-    >
-      {/* DEBUG LOG */}
-      {console.log(
-        `🎨 Orb [${mobileOverride ? "MOBILE" : "DESKTOP"}] Color:`,
-        themeColor
-      )}
-
-      {/* Chat Layer - Behind the canvas but interactive */}
-      {!isMinimized && (
-        <div className="orb-chat-layer">
-          {/* ✅ FUNZIONALITÀ: Preview mode o Chat completa */}
-          {previewMode ? (
-            <ChatPreview chatColors={chatColors} />
-          ) : (
-            <Chat
-              chatColors={chatColors}
-              devShopDomain={devShopDomain}
-              onTyping={setIsTyping}
-              onMinimize={() => {
-                setEnlarged(false);
-                // Wait for animation (600ms) before resizing iframe
-                setTimeout(() => {
-                  window.parent?.postMessage(
-                    { type: "resize", enlarged: false },
-                    "*"
-                  );
-                }, 600);
-              }}
-            />
-          )}
+        {/* Liquid Glass Background - Between chat and canvas */}
+        <div className="orb-glass-mask-wrapper">
+          <div className="orb-glass-layer">
+            <div className="glass-blobs" />
+            <div className="glass-noise" />
+            <div className="glass-shine" />
+          </div>
         </div>
-      )}
 
-      {/* Minimized Text */}
-      {isMinimized && (
-        <div
-          key={currentMessageIndex} // Force re-render to restart animations
-          className="minimized-text"
-          style={{
-            color: textColorMode === "light" ? chatColors.userMessage : "white",
-          }}
-        >
-          {messages[currentMessageIndex].split("\n").map((line, lineIndex) => (
-            <div key={lineIndex} className="minimized-text-line">
-              {Array.from(line).map((char, charIndex) => {
-                // Calculate global index for continuous delay
-                const previousCharsCount = messages[currentMessageIndex]
-                  .split("\n")
-                  .slice(0, lineIndex)
-                  .join("").length;
-                const globalIndex = previousCharsCount + charIndex;
-
-                return (
-                  <span
-                    key={charIndex}
-                    style={{ animationDelay: `${globalIndex * 0.03}s` }}
-                  >
-                    {char === " " ? "\u00A0" : char}
-                  </span>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ✅ FUNZIONALITÀ: Children support */}
-      {children}
-
-      {/* Liquid Glass Background - Between chat and canvas */}
-      <div className="orb-glass-mask-wrapper">
-        <div className="orb-glass-layer">
-          <div className="glass-blobs" />
-          <div className="glass-noise" />
-          <div className="glass-shine" />
-        </div>
+        {/* WebGL Canvas Layer - On top visually, but pointer-events: none to allow clicks through */}
+        <div ref={canvasContainerRef} className="orb-canvas-layer" />
       </div>
+    );
+  }
+);
 
-      {/* WebGL Canvas Layer - On top visually, but pointer-events: none to allow clicks through */}
-      <div ref={canvasContainerRef} className="orb-canvas-layer" />
-    </div>
-  );
-}
+export default Orb;

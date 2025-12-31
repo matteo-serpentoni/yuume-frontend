@@ -1,96 +1,36 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import OrbWithCustomization from "./components/Orb/OrbWithCustomization";
-import OrbDevWrapper from "./components/Orb/OrbDevWrapper";
 import Orb from "./components/Orb/Orb";
 import AppInstalled from "./components/AppInstalled/AppInstalled";
-import OrbPreview from "./pages/OrbPreview";
 
 const ORB_STATE_KEY = "yuume_orb_enlarged";
 
 function App() {
   console.log("📱 APP.JSX CARICATO");
 
-  // 🔥 Aggiungi gestione stato con sessionStorage
   const [enlarged, setEnlarged] = useState(() => {
     const saved = sessionStorage.getItem(ORB_STATE_KEY);
-    console.log("🔵 Stato orb caricato in App.jsx:", saved);
     return saved === "true";
   });
 
-  // Notifica subito al parent la misura corretta al primo load dell'iframe
   useEffect(() => {
-    const saved = sessionStorage.getItem(ORB_STATE_KEY) === "true";
-    window.parent?.postMessage({ type: "resize", enlarged: saved }, "*");
+    window.parent?.postMessage({ type: "resize", enlarged }, "*");
   }, []);
 
-  // 🔥 Salva in sessionStorage quando cambia
   useEffect(() => {
-    console.log("💾 Salvataggio stato orb in App.jsx:", enlarged);
     sessionStorage.setItem(ORB_STATE_KEY, enlarged.toString());
-    console.log(
-      "✅ Verificato sessionStorage:",
-      sessionStorage.getItem(ORB_STATE_KEY)
-    );
   }, [enlarged]);
 
-  // 🎨 Set transparent background when in embed mode
   useEffect(() => {
     const isEmbed = new URLSearchParams(window.location.search).get("embed");
     if (isEmbed) {
-      const originalBackground = document.body.style.backgroundColor;
       document.body.style.backgroundColor = "transparent";
-
-      return () => {
-        document.body.style.backgroundColor = originalBackground;
-      };
     }
   }, []);
-
-  // 🔥 Handle explicit leave signal
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      const sessionId = sessionStorage.getItem("yuume_session_id");
-      if (sessionId) {
-        const data = new Blob([JSON.stringify({ sessionId })], {
-          type: "application/json",
-        });
-        // Use sendBeacon for reliable delivery on unload
-        // Note: URL must be absolute or relative to the page origin
-        // Assuming widget is hosted on same domain or proxy handles it.
-        // If widget is on different domain, we need full URL.
-        // Since we are in dev/prod, let's try to infer or use env.
-        // For now, assuming relative path works if proxied, or we need the API URL.
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
-        navigator.sendBeacon(`${apiUrl}/api/chat/leave`, data);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
-
-  const isDevelopment = import.meta.env.DEV;
 
   return (
     <Router basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       <Routes>
-        {/* Debug Route for catch-all */}
-        <Route
-          path="*"
-          element={
-            <div style={{ color: "white", padding: 20 }}>
-              <h1>404 Not Found</h1>
-              <p>Current Path: {window.location.pathname}</p>
-              <p>Basename: {import.meta.env.BASE_URL}</p>
-            </div>
-          }
-        />
-
-        {/* Homepage con l'orb */}
         <Route
           path="/"
           element={
@@ -109,25 +49,23 @@ function App() {
                 justifyContent: "center",
               }}
             >
-              {isDevelopment &&
-              !new URLSearchParams(window.location.search).get("embed") ? (
-                <OrbDevWrapper enlarged={enlarged} setEnlarged={setEnlarged} />
-              ) : (
-                <OrbWithCustomization
-                  enlarged={enlarged}
-                  setEnlarged={setEnlarged}
-                />
-              )}
+              <Orb enlarged={enlarged} setEnlarged={setEnlarged} />
             </div>
           }
         />
-
-        {/* Pagina installazione app */}
         <Route path="/app/installed" element={<AppInstalled />} />
-
-        {/* Pagina preview orb - FAILSAFE: Add both path variants */}
-        <Route path="/orb-preview" element={<OrbPreview />} />
-        <Route path="/widget/orb-preview" element={<OrbPreview />} />
+        <Route
+          path="/orb-preview"
+          element={
+            <Orb mode="preview" enlarged={true} setEnlarged={() => {}} />
+          }
+        />
+        <Route
+          path="/widget/orb-preview"
+          element={
+            <Orb mode="preview" enlarged={true} setEnlarged={() => {}} />
+          }
+        />
       </Routes>
     </Router>
   );

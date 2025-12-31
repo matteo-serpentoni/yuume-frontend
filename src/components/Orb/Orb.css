@@ -36,6 +36,14 @@ body {
   z-index: 1000;
 }
 
+/* PREVIEW MODE: Disable only transitions for instant layout switching in dashboard */
+.orb-container.preview-mode,
+.orb-container.preview-mode *,
+.orb-container.preview-mode *::before,
+.orb-container.preview-mode *::after {
+  transition: none !important;
+}
+
 .orb-container.minimized {
   width: var(--orb-minimized-size);
   height: var(--orb-minimized-size);
@@ -791,8 +799,12 @@ body {
   padding: 0 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 
-  /* Effetto glass semi-trasparente */
-  background: rgba(0, 0, 0, 0.25);
+  /* Effetto glass semi-trasparente sintonizzato con il colore dell'header */
+  background: color-mix(
+    in srgb,
+    var(--chat-header-color, rgba(0, 0, 0, 0.8)),
+    transparent 75%
+  );
   border-radius: 20px 20px 0 0;
 
   /* Sticky positioning per fissare in cima */
@@ -867,9 +879,13 @@ body {
   height: 24px; /* Ultra sottile */
   padding: 0;
 
-  /* Quasi invisibile */
+  /* Quasi invisibile, ma con un lieve accenno del colore */
   border: none;
-  background: transparent;
+  background: color-mix(
+    in srgb,
+    var(--chat-header-color, transparent),
+    transparent 95%
+  );
 
   /* Sticky positioning */
   position: sticky;

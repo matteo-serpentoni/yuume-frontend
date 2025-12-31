@@ -1,5 +1,6 @@
 import "../Orb/Orb.css";
 import MessageInput from "./MessageInput";
+import ChatHeader from "./ChatHeader";
 
 /**
  * ChatPreview
@@ -58,7 +59,12 @@ const ChatPreview = ({
   };
 
   return (
-    <div className="chat-inner">
+    <div
+      className="chat-inner"
+      style={{ "--chat-header-color": chatColors.header }}
+    >
+      <ChatHeader />
+
       <div className="messages-area">
         {mockMessages.map((msg) => (
           <div key={msg.id}>{renderMessage(msg)}</div>
