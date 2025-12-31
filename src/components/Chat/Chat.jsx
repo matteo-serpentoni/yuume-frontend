@@ -2,19 +2,15 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useChat } from "../../hooks/useChat";
 import "../Orb/Orb.css";
 
-import { AnimatePresence, motion } from "framer-motion";
-import TypingIndicator from "./TypingIndicator";
+import { AnimatePresence } from "framer-motion";
 import MessageInput from "./MessageInput";
 import ChatHeader from "./ChatHeader";
-import ProductCards, { ProductDrawer } from "../Message/ProductCards";
-import OrderCards, { OrderDetailCard } from "../Message/OrderCards";
+import MessageList from "./MessageList";
+import { ProductDrawer } from "../Message/ProductCards";
+import { OrderDetailCard } from "../Message/OrderCards";
 import Drawer from "../UI/Drawer";
-import CategoryCards from "../Message/CategoryCards";
-import OrderLookupForm from "../Message/OrderLookupForm"; // ✅ Import
-import TextMessage from "../Message/TextMessage"; // ✅ Import
-import ProfileView from "./ProfileView"; // ✅ Import
-import StarRating from "./StarRating"; // ✅ Import
-import { formatTime } from "../../utils/messageHelpers"; // ✅ Import
+import ProfileView from "./ProfileView";
+import StarRating from "./StarRating";
 
 const Chat = ({
   onTyping,
@@ -99,18 +95,6 @@ const Chat = ({
     return blocks;
   }, [messages]);
 
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    if (view === "chat") {
-      scrollToBottom();
-    }
-  }, [messages, loading, view]);
-
   // Handle incoming order details for Drawer
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
@@ -122,364 +106,6 @@ const Chat = ({
       setActiveOrder(lastMessage.order);
     }
   }, [messages]);
-
-  const renderMessage = (msg) => {
-    // Se il messaggio è di tipo category_cards o CATEGORY_RESPONSE
-    if (msg.type === "category_cards" || msg.type === "CATEGORY_RESPONSE") {
-      return (
-        <div
-          className={`message-bubble ${msg.sender} category-cards-bubble`}
-          style={{
-            background: chatColors.aiMessage,
-            padding: "12px",
-            borderRadius: "18px 18px 18px 4px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            maxWidth: "100%",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "stretch",
-            boxSizing: "border-box",
-            overflow: "hidden",
-          }}
-        >
-          <CategoryCards
-            message={msg}
-            onCategoryClick={(title) =>
-              sendMessage(`Mostrami i prodotti della categoria ${title}`)
-            }
-          />
-          <div className="message-time" style={{ marginTop: 4 }}>
-            {formatTime(msg.timestamp)}
-          </div>
-        </div>
-      );
-    }
-
-    // Se il messaggio è di tipo product_cards o PRODUCT_RESPONSE
-    if (msg.type === "product_cards" || msg.type === "PRODUCT_RESPONSE") {
-      return (
-        <div
-          className={`message-bubble ${msg.sender} product-cards-bubble`}
-          style={{
-            background: chatColors.aiMessage, // Usa il colore del bot
-            padding: "12px", // Padding standard
-            borderRadius: "18px 18px 18px 4px", // Stesso raggio dei messaggi bot
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            maxWidth: "85%", // Larghezza standard
-            width: "fit-content",
-          }}
-        >
-          <ProductCards
-            message={msg}
-            shopDomain={shopDomain}
-            onOpen={setActiveProduct}
-            activeProduct={activeProduct}
-          />
-          <div className="message-time" style={{ marginTop: 4 }}>
-            {formatTime(msg.timestamp)}
-          </div>
-        </div>
-      );
-    }
-
-    // Order Related Messages
-    if (msg.type === "order_form") {
-      const hasResults = !!msg.results;
-
-      return (
-        <div className={`message-bubble ${msg.sender} order-form-bubble`}>
-          <AnimatePresence mode="wait">
-            {!hasResults ? (
-              <motion.div
-                key="form"
-                initial={{ opacity: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
-                <OrderLookupForm
-                  onSubmit={(lookupString) =>
-                    sendMessage(lookupString, { hidden: true })
-                  }
-                  isLoading={loading}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="results"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {msg.results.type === "text" ? (
-                  <div
-                    style={{
-                      padding: "16px",
-                      textAlign: "center",
-                      background: "rgba(255,255,255,0.05)",
-                      borderRadius: "16px",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                    }}
-                  >
-                    <div style={{ fontSize: "24px", marginBottom: "8px" }}>
-                      🔍
-                    </div>
-                    <p
-                      style={{
-                        fontSize: "14px",
-                        margin: "0 0 16px 0",
-                        color: "white",
-                        opacity: 0.8,
-                      }}
-                    >
-                      {msg.results.text}
-                    </p>
-                    <button
-                      onClick={() => sendMessage("Cerca ordine")}
-                      style={{
-                        background: "white",
-                        color: "black",
-                        border: "none",
-                        padding: "8px 16px",
-                        borderRadius: "10px",
-                        fontSize: "13px",
-                        fontWeight: "700",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Riprova
-                    </button>
-                  </div>
-                ) : (
-                  <OrderCards
-                    message={msg.results}
-                    onOrderClick={(orderNumber, email) => {
-                      sendMessage(`ORDER_LOOKUP:${email}:${orderNumber}`, {
-                        hidden: true,
-                      });
-                    }}
-                  />
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div
-            className="message-time"
-            style={{ marginTop: 4, paddingLeft: 12 }}
-          >
-            {formatTime(msg.timestamp)}
-          </div>
-        </div>
-      );
-    }
-
-    if (["order_detail", "order_list", "order_cards"].includes(msg.type)) {
-      return (
-        <div
-          className={`message-bubble ${msg.sender} order-cards-bubble`}
-          style={{
-            background: chatColors.aiMessage,
-            padding: "8px",
-            borderRadius: "18px 18px 18px 4px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            maxWidth: "85%",
-            width: "fit-content",
-          }}
-        >
-          <OrderCards
-            message={msg}
-            onOrderClick={(orderNumber, email) => {
-              sendMessage(`ORDER_LOOKUP:${email}:${orderNumber}`, {
-                hidden: true,
-              });
-            }}
-          />
-          <div className="message-time" style={{ marginTop: 4 }}>
-            {formatTime(msg.timestamp)}
-          </div>
-        </div>
-      );
-    }
-
-    const msgColor =
-      msg.sender === "user" ? chatColors.userMessage : chatColors.aiMessage;
-
-    // Messaggio normale
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: msg.sender === "user" ? "flex-end" : "flex-start",
-        }}
-      >
-        <div
-          className={`message-bubble ${msg.sender}`}
-          style={{
-            background: msgColor,
-            borderRadius:
-              msg.sender === "user"
-                ? "18px 18px 4px 18px"
-                : "18px 18px 18px 4px",
-            position: "relative",
-            marginBottom: msg.sender === "assistant" && !msg.error ? 4 : 0,
-          }}
-        >
-          <div className="message-content">
-            <TextMessage message={msg} />
-          </div>
-          <div
-            className="message-footer"
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: 4,
-            }}
-          >
-            <div className="message-time">{formatTime(msg.timestamp)}</div>
-          </div>
-        </div>
-
-        {/* Feedback Buttons OUTSIDE the bubble */}
-        {msg.sender === "assistant" && !msg.error && !msg.disableFeedback && (
-          <div
-            className="feedback-actions"
-            style={{
-              display: "flex",
-              gap: 8,
-              paddingLeft: 4,
-              opacity: 0.7,
-            }}
-          >
-            <button
-              onClick={() => sendFeedback(msg.id, "positive", msg.text)}
-              title="Utile"
-              aria-label="Feedback positivo"
-              className={msg.feedback === "positive" ? "thumb-animate" : ""}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 4,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color:
-                  msg.feedback === "positive"
-                    ? "#FFFFFF"
-                    : "rgba(255, 255, 255, 0.5)", // White or Transparent Gray
-                transition: "all 0.2s",
-                opacity: msg.feedback === "positive" ? 1 : 0.7,
-                filter: "none", // Removed grayscale filter as we control color directly
-              }}
-              onMouseEnter={(e) => {
-                if (msg.feedback !== "positive") {
-                  e.currentTarget.style.color = "#FFFFFF";
-                  e.currentTarget.style.opacity = 1;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (msg.feedback !== "positive") {
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
-                  e.currentTarget.style.opacity = 0.7;
-                }
-              }}
-            >
-              {msg.feedback === "positive" ? (
-                // Filled Thumbs Up
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-                </svg>
-              ) : (
-                // Outline Thumbs Up
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-                </svg>
-              )}
-            </button>
-            <button
-              onClick={() => sendFeedback(msg.id, "negative", msg.text)}
-              title="Non utile"
-              aria-label="Feedback negativo"
-              className={msg.feedback === "negative" ? "thumb-animate" : ""}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 4,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color:
-                  msg.feedback === "negative"
-                    ? "#FFFFFF"
-                    : "rgba(255, 255, 255, 0.5)", // White or Transparent Gray
-                transition: "all 0.2s",
-                opacity: msg.feedback === "negative" ? 1 : 0.7,
-                filter: "none",
-              }}
-              onMouseEnter={(e) => {
-                if (msg.feedback !== "negative") {
-                  e.currentTarget.style.color = "#FFFFFF";
-                  e.currentTarget.style.opacity = 1;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (msg.feedback !== "negative") {
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
-                  e.currentTarget.style.opacity = 0.7;
-                }
-              }}
-            >
-              {msg.feedback === "negative" ? (
-                // Filled Thumbs Down
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
-                </svg>
-              ) : (
-                // Outline Thumbs Down
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
-                </svg>
-              )}
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div
@@ -507,62 +133,57 @@ const Chat = ({
               overflow: "hidden",
             }}
           >
-            <div
-              className={`messages-area ${
-                activeProduct ? "yuume-drawer-active" : ""
-              }`}
-            >
-              {chatBlocks.map((msg) => (
-                <div key={msg.id}>{renderMessage(msg)}</div>
-              ))}
+            <MessageList
+              chatBlocks={chatBlocks}
+              chatColors={chatColors}
+              loading={loading}
+              shopDomain={shopDomain}
+              activeProduct={activeProduct}
+              setActiveProduct={setActiveProduct}
+              sendMessage={sendMessage}
+              sendFeedback={sendFeedback}
+            />
 
-              {loading && (
-                <TypingIndicator aiMessageColor={chatColors.aiMessage} />
-              )}
-
-              {/* Conversation Ended Separator & Rating */}
-              {sessionStatus === "completed" && (
-                <div style={{ padding: "0 16px 24px 16px" }}>
+            {/* Conversation Ended Separator & Rating */}
+            {sessionStatus === "completed" && (
+              <div style={{ padding: "0 16px 24px 16px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    margin: "24px 0",
+                    color: "rgba(255, 255, 255, 0.4)",
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                  }}
+                >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      margin: "24px 0",
-                      color: "rgba(255, 255, 255, 0.4)",
-                      fontSize: "12px",
-                      textTransform: "uppercase",
-                      letterSpacing: "1px",
+                      flex: 1,
+                      height: "1px",
+                      background: "rgba(255, 255, 255, 0.1)",
                     }}
-                  >
-                    <div
-                      style={{
-                        flex: 1,
-                        height: "1px",
-                        background: "rgba(255, 255, 255, 0.1)",
-                      }}
-                    />
-                    <span style={{ padding: "0 12px" }}>
-                      Conversazione Terminata
-                    </span>
-                    <div
-                      style={{
-                        flex: 1,
-                        height: "1px",
-                        background: "rgba(255, 255, 255, 0.1)",
-                      }}
-                    />
-                  </div>
-
-                  <StarRating
-                    onRate={(rating) =>
-                      sendFeedback(null, rating, null, "conversation")
-                    }
+                  />
+                  <span style={{ padding: "0 12px" }}>
+                    Conversazione Terminata
+                  </span>
+                  <div
+                    style={{
+                      flex: 1,
+                      height: "1px",
+                      background: "rgba(255, 255, 255, 0.1)",
+                    }}
                   />
                 </div>
-              )}
 
-              <div ref={messagesEndRef} />
-            </div>
+                <StarRating
+                  onRate={(rating) =>
+                    sendFeedback(null, rating, null, "conversation")
+                  }
+                />
+              </div>
+            )}
 
             <MessageInput
               onSend={(text) => {

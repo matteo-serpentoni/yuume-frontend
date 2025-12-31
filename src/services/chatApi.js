@@ -106,10 +106,9 @@ export const getSessionStatus = async (sessionId) => {
       }
     );
 
-    if (!response.ok) throw new Error("Failed to fetch session status");
+    if (!response.ok) return null;
     return await response.json();
   } catch (error) {
-    console.error("Error fetching session status:", error);
     return null;
   }
 };

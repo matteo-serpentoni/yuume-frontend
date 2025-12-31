@@ -24,6 +24,8 @@ const Orb = memo(
       mode,
       isMobile,
       isPreviewMobile,
+      textColorMode,
+      shopDomain,
       setConfig,
       setShopDomain,
     } = useOrb(modeOverride);
@@ -390,21 +392,6 @@ const Orb = memo(
       [handleExpand, isMinimized]
     );
 
-    // ✅ FUNZIONALITÀ: Adattamento colore testo allo sfondo
-    const [textColorMode, setTextColorMode] = useState("dark"); // default dark bg -> white text
-
-    useEffect(() => {
-      const handleMessage = (event) => {
-        if (event.data.type === "YUUME_BG_LUMINANCE") {
-          // Se lo sfondo è light, vogliamo testo scuro (dark-mode)
-          // Se lo sfondo è dark, vogliamo testo chiaro (default)
-          setTextColorMode(event.data.mode === "light" ? "light" : "dark");
-        }
-      };
-      window.addEventListener("message", handleMessage);
-      return () => window.removeEventListener("message", handleMessage);
-    }, []);
-
     // ✅ FUNZIONALITÀ: Messaggi a rotazione
     const messages = ["Ciao! 👋", "Serve\naiuto? 💬", "Chiedimi\ntutto ✨"];
     const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -479,6 +466,7 @@ const Orb = memo(
             ) : (
               <Chat
                 chatColors={chatColors}
+                devShopDomain={shopDomain}
                 onTyping={setIsTyping}
                 onMinimize={() => {
                   setEnlarged(false);
