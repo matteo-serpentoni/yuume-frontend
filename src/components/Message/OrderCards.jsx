@@ -1,6 +1,8 @@
-import { motion } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 
-const OrderItemRow = ({ item, index }) => {
+export const OrderItemRow = ({ item, index, theme = "dark" }) => {
+  const isLight = theme === "light";
   return (
     <motion.div
       initial={{ opacity: 0, x: -5 }}
@@ -11,16 +13,18 @@ const OrderItemRow = ({ item, index }) => {
         justifyContent: "space-between",
         alignItems: "center",
         padding: "8px 0",
-        borderBottom: "1px solid #f3f4f6",
+        borderBottom: `1px solid ${
+          isLight ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0.03)"
+        }`,
       }}
     >
       <div style={{ flex: 1 }}>
         <div
           style={{
-            fontSize: 14,
-            fontWeight: 500,
-            color: "#1f2937",
-            marginBottom: 2,
+            fontSize: 13,
+            fontWeight: 600,
+            color: isLight ? "#1e293b" : "#ffffff",
+            marginBottom: 1,
           }}
         >
           {item.title}
@@ -28,8 +32,8 @@ const OrderItemRow = ({ item, index }) => {
         {item.variantTitle && item.variantTitle !== "Default Title" && (
           <div
             style={{
-              fontSize: 12,
-              color: "#6b7280",
+              fontSize: 11,
+              color: isLight ? "#64748b" : "rgba(255, 255, 255, 0.5)",
             }}
           >
             {item.variantTitle}
@@ -45,8 +49,8 @@ const OrderItemRow = ({ item, index }) => {
       >
         <div
           style={{
-            fontSize: 12,
-            color: "#6b7280",
+            fontSize: 11,
+            color: isLight ? "#64748b" : "rgba(255, 255, 255, 0.6)",
             fontWeight: 500,
           }}
         >
@@ -54,9 +58,9 @@ const OrderItemRow = ({ item, index }) => {
         </div>
         <div
           style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: "#111827",
+            fontSize: 13,
+            fontWeight: 700,
+            color: isLight ? "#0f172a" : "#ffffff",
             minWidth: 60,
             textAlign: "right",
           }}
@@ -68,72 +72,73 @@ const OrderItemRow = ({ item, index }) => {
   );
 };
 
-const OrderCard = ({ order, index }) => {
-  const { id, orderNumber, status, createdAt, total, items = [] } = order;
+// Detail view for a single order
+export const OrderDetailCard = ({ order, theme = "dark" }) => {
+  const isLight = theme === "light";
+  const {
+    id,
+    orderNumber,
+    status,
+    createdAt,
+    total,
+    items = [],
+    tracking = [],
+  } = order;
 
-  // Status colors
   const getStatusColor = (statusType, statusValue) => {
     if (statusType === "financial") {
       switch (statusValue) {
         case "PAID":
-          return "#059669";
+          return "#10b981";
         case "PENDING":
-          return "#d97706";
+          return "#f59e0b";
         case "REFUNDED":
-          return "#dc2626";
+          return "#ef4444";
         default:
-          return "#6b7280";
+          return "#94a3b8";
       }
     }
     if (statusType === "fulfillment") {
       switch (statusValue) {
         case "FULFILLED":
-          return "#059669";
+          return "#10b981";
         case "UNFULFILLED":
-          return "#d97706";
+          return "#f59e0b";
         case "PARTIALLY_FULFILLED":
-          return "#2563eb";
+          return "#3b82f6";
         default:
-          return "#6b7280";
+          return "#94a3b8";
       }
     }
-    return "#6b7280";
+    return "#94a3b8";
   };
 
-  const getStatusLabel = (statusValue) => {
-    const labels = {
-      // Financial
-      PAID: "Pagato",
-      PENDING: "In attesa",
-      REFUNDED: "Rimborsato",
-      // Fulfillment
-      FULFILLED: "Spedito",
-      UNFULFILLED: "Da spedire",
-      PARTIALLY_FULFILLED: "Parzialmente spedito",
-    };
-    return labels[statusValue] || statusValue;
-  };
+  const statusLabel = status?.fulfillment || status;
+  const paymentLabel = status?.financial;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className={`yuume-order-detail-card ${theme}`}
       style={{
-        borderRadius: 12,
-        background: "#ffffff",
-        boxShadow:
-          "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        borderRadius: 16,
+        background: isLight ? "transparent" : "rgba(255, 255, 255, 0.06)",
+        backdropFilter: isLight ? "none" : "blur(10px)",
+        border: isLight ? "none" : "1px solid rgba(255, 255, 255, 0.08)",
         overflow: "hidden",
-        marginBottom: 12,
+        width: "100%",
+        boxShadow: isLight ? "none" : "0 8px 20px rgba(0,0,0,0.1)",
       }}
     >
-      {/* Order Header */}
+      {/* Header */}
       <div
         style={{
-          padding: "16px",
-          background: "#f9fafb",
-          borderBottom: "1px solid #e5e7eb",
+          padding: isLight ? "0 0 12px 0" : "12px 14px",
+          borderBottom: `1px solid ${
+            isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.03)"
+          }`,
+          background: isLight ? "transparent" : "rgba(255,255,255,0.01)",
         }}
       >
         <div
@@ -144,131 +149,148 @@ const OrderCard = ({ order, index }) => {
             marginBottom: 8,
           }}
         >
-          <div
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#111827",
-            }}
-          >
-            Ordine {orderNumber}
+          <div>
+            <h4
+              style={{
+                margin: 0,
+                color: isLight ? "#1e293b" : "white",
+                fontWeight: 700,
+              }}
+            >
+              #{orderNumber}
+            </h4>
+            <p
+              style={{
+                margin: "2px 0 0",
+                fontSize: 11,
+                color: isLight ? "#64748b" : "rgba(255,255,255,0.4)",
+              }}
+            >
+              {createdAt}
+            </p>
           </div>
           <div
             style={{
               fontSize: 16,
-              fontWeight: 700,
-              color: "#059669",
+              fontWeight: 800,
+              color: isLight ? "#0f172a" : "#ffffff",
             }}
           >
             {total}
           </div>
         </div>
 
-        {/* Status Badges */}
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            flexWrap: "wrap",
-          }}
-        >
-          <div
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {paymentLabel && (
+            <span
+              style={{
+                padding: "4px 10px",
+                borderRadius: 20,
+                fontSize: 11,
+                fontWeight: 600,
+                background: `${getStatusColor("financial", paymentLabel)}20`,
+                color: getStatusColor("financial", paymentLabel),
+                border: `1px solid ${getStatusColor(
+                  "financial",
+                  paymentLabel
+                )}40`,
+              }}
+            >
+              💳 {paymentLabel}
+            </span>
+          )}
+          <span
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 4,
               padding: "4px 10px",
               borderRadius: 20,
               fontSize: 11,
               fontWeight: 600,
-              background: `${getStatusColor("financial", status.financial)}15`,
-              color: getStatusColor("financial", status.financial),
-              border: `1px solid ${getStatusColor(
-                "financial",
-                status.financial
-              )}30`,
-            }}
-          >
-            💳 {getStatusLabel(status.financial)}
-          </div>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 4,
-              padding: "4px 10px",
-              borderRadius: 20,
-              fontSize: 11,
-              fontWeight: 600,
-              background: `${getStatusColor(
-                "fulfillment",
-                status.fulfillment
-              )}15`,
-              color: getStatusColor("fulfillment", status.fulfillment),
+              background: `${getStatusColor("fulfillment", statusLabel)}20`,
+              color: getStatusColor("fulfillment", statusLabel),
               border: `1px solid ${getStatusColor(
                 "fulfillment",
-                status.fulfillment
-              )}30`,
+                statusLabel
+              )}40`,
             }}
           >
-            📦 {getStatusLabel(status.fulfillment)}
-          </div>
-        </div>
-
-        {/* Date */}
-        <div
-          style={{
-            fontSize: 12,
-            color: "#6b7280",
-            marginTop: 8,
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-          }}
-        >
-          <span>📅</span> {createdAt}
+            📦 {statusLabel}
+          </span>
         </div>
       </div>
 
-      {/* Order Items */}
-      <div
-        style={{
-          padding: "16px",
-        }}
-      >
-        <div
+      {/* Items */}
+      <div style={{ padding: isLight ? "16px 0" : "12px 14px" }}>
+        <p
           style={{
-            fontSize: 11,
-            fontWeight: 700,
-            color: "#9ca3af",
-            marginBottom: 12,
+            margin: "0 0 10px",
+            fontSize: 10,
+            fontWeight: 800,
+            color: isLight ? "#64748b" : "rgba(255,255,255,0.3)",
             textTransform: "uppercase",
-            letterSpacing: "0.05em",
+            letterSpacing: "0.08em",
           }}
         >
           ARTICOLI ({items.length})
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
+        </p>
+        <div>
           {items.map((item, idx) => (
-            <OrderItemRow key={item.id || idx} item={item} index={idx} />
+            <OrderItemRow key={idx} item={item} index={idx} theme={theme} />
           ))}
         </div>
 
-        {/* Order ID */}
+        {/* Tracking */}
+        {tracking.length > 0 && (
+          <div
+            style={{
+              marginTop: 20,
+              padding: "10px 12px",
+              background: "rgba(255,255,255,0.02)",
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.03)",
+            }}
+          >
+            <p
+              style={{
+                margin: "0 0 8px",
+                fontSize: 10,
+                fontWeight: 800,
+                color: isLight ? "#64748b" : "rgba(255,255,255,0.3)",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
+              TRACKING
+            </p>
+            {tracking.map((t, idx) => (
+              <a
+                key={idx}
+                href={t.url}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  color: "#60a5fa",
+                  fontSize: 12,
+                  textDecoration: "none",
+                  padding: "2px 0",
+                }}
+              >
+                <span>{t.company || "Spedizione"}</span>
+                <span style={{ fontWeight: 600 }}>{t.number} ↗</span>
+              </a>
+            ))}
+          </div>
+        )}
+
         <div
           style={{
             marginTop: 16,
-            paddingTop: 12,
-            borderTop: "1px solid #f3f4f6",
-            fontSize: 11,
-            color: "#9ca3af",
+            textAlign: "center",
+            fontSize: 9,
+            color: isLight ? "#94a3b8" : "rgba(255,255,255,0.15)",
             fontFamily: "monospace",
+            letterSpacing: "0.02em",
           }}
         >
           ID: {id}
@@ -278,89 +300,199 @@ const OrderCard = ({ order, index }) => {
   );
 };
 
-const OrderCards = ({ message }) => {
-  const { orders = [], title, message: displayMessage, total_count } = message;
-
-  if (!Array.isArray(orders) || orders.length === 0) {
-    return (
-      <div style={{ color: "white", padding: 4 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginBottom: 8,
-            borderBottom: "1px solid rgba(255,255,255,0.2)",
-            paddingBottom: 8,
-          }}
-        >
-          <span style={{ fontSize: 18 }}>📦</span>
-          <span style={{ fontWeight: 600, fontSize: 16 }}>
-            {title || "Ordini"}
+// Summary row for list view
+const OrderListRow = ({ order, index, onClick }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      onClick={() => onClick(order)}
+      style={{
+        padding: "10px 12px",
+        background: "rgba(255, 255, 255, 0.04)",
+        border: "1px solid rgba(255, 255, 255, 0.03)",
+        borderRadius: 10,
+        cursor: "pointer",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "12px",
+      }}
+      whileHover={{
+        background: "rgba(255, 255, 255, 0.08)",
+        scale: 1.01,
+      }}
+      transition={{
+        delay: index * 0.05,
+        type: "spring",
+        stiffness: 400,
+        damping: 25,
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span
+            style={{
+              fontWeight: 700,
+              color: "white",
+              fontSize: 13,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {order.orderNumber}
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              color: "rgba(255,255,255,0.3)",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            • {order.createdAt}
           </span>
         </div>
         <div
           style={{
-            color: "rgba(255,255,255,0.9)",
-            fontSize: 14,
+            fontSize: 11,
+            color: "#10b981",
+            marginTop: 2,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "0.02em",
           }}
         >
-          {displayMessage || "Nessun ordine trovato."}
+          {order.status}
         </div>
+      </div>
+      <div style={{ textAlign: "right", flexShrink: 0 }}>
+        <div
+          style={{
+            fontWeight: 700,
+            color: "white",
+            fontSize: 14,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {order.total}
+        </div>
+        <div
+          style={{
+            fontSize: 9,
+            color: "rgba(255,255,255,0.2)",
+            marginTop: 1,
+            fontWeight: 700,
+            textTransform: "uppercase",
+          }}
+        >
+          Vedi →
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const OrderCards = ({ message, onOrderClick }) => {
+  const {
+    type,
+    orders = [],
+    order,
+    title,
+    message: displayMessage,
+    email,
+  } = message;
+
+  // 1. Single Order Detail View
+  if (
+    type === "order_detail" ||
+    (type === "order_cards" && orders.length === 1)
+  ) {
+    const targetOrder = order || orders[0];
+    return (
+      <div style={{ width: "100%", padding: "4px 0" }}>
+        {displayMessage && (
+          <p
+            style={{
+              color: "rgba(255,255,255,0.9)",
+              fontSize: 14,
+              marginBottom: 12,
+            }}
+          >
+            {displayMessage}
+          </p>
+        )}
+        <OrderDetailCard order={targetOrder} />
       </div>
     );
   }
 
+  // 2. Order List View
   return (
-    <div style={{ width: "100%", minWidth: "240px" }}>
-      {/* Header */}
+    <div style={{ width: "100%", padding: "4px 0" }}>
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          gap: 8,
           marginBottom: 12,
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
           paddingBottom: 8,
-          borderBottom: "1px solid rgba(255,255,255,0.2)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 18 }}>📦</span>
-          <span style={{ fontWeight: 600, fontSize: 16, color: "white" }}>
-            {title || "I tuoi ordini"}
-          </span>
-        </div>
-        {total_count && (
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>
-            {orders.length} di {total_count}
-          </span>
-        )}
-      </div>
-
-      {/* Display Message */}
-      {displayMessage && (
         <div
           style={{
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             fontSize: 14,
-            color: "rgba(255,255,255,0.9)",
-            marginBottom: 16,
-            lineHeight: 1.5,
           }}
         >
-          {displayMessage}
+          📦
         </div>
+        <div>
+          <h4 style={{ margin: 0, color: "white", fontSize: 14 }}>
+            {title || "I tuoi ordini"}
+          </h4>
+          {email && (
+            <p
+              style={{
+                margin: 0,
+                fontSize: 11,
+                color: "rgba(255,255,255,0.3)",
+              }}
+            >
+              {email}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {displayMessage && (
+        <p
+          style={{
+            color: "rgba(255,255,255,0.8)",
+            fontSize: 13,
+            marginBottom: 16,
+            fontWeight: 500,
+          }}
+        >
+          {displayMessage.replace("1 ordini", "1 ordine")}
+        </p>
       )}
 
-      {/* Order Cards */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-        }}
-      >
-        {orders.map((order, index) => (
-          <OrderCard key={order.id || index} order={order} index={index} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {orders.map((o, idx) => (
+          <OrderListRow
+            key={o.id || idx}
+            order={o}
+            index={idx}
+            onClick={() => onOrderClick?.(o.orderNumber, email)}
+          />
         ))}
       </div>
     </div>

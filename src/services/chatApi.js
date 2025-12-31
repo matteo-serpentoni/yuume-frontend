@@ -32,6 +32,7 @@ export const sendMessage = async (
         customer: meta.customer, // ✅ Passa info customer se presenti nei meta
         meta: { lang: navigator.language || "it", ...meta },
         clientMessageId, // ✅ Send client ID
+        hidden: !!meta.hidden, // ✅ Send hidden flag if present
       }),
     });
 

@@ -1,13 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useChat } from "../../hooks/useChat";
 import "../Orb/Orb.css";
 
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import TypingIndicator from "./TypingIndicator";
 import MessageInput from "./MessageInput";
 import ProductCards, { ProductDrawer } from "../Message/ProductCards";
-import OrderCards from "../Message/OrderCards";
+import OrderCards, { OrderDetailCard } from "../Message/OrderCards";
+import Drawer from "../ui/Drawer";
 import CategoryCards from "../Message/CategoryCards";
+import OrderLookupForm from "../Message/OrderLookupForm"; // ✅ Import
 import TextMessage from "../Message/TextMessage"; // ✅ Import
 import ProfileView from "./ProfileView"; // ✅ Import
 import StarRating from "./StarRating"; // ✅ Import
@@ -27,18 +29,73 @@ const Chat = ({
 }) => {
   const [view, setView] = useState("chat"); // 'chat' | 'profile'
   const [activeProduct, setActiveProduct] = useState(null);
+  const [activeOrder, setActiveOrder] = useState(null);
 
   const {
     messages,
     loading,
     shopDomain,
     sessionId,
-    sessionStatus, // ✅ Get status
-    assignedTo, // ✅ Get assignedTo
+    sessionStatus,
+    assignedTo,
     sendMessage,
-    clearChat,
     sendFeedback,
   } = useChat(devShopDomain);
+
+  // Group messages to handle "transforming" components (like OrderLookupForm)
+  const chatBlocks = useMemo(() => {
+    const blocks = [];
+    const filtered = messages.filter(
+      (msg) =>
+        !msg.hidden &&
+        !["order_detail", "ORDER_DETAIL_RESPONSE"].includes(msg.type)
+    );
+
+    for (let i = 0; i < filtered.length; i++) {
+      const msg = filtered[i];
+
+      // Try to merge order_form with its subsequent response
+      if (msg.type === "order_form") {
+        let resultIndex = -1;
+
+        // Look ahead for the next response from assistant/ai
+        // We look ahead up to 3 messages to find a result or an error
+        for (let j = i + 1; j < Math.min(i + 4, filtered.length); j++) {
+          const next = filtered[j];
+          if (next.sender === "assistant" || next.sender === "ai") {
+            const isOrderResult = [
+              "order_list",
+              "order_detail",
+              "order_cards",
+              "ORDER_LIST_RESPONSE",
+              "ORDER_DETAIL_RESPONSE",
+            ].includes(next.type);
+
+            const isOrderError =
+              (next.type === "text" || !next.type) &&
+              next.text &&
+              (next.text.toLowerCase().includes("non ho trovato") ||
+                next.text.toLowerCase().includes("spiacenti") ||
+                next.text.toLowerCase().includes("a questa email")); // Added context from user screenshot
+
+            if (isOrderResult || isOrderError) {
+              resultIndex = j;
+              break;
+            }
+          }
+        }
+
+        if (resultIndex !== -1) {
+          blocks.push({ ...msg, results: filtered[resultIndex] });
+          i = resultIndex; // Skip everything until the result
+          continue;
+        }
+      }
+
+      blocks.push(msg);
+    }
+    return blocks;
+  }, [messages]);
 
   const messagesEndRef = useRef(null);
 
@@ -51,6 +108,18 @@ const Chat = ({
       scrollToBottom();
     }
   }, [messages, loading, view]);
+
+  // Handle incoming order details for Drawer
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (
+      lastMessage &&
+      ["order_detail", "ORDER_DETAIL_RESPONSE"].includes(lastMessage.type) &&
+      lastMessage.order
+    ) {
+      setActiveOrder(lastMessage.order);
+    }
+  }, [messages]);
 
   // Helper per formattare il timestamp in HH:MM
   const formatTime = (timestamp) => {
@@ -121,21 +190,117 @@ const Chat = ({
       );
     }
 
-    // Se il messaggio è di tipo order_cards
-    if (msg.type === "order_cards") {
+    // Order Related Messages
+    if (msg.type === "order_form") {
+      const hasResults = !!msg.results;
+
+      return (
+        <div className={`message-bubble ${msg.sender} order-form-bubble`}>
+          <AnimatePresence mode="wait">
+            {!hasResults ? (
+              <motion.div
+                key="form"
+                initial={{ opacity: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <OrderLookupForm
+                  onSubmit={(lookupString) =>
+                    sendMessage(lookupString, { hidden: true })
+                  }
+                  isLoading={loading}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {msg.results.type === "text" ? (
+                  <div
+                    style={{
+                      padding: "16px",
+                      textAlign: "center",
+                      background: "rgba(255,255,255,0.05)",
+                      borderRadius: "16px",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <div style={{ fontSize: "24px", marginBottom: "8px" }}>
+                      🔍
+                    </div>
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        margin: "0 0 16px 0",
+                        color: "white",
+                        opacity: 0.8,
+                      }}
+                    >
+                      {msg.results.text}
+                    </p>
+                    <button
+                      onClick={() => sendMessage("Cerca ordine")}
+                      style={{
+                        background: "white",
+                        color: "black",
+                        border: "none",
+                        padding: "8px 16px",
+                        borderRadius: "10px",
+                        fontSize: "13px",
+                        fontWeight: "700",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Riprova
+                    </button>
+                  </div>
+                ) : (
+                  <OrderCards
+                    message={msg.results}
+                    onOrderClick={(orderNumber, email) => {
+                      sendMessage(`ORDER_LOOKUP:${email}:${orderNumber}`, {
+                        hidden: true,
+                      });
+                    }}
+                  />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <div
+            className="message-time"
+            style={{ marginTop: 4, paddingLeft: 12 }}
+          >
+            {formatTime(msg.timestamp)}
+          </div>
+        </div>
+      );
+    }
+
+    if (["order_detail", "order_list", "order_cards"].includes(msg.type)) {
       return (
         <div
           className={`message-bubble ${msg.sender} order-cards-bubble`}
           style={{
             background: chatColors.aiMessage,
-            padding: "12px",
+            padding: "8px",
             borderRadius: "18px 18px 18px 4px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             maxWidth: "85%",
             width: "fit-content",
           }}
         >
-          <OrderCards message={msg} />
+          <OrderCards
+            message={msg}
+            onOrderClick={(orderNumber, email) => {
+              sendMessage(`ORDER_LOOKUP:${email}:${orderNumber}`, {
+                hidden: true,
+              });
+            }}
+          />
           <div className="message-time" style={{ marginTop: 4 }}>
             {formatTime(msg.timestamp)}
           </div>
@@ -358,7 +523,7 @@ const Chat = ({
                 activeProduct ? "yuume-drawer-active" : ""
               }`}
             >
-              {messages.map((msg) => (
+              {chatBlocks.map((msg) => (
                 <div key={msg.id}>{renderMessage(msg)}</div>
               ))}
 
@@ -518,6 +683,18 @@ const Chat = ({
             onClose={() => setActiveProduct(null)}
             shopDomain={shopDomain}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {activeOrder && (
+          <Drawer
+            isOpen={!!activeOrder}
+            onClose={() => setActiveOrder(null)}
+            title={`Ordine #${activeOrder.orderNumber}`}
+          >
+            <OrderDetailCard order={activeOrder} theme="light" />
+          </Drawer>
         )}
       </AnimatePresence>
     </div>

@@ -242,16 +242,20 @@ export const useChat = (devShopDomain, customer) => {
     };
   }, [sessionId]);
 
-  const addUserMessage = useCallback((text, id = Date.now()) => {
-    const userMessage = {
-      id,
-      sender: "user",
-      text,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    return userMessage;
-  }, []);
+  const addUserMessage = useCallback(
+    (text, id = Date.now(), hidden = false) => {
+      const userMessage = {
+        id,
+        sender: "user",
+        text,
+        timestamp: new Date().toISOString(),
+        hidden, // ✅ Usa il flag passato esplicitamente o rilevato
+      };
+      setMessages((prev) => [...prev, userMessage]);
+      return userMessage;
+    },
+    []
+  );
 
   const addAssistantMessage = useCallback((data) => {
     const assistantMessage = {
@@ -271,7 +275,7 @@ export const useChat = (devShopDomain, customer) => {
   }, []);
 
   const sendChatMessage = useCallback(
-    async (text) => {
+    async (text, options = {}) => {
       if (!text.trim() || loading) return;
 
       let currentSessionId = sessionId;
@@ -300,7 +304,7 @@ export const useChat = (devShopDomain, customer) => {
 
       setLoading(true);
       const userMsgId = Date.now(); // Generate ID here
-      const userMsg = addUserMessage(text, userMsgId);
+      const userMsg = addUserMessage(text, userMsgId, options.hidden);
 
       try {
         const response = await sendMessage(
@@ -309,6 +313,7 @@ export const useChat = (devShopDomain, customer) => {
           shopDomain,
           {
             customer,
+            ...options,
           },
           userMsgId
         );
