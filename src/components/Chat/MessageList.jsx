@@ -23,13 +23,24 @@ const MessageList = ({
   sendFeedback,
 }) => {
   const messagesEndRef = useRef(null);
+  const lastMessageIdRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (behavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
+  // Autoscroll logic
   useEffect(() => {
-    scrollToBottom();
+    const lastBlock = chatBlocks[chatBlocks.length - 1];
+    const lastId = lastBlock?.id;
+
+    // Scroll only if:
+    // 1. Loading state changed (bot started typing)
+    // 2. A new message actually arrived (lastId changed)
+    if (loading || lastId !== lastMessageIdRef.current) {
+      scrollToBottom();
+      lastMessageIdRef.current = lastId;
+    }
   }, [chatBlocks, loading]);
 
   const renderMessage = (msg) => {

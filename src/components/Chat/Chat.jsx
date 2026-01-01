@@ -24,21 +24,33 @@ const Chat = ({
     inputFocus: "#4CC2E9",
   },
   devShopDomain,
+  isPreview = false,
+  messages: mockMessages,
+  loading: mockLoading,
+  sessionStatus: mockStatus,
+  assignedTo: mockAssignedTo,
+  shopDomain: mockShopDomain,
 }) => {
   const [view, setView] = useState("chat"); // 'chat' | 'profile'
   const [activeProduct, setActiveProduct] = useState(null);
   const [activeOrder, setActiveOrder] = useState(null);
 
-  const {
-    messages,
-    loading,
-    shopDomain,
-    sessionId,
-    sessionStatus,
-    assignedTo,
-    sendMessage,
-    sendFeedback,
-  } = useChat(devShopDomain);
+  const liveChat = useChat(devShopDomain, null, { disabled: isPreview });
+
+  // ✅ Source of truth: use host props if preview, otherwise use live hook results
+  const messages = isPreview ? mockMessages || [] : liveChat.messages;
+  const loading = isPreview ? mockLoading || false : liveChat.loading;
+  const shopDomain = isPreview
+    ? mockShopDomain || "preview-shop"
+    : liveChat.shopDomain;
+  const sessionId = isPreview ? "preview-session" : liveChat.sessionId;
+  const sessionStatus = isPreview
+    ? mockStatus || "active"
+    : liveChat.sessionStatus;
+  const assignedTo = isPreview ? mockAssignedTo || null : liveChat.assignedTo;
+
+  const sendMessage = isPreview ? () => {} : liveChat.sendMessage;
+  const sendFeedback = isPreview ? () => {} : liveChat.sendFeedback;
 
   // Group messages to handle "transforming" components (like OrderLookupForm)
   const chatBlocks = useMemo(() => {
@@ -202,8 +214,8 @@ const Chat = ({
               sendButtonColor={chatColors.sendButton}
               inputBorderColor={chatColors.inputBorder}
               inputFocusColor={chatColors.inputFocus}
-              previewMode={false}
-              onProfileClick={() => setView("profile")} // ✅ Passa handler
+              previewMode={isPreview}
+              onProfileClick={isPreview ? null : () => setView("profile")} // ✅ Passa handler
             />
 
             {/* Legal Disclaimer */}
@@ -266,7 +278,7 @@ const Chat = ({
           aria-label="Riduci chat"
           onClick={(e) => {
             e.stopPropagation();
-            onMinimize && onMinimize();
+            if (!isPreview && onMinimize) onMinimize();
           }}
         >
           <svg

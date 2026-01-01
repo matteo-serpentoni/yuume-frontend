@@ -21,8 +21,11 @@ const generateSessionId = () => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
-export const useChat = (devShopDomain, customer) => {
+export const useChat = (devShopDomain, customer, options = {}) => {
+  const { disabled = false } = options;
+
   const [sessionId, setSessionId] = useState(() => {
+    if (disabled) return "preview-session";
     let id = sessionStorage.getItem(STORAGE_KEYS.SESSION_ID);
     const savedTime = sessionStorage.getItem(STORAGE_KEYS.SESSION_TIME);
 
@@ -52,7 +55,9 @@ export const useChat = (devShopDomain, customer) => {
 
   const [messages, setMessages] = useState(() => {
     try {
-      const saved = sessionStorage.getItem(STORAGE_KEYS.MESSAGES);
+      const saved = !disabled
+        ? sessionStorage.getItem(STORAGE_KEYS.MESSAGES)
+        : null;
       if (saved) {
         return JSON.parse(saved);
       }
@@ -75,6 +80,7 @@ export const useChat = (devShopDomain, customer) => {
 
   // ✅ Session Status State
   const [sessionStatus, setSessionStatus] = useState(() => {
+    if (disabled) return "active";
     return sessionStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || "active";
   });
 
@@ -84,6 +90,7 @@ export const useChat = (devShopDomain, customer) => {
   const socketRef = useRef(null);
 
   const [shopDomain, setShopDomain] = useState(() => {
+    if (disabled) return "preview-shop.myshopify.com";
     // ✅ Priorità a devShopDomain se presente
     if (devShopDomain) return devShopDomain;
 
@@ -95,26 +102,30 @@ export const useChat = (devShopDomain, customer) => {
 
   // ✅ Aggiorna shopDomain se cambia devShopDomain
   useEffect(() => {
+    if (disabled) return;
     if (devShopDomain) {
       setShopDomain(devShopDomain);
       sessionStorage.setItem(STORAGE_KEYS.SHOP_DOMAIN, devShopDomain);
     }
-  }, [devShopDomain]);
+  }, [devShopDomain, disabled]);
 
   useEffect(() => {
+    if (disabled) return;
     try {
       sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
     } catch (error) {
       console.error("Errore salvataggio messaggi:", error);
     }
-  }, [messages]);
+  }, [messages, disabled]);
 
   // ✅ Persist session status
   useEffect(() => {
+    if (disabled) return;
     sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, sessionStatus);
-  }, [sessionStatus]);
+  }, [sessionStatus, disabled]);
 
   useEffect(() => {
+    if (disabled) return;
     const handleMessage = (event) => {
       if (event.data.type === "YUUME_SHOP_DOMAIN") {
         setShopDomain(event.data.shopDomain);
@@ -127,7 +138,7 @@ export const useChat = (devShopDomain, customer) => {
     window.parent.postMessage({ type: "REQUEST_SHOP_DOMAIN" }, "*");
 
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [disabled]);
 
   const clearChat = useCallback(() => {
     // Reset to welcome message instead of empty array
@@ -154,6 +165,7 @@ export const useChat = (devShopDomain, customer) => {
   }, []);
 
   useEffect(() => {
+    if (disabled) return;
     const interval = setInterval(() => {
       const savedTime = sessionStorage.getItem(STORAGE_KEYS.SESSION_TIME);
       if (savedTime) {
@@ -169,11 +181,11 @@ export const useChat = (devShopDomain, customer) => {
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [clearChat]);
+  }, [clearChat, disabled]);
 
   // ✅ WebSocket Connection
   useEffect(() => {
-    if (!sessionId) return;
+    if (disabled || !sessionId) return;
 
     // Initial status fetch (sync status, assignment and history)
     getSessionStatus(sessionId)
