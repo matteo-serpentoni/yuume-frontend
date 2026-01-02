@@ -33,9 +33,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       const elapsed = Date.now() - parseInt(savedTime);
 
       if (elapsed >= SESSION_TIMEOUT) {
-        console.log(
-          "⏰ Sessione scaduta per inattività, creazione nuova sessione"
-        );
         sessionStorage.clear();
         id = null;
       }
@@ -45,9 +42,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       id = generateSessionId();
       sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, id);
       sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
-      console.log("🆕 Nuova sessione creata:", id);
-    } else {
-      console.log("♻️ Sessione esistente recuperata:", id);
     }
 
     return id;
@@ -83,6 +77,31 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     if (disabled) return "active";
     return sessionStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || "active";
   });
+
+  // ✅ Connection Status logic
+  const [connectionStatus, setConnectionStatus] = useState("online");
+
+  useEffect(() => {
+    if (disabled) return;
+
+    const updateStatus = () => {
+      if (!window.navigator.onLine) {
+        setConnectionStatus("offline");
+      }
+    };
+
+    window.addEventListener("online", () => setConnectionStatus("online"));
+    window.addEventListener("offline", () => setConnectionStatus("offline"));
+
+    updateStatus();
+
+    return () => {
+      window.removeEventListener("online", () => setConnectionStatus("online"));
+      window.removeEventListener("offline", () =>
+        setConnectionStatus("offline")
+      );
+    };
+  }, [disabled]);
 
   const [assignedTo, setAssignedTo] = useState(null); // ✅ New state for human assignment
 
@@ -130,7 +149,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       if (event.data.type === "YUUME_SHOP_DOMAIN") {
         setShopDomain(event.data.shopDomain);
         sessionStorage.setItem(STORAGE_KEYS.SHOP_DOMAIN, event.data.shopDomain);
-        console.log("Shop domain ricevuto e salvato:", event.data.shopDomain);
       }
     };
 
@@ -172,9 +190,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         const elapsed = Date.now() - parseInt(savedTime);
 
         if (elapsed >= SESSION_TIMEOUT) {
-          console.log(
-            "⏰ Sessione scaduta per inattività, pulizia in corso..."
-          );
           clearChat(); // Use clearChat instead of reload
         }
       }
@@ -214,24 +229,45 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         }
       })
       .catch((err) => {
-        console.log(
-          "No existing session on server yet (New session or expired)"
-        );
+        // Silently fail if session doesn't exist yet
       });
 
-    // Connect Socket
+    // Connect Socket with Reconnection Logic
     const socket = io(API_URL, {
       transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
     });
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("🔌 Connected to WebSocket");
+      setConnectionStatus("online");
       socket.emit("join_session", sessionId);
     });
 
+    socket.on("disconnect", (reason) => {
+      // If client is still online, means it's a server/socket issue
+      if (window.navigator.onLine) {
+        setConnectionStatus("reconnecting");
+      }
+    });
+
+    socket.on("reconnect_attempt", () => {
+      if (window.navigator.onLine) {
+        setConnectionStatus("reconnecting");
+      }
+    });
+
+    socket.on("connect_error", () => {
+      if (window.navigator.onLine) {
+        setConnectionStatus("reconnecting");
+      }
+    });
+
     socket.on("message:received", (message) => {
-      console.log("📩 Message received via socket:", message);
       setMessages((prev) => {
         // Avoid duplicates
         if (prev.some((m) => m.id === message.id)) return prev;
@@ -244,7 +280,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     });
 
     socket.on("session:updated", (data) => {
-      console.log("🔄 Session updated via socket:", data);
       if (data.status) setSessionStatus(data.status);
       if (data.assignedTo !== undefined) setAssignedTo(data.assignedTo);
     });
@@ -294,8 +329,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
       // 🔥 AUTO-START NEW SESSION IF COMPLETED
       if (sessionStatus === "completed" || sessionStatus === "abandoned") {
-        console.log("🔄 Starting new session (soft reset)...");
-
         // 1. Generate new ID
         const newId = generateSessionId();
         currentSessionId = newId; // Use new ID for this request
@@ -363,8 +396,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           error.status === 410 ||
           error.message?.includes("session_expired")
         ) {
-          console.log("⏰ Sessione scaduta dal backend");
-
           sessionStorage.clear();
 
           addAssistantMessage({
@@ -433,26 +464,21 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
       // 3. Send to backend
       try {
-        await fetch(
-          `${
-            import.meta.env.VITE_API_URL || "http://localhost:3000"
-          }/api/feedback`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              shopDomain,
-              sessionId,
-              messageId,
-              userQuery,
-              aiResponse: aiMessageText,
-              rating,
-              type, // ✅ Send type
-            }),
-          }
-        );
+        await fetch(`${API_URL}/api/feedback`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            shopDomain,
+            sessionId,
+            messageId,
+            userQuery,
+            aiResponse: aiMessageText,
+            rating,
+            type, // ✅ Send type
+          }),
+        });
       } catch (error) {
         console.error("Error sending feedback:", error);
       }
@@ -464,6 +490,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     messages,
     loading,
     shopDomain,
+    connectionStatus, // ✅ Return connection status
     sessionId,
     sessionStatus,
     assignedTo, // ✅ Return assignedTo

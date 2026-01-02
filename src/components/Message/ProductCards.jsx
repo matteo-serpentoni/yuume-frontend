@@ -106,10 +106,6 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
               onClick={(e) => {
                 e.stopPropagation(); // Essential to prevent card onClick from firing
                 e.preventDefault();
-                console.log(
-                  "🛠 [ProductCard] Clicked Opzioni for:",
-                  product.name
-                );
                 onOpen(product);
               }}
             >
@@ -130,8 +126,7 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
 
 export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   React.useEffect(() => {
-    console.log("🟢 [ProductDrawer] MOUNTED for:", product.name);
-    return () => console.log("🔴 [ProductDrawer] UNMOUNTED for:", product.name);
+    return () => {};
   }, [product.name]);
   const {
     name,
@@ -273,16 +268,7 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
 const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
   const { products = [], message: displayMessage, meta = {} } = message;
 
-  React.useEffect(() => {
-    if (activeProduct) {
-      console.log(
-        "📦 [ProductCards] activeProduct changed to:",
-        activeProduct.name
-      );
-    } else {
-      console.log("📦 [ProductCards] activeProduct is now null");
-    }
-  }, [activeProduct]);
+  React.useEffect(() => {}, [activeProduct]);
 
   if (!Array.isArray(products) || products.length === 0) {
     return (

@@ -6,8 +6,6 @@ import AppInstalled from "./components/AppInstalled/AppInstalled";
 const ORB_STATE_KEY = "yuume_orb_enlarged";
 
 function App() {
-  console.log("📱 APP.JSX CARICATO");
-
   const [enlarged, setEnlarged] = useState(() => {
     const saved = sessionStorage.getItem(ORB_STATE_KEY);
     return saved === "true";
@@ -15,7 +13,7 @@ function App() {
 
   useEffect(() => {
     window.parent?.postMessage({ type: "resize", enlarged }, "*");
-  }, []);
+  }, [enlarged]);
 
   useEffect(() => {
     sessionStorage.setItem(ORB_STATE_KEY, enlarged.toString());

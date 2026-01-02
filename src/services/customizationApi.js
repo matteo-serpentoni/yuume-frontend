@@ -93,8 +93,6 @@ export async function getCustomization(siteId) {
  */
 export async function updateCustomization(siteId, customization) {
   try {
-    console.log("📤 Sending customization update:", { siteId, customization });
-
     const response = await fetch(`${API_URL}/api/customization/${siteId}`, {
       method: "PUT",
       headers: {
@@ -115,7 +113,6 @@ export async function updateCustomization(siteId, customization) {
       throw new Error(result.message || "Failed to update customization");
     }
 
-    console.log("✅ Customization updated successfully:", result.data);
     return result.data;
   } catch (error) {
     console.error("❌ Error updating customization:", error);

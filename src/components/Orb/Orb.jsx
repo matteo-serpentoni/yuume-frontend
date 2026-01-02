@@ -409,21 +409,6 @@ const Orb = memo(
       baseColor1[2] * 255
     })`;
 
-    // ✅ FUNZIONALITÀ: Gestione hover per effetti WebGL
-    const handleMouseEnter = () => {
-      if (rotateOnHover) {
-        // Logic to trigger hover effect in shader (if needed)
-      }
-    };
-
-    const handleMouseLeave = () => {
-      // Logic to reset hover effect
-    };
-
-    const handleMouseMove = (e) => {
-      // Logic to track mouse position for shader interaction
-    };
-
     return (
       <div
         ref={containerRef}
@@ -437,9 +422,6 @@ const Orb = memo(
         } ${mode === "preview" ? "preview-mode" : ""}`}
         onClick={handleExpand}
         onKeyDown={handleKeyDown}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onMouseMove={handleMouseMove}
         style={{
           "--orb-theme-color": themeColor,
           opacity: loading ? 0.6 : 1,

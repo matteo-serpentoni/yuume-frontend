@@ -17,10 +17,6 @@ export const sendMessage = async (
 ) => {
   try {
     const headers = { "Content-Type": "application/json" };
-    const accessToken = import.meta.env.VITE_SHOPIFY_ACCESS_TOKEN;
-    if (accessToken) {
-      headers["X-Shopify-Access-Token"] = accessToken;
-    }
 
     const response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: "POST",
@@ -57,8 +53,6 @@ export const sendMessage = async (
 export const getProfile = async (sessionId, shopDomain) => {
   try {
     const headers = { "Content-Type": "application/json" };
-    const accessToken = import.meta.env.VITE_SHOPIFY_ACCESS_TOKEN;
-    if (accessToken) headers["X-Shopify-Access-Token"] = accessToken;
 
     const response = await fetch(
       `${API_BASE_URL}/api/chat/profile?sessionId=${sessionId}&shopDomain=${shopDomain}`,
@@ -76,8 +70,6 @@ export const getProfile = async (sessionId, shopDomain) => {
 export const updateProfile = async (sessionId, shopDomain, data) => {
   try {
     const headers = { "Content-Type": "application/json" };
-    const accessToken = import.meta.env.VITE_SHOPIFY_ACCESS_TOKEN;
-    if (accessToken) headers["X-Shopify-Access-Token"] = accessToken;
 
     const response = await fetch(`${API_BASE_URL}/api/chat/profile`, {
       method: "POST",
@@ -96,8 +88,6 @@ export const updateProfile = async (sessionId, shopDomain, data) => {
 export const getSessionStatus = async (sessionId) => {
   try {
     const headers = { "Content-Type": "application/json" };
-    const accessToken = import.meta.env.VITE_SHOPIFY_ACCESS_TOKEN;
-    if (accessToken) headers["X-Shopify-Access-Token"] = accessToken;
 
     const response = await fetch(
       `${API_BASE_URL}/api/chat/session/${sessionId}`,

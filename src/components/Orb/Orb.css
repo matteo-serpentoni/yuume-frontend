@@ -308,12 +308,19 @@ body {
   padding-bottom: 10px;
   padding-top: 10px;
   scrollbar-width: none;
-  /* Desktop: rimuovere il fade superiore - i messaggi scompariranno sotto l'header */
-  mask-image: linear-gradient(to bottom, black 0%, black 95%, transparent 100%);
+  /* Mask is the only one responsible for the fade-out effect */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 15%,
+    black 90%,
+    transparent 100%
+  );
   -webkit-mask-image: linear-gradient(
     to bottom,
-    black 0%,
-    black 95%,
+    transparent 0%,
+    black 15%,
+    black 90%,
     transparent 100%
   );
 }
@@ -799,22 +806,21 @@ body {
   padding: 0 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 
-  /* Effetto glass semi-trasparente sintonizzato con il colore dell'header */
-  background: color-mix(
-    in srgb,
-    var(--chat-header-color, rgba(0, 0, 0, 0.8)),
-    transparent 75%
-  );
+  /* Fully transparent header - Role is just to space the text */
+  background: transparent;
   border-radius: 20px 20px 0 0;
 
-  /* Sticky positioning per fissare in cima */
+  /* Sticky positioning */
   position: sticky;
-  top: 0; /* Fissato in cima al chat-inner */
-  z-index: 10; /* Sopra i messaggi */
+  top: 0;
+  z-index: 100;
+  pointer-events: none; /* Let scrolls pass through */
 
-  margin: 0 -20px 0 -20px; /* Espandi orizzontalmente oltre il padding laterale */
-  backdrop-filter: blur(30px) saturate(140%);
-  -webkit-backdrop-filter: blur(30px) saturate(140%);
+  margin: 0 -20px 0 -20px;
+  padding-bottom: 5px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
 }
 
 .orb-container:not(.minimized) .header-content {
@@ -844,13 +850,22 @@ body {
   letter-spacing: 0.5px;
 }
 
-.orb-container:not(.minimized) .status-dot {
-  width: 8px; /* Più grande su mobile */
-  height: 8px;
+.orb-container:not(.minimized) .status-dot.status-online {
   background-color: #10b981;
-  border-radius: 50%;
   box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
   animation: pulse-green 2s infinite;
+}
+
+.orb-container:not(.minimized) .status-dot.status-offline {
+  background-color: #9ca3af;
+  box-shadow: none;
+  animation: none;
+}
+
+.orb-container:not(.minimized) .status-dot.status-reconnecting {
+  background-color: #f59e0b;
+  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  animation: pulse-orange 2s infinite;
 }
 
 /* KEYFRAMES (Global scope to ensure they work) */
@@ -881,19 +896,20 @@ body {
 
   /* Quasi invisibile, ma con un lieve accenno del colore */
   border: none;
-  background: color-mix(
-    in srgb,
-    var(--chat-header-color, transparent),
-    transparent 95%
-  );
+  /* DESKTOP HEADER - Transparent */
+  background: transparent;
 
   /* Sticky positioning */
   position: sticky;
   top: -20px;
-  z-index: 10;
+  z-index: 100;
 
   margin: -20px -20px 0 -20px;
-  pointer-events: none; /* Non intercetta click */
+  padding-bottom: 10px;
+  pointer-events: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
 }
 
 .header-content {
@@ -926,10 +942,37 @@ body {
 .status-dot {
   width: 6px; /* Leggermente più grande */
   height: 6px;
-  background-color: #10b981;
   border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  transition: background-color 0.3s ease;
+}
+
+.status-dot.status-online {
+  background-color: #10b981;
   animation: pulse-green 2s infinite;
+}
+
+.status-dot.status-offline {
+  background-color: #9ca3af;
+}
+
+.status-dot.status-reconnecting {
+  background-color: #f59e0b;
+  animation: pulse-orange 2s infinite;
+}
+
+@keyframes pulse-orange {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
 }
 /* FEEDBACK ANIMATION */
 @keyframes thumb-pop {

@@ -1,25 +1,39 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const MessageInput = ({
-  onSend,
+  onSendMessage, // ✅ Changed from onSend
+  disabled: propDisabled, // ✅ Renamed disabled to propDisabled
   loading,
-  placeholder = "Scrivi un messaggio…",
-  sendButtonColor = "#a259ff",
-  inputBorderColor = "#a259ff",
-  inputFocusColor = "#4CC2E9",
+  placeholder = "Scrivi un messaggio…", // ✅ Kept existing prop
+  sendButtonColor = "#a259ff", // ✅ Kept existing prop
+  inputBorderColor = "#a259ff", // ✅ Kept existing prop
+  inputFocusColor = "#4CC2E9", // ✅ Kept existing prop
   previewMode = false,
-  onProfileClick,
-  disabled = false, // ✅ New prop
+  onProfileClick, // ✅ Kept existing prop
+  connectionStatus = "online", // ✅ New prop
 }) => {
-  const [input, setInput] = useState("");
+  const [message, setMessage] = useState(""); // ✅ Renamed input to message
   const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef(null); // ✅ Added useRef
+
+  // Consider as disabled if prop says so, if we're loading, or if we're NOT online
+  const isDisconnected = connectionStatus !== "online";
+  const disabled = propDisabled || loading || isDisconnected; // ✅ New disabled logic
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (previewMode || disabled) return; // ✅ Check disabled
-    if (!input.trim() || loading) return;
-    onSend(input.trim());
-    setInput("");
+    if (message.trim() && !disabled) {
+      // ✅ Updated condition and used message
+      onSendMessage(message); // ✅ Used onSendMessage
+      setMessage(""); // ✅ Used setMessage
+    }
+  };
+
+  const getPlaceholder = () => {
+    // ✅ New function for dynamic placeholder
+    if (connectionStatus === "offline") return "Nessuna connessione...";
+    if (connectionStatus === "reconnecting") return "Riconnessione...";
+    return placeholder; // Use the prop placeholder as default
   };
 
   const hexToRgb = (hex) => {
@@ -47,7 +61,7 @@ const MessageInput = ({
     return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
   };
 
-  const shouldShowButton = input.trim() && !loading && !disabled; // ✅ Check disabled
+  const shouldShowButton = message.trim() && !loading && !disabled; // ✅ Check disabled
 
   return (
     <form
@@ -74,13 +88,16 @@ const MessageInput = ({
         }}
       >
         <input
+          ref={inputRef}
           type="text"
-          value={previewMode ? "" : input}
-          onChange={(e) => !previewMode && setInput(e.target.value)}
+          className="chat-input"
+          placeholder={getPlaceholder()}
+          aria-label="Messaggio da inviare"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           onFocus={() => !previewMode && setIsFocused(true)}
           onBlur={() => !previewMode && setIsFocused(false)}
-          placeholder={loading ? "Attendere risposta…" : placeholder}
-          disabled={loading || previewMode || disabled} // ✅ Check disabled
+          disabled={disabled}
           maxLength={2000}
           style={{
             boxSizing: "border-box", // ✅ Prevent padding from expanding width
@@ -113,6 +130,7 @@ const MessageInput = ({
         {shouldShowButton && (
           <button
             type="submit"
+            aria-label="Invia messaggio"
             style={{
               position: "absolute",
               right: 6,

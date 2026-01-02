@@ -60,7 +60,6 @@ export const useOrb = (modeOverride = null) => {
   useEffect(() => {
     const handleMessage = (event) => {
       if (event.data.type === "YUUME_UPDATE_CUSTOMIZATION") {
-        console.log("🎨 [useOrb] Customization update:", event.data.data);
         const { orbTheme, chatColors, mobileMode } = event.data.data;
 
         if (mobileMode !== undefined) {

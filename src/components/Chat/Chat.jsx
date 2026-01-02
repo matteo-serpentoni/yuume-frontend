@@ -25,29 +25,36 @@ const Chat = ({
   },
   devShopDomain,
   isPreview = false,
-  messages: mockMessages,
-  loading: mockLoading,
-  sessionStatus: mockStatus,
-  assignedTo: mockAssignedTo,
-  shopDomain: mockShopDomain,
+  messages: previewMessages,
+  loading: previewLoading,
+  sessionStatus: previewSessionStatus,
+  assignedTo: previewAssignedTo,
+  shopDomain: previewShopDomain,
+  connectionStatus: previewConnectionStatus = "online",
 }) => {
   const [view, setView] = useState("chat"); // 'chat' | 'profile'
   const [activeProduct, setActiveProduct] = useState(null);
   const [activeOrder, setActiveOrder] = useState(null);
 
-  const liveChat = useChat(devShopDomain, null, { disabled: isPreview });
+  // Use custom hook for live chat logic, but ONLY if NOT in preview mode
+  const liveChat = useChat(null, null, { disabled: isPreview });
 
   // ✅ Source of truth: use host props if preview, otherwise use live hook results
-  const messages = isPreview ? mockMessages || [] : liveChat.messages;
-  const loading = isPreview ? mockLoading || false : liveChat.loading;
+  const messages = isPreview ? previewMessages || [] : liveChat.messages;
+  const loading = isPreview ? previewLoading || false : liveChat.loading;
   const shopDomain = isPreview
-    ? mockShopDomain || "preview-shop"
+    ? previewShopDomain || "preview-shop"
     : liveChat.shopDomain;
   const sessionId = isPreview ? "preview-session" : liveChat.sessionId;
   const sessionStatus = isPreview
-    ? mockStatus || "active"
+    ? previewSessionStatus || "active"
     : liveChat.sessionStatus;
-  const assignedTo = isPreview ? mockAssignedTo || null : liveChat.assignedTo;
+  const connectionStatus = isPreview
+    ? previewConnectionStatus
+    : liveChat.connectionStatus;
+  const assignedTo = isPreview
+    ? previewAssignedTo || null
+    : liveChat.assignedTo;
 
   const sendMessage = isPreview ? () => {} : liveChat.sendMessage;
   const sendFeedback = isPreview ? () => {} : liveChat.sendFeedback;
@@ -124,7 +131,7 @@ const Chat = ({
       className="chat-inner"
       style={{ "--chat-header-color": chatColors.header }}
     >
-      <ChatHeader />
+      <ChatHeader connectionStatus={connectionStatus} />
 
       {view === "profile" ? (
         <ProfileView
@@ -198,7 +205,7 @@ const Chat = ({
             )}
 
             <MessageInput
-              onSend={(text) => {
+              onSendMessage={(text) => {
                 if (!loading) {
                   sendMessage(text);
                   if (onTyping) onTyping(false);
@@ -210,6 +217,7 @@ const Chat = ({
                   ? "Attendi l'intervento."
                   : "Scrivi qualcosa..."
               }
+              connectionStatus={connectionStatus}
               disabled={sessionStatus === "escalated" && !assignedTo} // ✅ Enable if assigned
               sendButtonColor={chatColors.sendButton}
               inputBorderColor={chatColors.inputBorder}
