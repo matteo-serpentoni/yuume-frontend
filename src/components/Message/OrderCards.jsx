@@ -1,5 +1,4 @@
-import React from "react";
-import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
+import { motion } from "framer-motion";
 
 export const OrderItemRow = ({ item, index, theme = "dark" }) => {
   const isLight = theme === "light";
@@ -227,6 +226,35 @@ export const OrderDetailCard = ({ order, theme = "dark" }) => {
           >
             📦 {statusLabel}
           </span>
+          {tracking.length > 0 && (
+            <a
+              href={tracking[0].url}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                padding: "4px 10px",
+                borderRadius: 20,
+                fontSize: 11,
+                fontWeight: 700,
+                background: "rgba(59, 130, 246, 0.1)",
+                color: "#3b82f6",
+                border: "1px solid rgba(59, 130, 246, 0.2)",
+                textDecoration: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                transition: "all 0.2s ease",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = "rgba(59, 130, 246, 0.2)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = "rgba(59, 130, 246, 0.1)";
+              }}
+            >
+              🚀 Traccia pacco
+            </a>
+          )}
         </div>
       </div>
 
@@ -249,51 +277,6 @@ export const OrderDetailCard = ({ order, theme = "dark" }) => {
             <OrderItemRow key={idx} item={item} index={idx} theme={theme} />
           ))}
         </div>
-
-        {/* Tracking */}
-        {tracking.length > 0 && (
-          <div
-            style={{
-              marginTop: 20,
-              padding: "10px 12px",
-              background: "rgba(255,255,255,0.02)",
-              borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.03)",
-            }}
-          >
-            <p
-              style={{
-                margin: "0 0 8px",
-                fontSize: 10,
-                fontWeight: 800,
-                color: isLight ? "#64748b" : "rgba(255,255,255,0.3)",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
-              TRACKING
-            </p>
-            {tracking.map((t, idx) => (
-              <a
-                key={idx}
-                href={t.url}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  color: "#60a5fa",
-                  fontSize: 12,
-                  textDecoration: "none",
-                  padding: "2px 0",
-                }}
-              >
-                <span>{t.company || "Spedizione"}</span>
-                <span style={{ fontWeight: 600 }}>{t.number} ↗</span>
-              </a>
-            ))}
-          </div>
-        )}
       </div>
     </motion.div>
   );
@@ -336,40 +319,27 @@ const OrderListRow = ({ order, index, onClick }) => {
     >
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {order.orderNumber ? (
-            <>
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: "white",
-                  fontSize: 13,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {`#${String(order.orderNumber).replace(/^#+/, "")}`}
-              </span>
-              <span
-                style={{
-                  fontSize: 10,
-                  color: "rgba(255,255,255,0.3)",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                • {order.createdAt}
-              </span>
-            </>
-          ) : (
+          <span
+            style={{
+              fontWeight: 700,
+              color: "white",
+              fontSize: 13,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {order.orderNumber
+              ? `#${String(order.orderNumber).replace(/^#+/, "")}`
+              : order.createdAt}
+          </span>
+          {order.orderNumber && (
             <span
               style={{
-                fontWeight: 700,
-                color: "white",
-                fontSize: 13,
+                fontSize: 10,
+                color: "rgba(255,255,255,0.3)",
                 whiteSpace: "nowrap",
               }}
             >
-              {order.createdAt}
+              • {order.createdAt}
             </span>
           )}
         </div>
@@ -405,13 +375,13 @@ const OrderListRow = ({ order, index, onClick }) => {
           <div
             style={{
               fontSize: 9,
-              color: "rgba(255,255,255,0.2)",
+              color: "#3b82f6",
               marginTop: 1,
               fontWeight: 700,
               textTransform: "uppercase",
             }}
           >
-            Vedi →
+            Dettagli →
           </div>
         )}
       </div>

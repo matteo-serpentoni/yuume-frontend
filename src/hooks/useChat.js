@@ -296,6 +296,11 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     });
 
     socket.on("message:received", (message) => {
+      // ✅ SAFETY FILTER: Never show system messages to the end user
+      if (message.sender === "system" || message.role === "system") {
+        return;
+      }
+
       setMessages((prev) => {
         // Avoid duplicates
         if (prev.some((m) => m.id === message.id)) return prev;

@@ -8,6 +8,8 @@ import TextMessage from "../Message/TextMessage";
 import { formatTime } from "../../utils/messageHelpers";
 import { AnimatePresence, motion } from "framer-motion";
 
+import Suggestions from "../Message/Suggestions";
+
 /**
  * MessageList
  * Handles the iterative rendering of chat messages and specialized blocks.
@@ -46,9 +48,11 @@ const MessageList = ({
   }, [chatBlocks, loading]);
 
   const renderMessage = (msg) => {
+    let bubbleContent = null;
+
     // 1. Category Cards
     if (msg.type === "category_cards" || msg.type === "CATEGORY_RESPONSE") {
-      return (
+      bubbleContent = (
         <div
           className={`message-bubble ${msg.sender} category-cards-bubble`}
           style={{
@@ -77,10 +81,9 @@ const MessageList = ({
         </div>
       );
     }
-
     // 2. Product Cards
-    if (msg.type === "product_cards" || msg.type === "PRODUCT_RESPONSE") {
-      return (
+    else if (msg.type === "product_cards" || msg.type === "PRODUCT_RESPONSE") {
+      bubbleContent = (
         <div
           className={`message-bubble ${msg.sender} product-cards-bubble`}
           style={{
@@ -104,12 +107,11 @@ const MessageList = ({
         </div>
       );
     }
-
     // 3. Order Lookup Form (with results)
-    if (msg.type === "order_form") {
+    else if (msg.type === "order_form") {
       const hasResults = !!msg.results;
 
-      return (
+      bubbleContent = (
         <div className={`message-bubble ${msg.sender} order-form-bubble`}>
           <AnimatePresence mode="wait">
             {!hasResults ? (
@@ -198,10 +200,9 @@ const MessageList = ({
         </div>
       );
     }
-
     // 4. Order Details/Lists
-    if (["order_detail", "order_list", "order_cards"].includes(msg.type)) {
-      return (
+    else if (["order_detail", "order_list", "order_cards"].includes(msg.type)) {
+      bubbleContent = (
         <div
           className={`message-bubble ${msg.sender} order-cards-bubble`}
           style={{
@@ -230,177 +231,136 @@ const MessageList = ({
           </div>
         </div>
       );
-    }
+    } else {
+      const msgColor =
+        msg.sender === "user" ? chatColors.userMessage : chatColors.aiMessage;
 
-    const msgColor =
-      msg.sender === "user" ? chatColors.userMessage : chatColors.aiMessage;
-
-    // 5. Standard Message
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: msg.sender === "user" ? "flex-end" : "flex-start",
-        }}
-      >
+      bubbleContent = (
         <div
-          className={`message-bubble ${msg.sender}`}
           style={{
-            background: msgColor,
-            borderRadius:
-              msg.sender === "user"
-                ? "18px 18px 4px 18px"
-                : "18px 18px 18px 4px",
-            position: "relative",
-            marginBottom: msg.sender === "assistant" && !msg.error ? 4 : 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: msg.sender === "user" ? "flex-end" : "flex-start",
           }}
         >
-          <div className="message-content">
-            <TextMessage message={msg} />
-          </div>
           <div
-            className="message-footer"
+            className={`message-bubble ${msg.sender}`}
             style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: 4,
+              background: msgColor,
+              borderRadius:
+                msg.sender === "user"
+                  ? "18px 18px 4px 18px"
+                  : "18px 18px 18px 4px",
+              position: "relative",
+              marginBottom: msg.sender === "assistant" && !msg.error ? 4 : 0,
             }}
           >
-            <div className="message-time">{formatTime(msg.timestamp)}</div>
+            <div className="message-content">
+              <TextMessage message={msg} />
+            </div>
+            <div
+              className="message-footer"
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginTop: 4,
+              }}
+            >
+              <div className="message-time">{formatTime(msg.timestamp)}</div>
+            </div>
           </div>
-        </div>
 
-        {/* Feedback Buttons */}
-        {msg.sender === "assistant" && !msg.error && !msg.disableFeedback && (
-          <div
-            className="feedback-actions"
-            style={{
-              display: "flex",
-              gap: 8,
-              paddingLeft: 4,
-              opacity: 0.7,
-            }}
-          >
-            <button
-              onClick={() => sendFeedback(msg.id, "positive", msg.text)}
-              title="Utile"
-              aria-label="Feedback positivo"
-              className={msg.feedback === "positive" ? "thumb-animate" : ""}
+          {/* Feedback Buttons */}
+          {msg.sender === "assistant" && !msg.error && !msg.disableFeedback && (
+            <div
+              className="feedback-actions"
               style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 4,
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color:
-                  msg.feedback === "positive"
-                    ? "#FFFFFF"
-                    : "rgba(255, 255, 255, 0.5)",
-                transition: "all 0.2s",
-                opacity: msg.feedback === "positive" ? 1 : 0.7,
-              }}
-              onMouseEnter={(e) => {
-                if (msg.feedback !== "positive") {
-                  e.currentTarget.style.color = "#FFFFFF";
-                  e.currentTarget.style.opacity = 1;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (msg.feedback !== "positive") {
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
-                  e.currentTarget.style.opacity = 0.7;
-                }
+                gap: 8,
+                paddingLeft: 4,
+                opacity: 0.7,
               }}
             >
-              {msg.feedback === "positive" ? (
+              <button
+                onClick={() => sendFeedback(msg.id, "positive", msg.text)}
+                title="Utile"
+                aria-label="Feedback positivo"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color:
+                    msg.feedback === "positive"
+                      ? "#48bb78"
+                      : "rgba(255, 255, 255, 0.5)",
+                  transition: "color 0.2s ease",
+                }}
+              >
                 <svg
                   width="16"
                   height="16"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-                </svg>
-              ) : (
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
+                  fill={msg.feedback === "positive" ? "currentColor" : "none"}
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
                 </svg>
-              )}
-            </button>
-            <button
-              onClick={() => sendFeedback(msg.id, "negative", msg.text)}
-              title="Non utile"
-              aria-label="Feedback negativo"
-              className={msg.feedback === "negative" ? "thumb-animate" : ""}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 4,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color:
-                  msg.feedback === "negative"
-                    ? "#FFFFFF"
-                    : "rgba(255, 255, 255, 0.5)",
-                transition: "all 0.2s",
-                opacity: msg.feedback === "negative" ? 1 : 0.7,
-              }}
-              onMouseEnter={(e) => {
-                if (msg.feedback !== "negative") {
-                  e.currentTarget.style.color = "#FFFFFF";
-                  e.currentTarget.style.opacity = 1;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (msg.feedback !== "negative") {
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
-                  e.currentTarget.style.opacity = 0.7;
-                }
-              }}
-            >
-              {msg.feedback === "negative" ? (
+              </button>
+              <button
+                onClick={() => sendFeedback(msg.id, "negative", msg.text)}
+                title="Non utile"
+                aria-label="Feedback negativo"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color:
+                    msg.feedback === "negative"
+                      ? "#f56565"
+                      : "rgba(255, 255, 255, 0.5)",
+                  transition: "color 0.2s ease",
+                }}
+              >
                 <svg
                   width="16"
                   height="16"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
-                </svg>
-              ) : (
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
+                  fill={msg.feedback === "negative" ? "currentColor" : "none"}
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
                 </svg>
-              )}
-            </button>
-          </div>
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="yuume-message-block">
+        {bubbleContent}
+
+        {/* Suggestion Chips - Universal Support */}
+        {msg.suggestions && msg.suggestions.length > 0 && (
+          <Suggestions
+            suggestions={msg.suggestions}
+            onSuggestionClick={(value) => sendMessage(value)}
+          />
         )}
       </div>
     );
