@@ -86,25 +86,37 @@ export const OrderDetailCard = ({ order, theme = "dark" }) => {
   } = order;
 
   const getStatusColor = (statusType, statusValue) => {
+    const val = String(statusValue).toUpperCase();
     if (statusType === "financial") {
-      switch (statusValue) {
+      switch (val) {
         case "PAID":
+        case "PAGATO":
           return "#10b981";
         case "PENDING":
+        case "IN SOSPESO":
+        case "AUTORIZZATO":
+        case "AUTHORIZED":
           return "#f59e0b";
         case "REFUNDED":
+        case "RIMBORSATO":
+        case "ANNULLATO":
+        case "VOIDED":
           return "#ef4444";
         default:
           return "#94a3b8";
       }
     }
     if (statusType === "fulfillment") {
-      switch (statusValue) {
+      switch (val) {
         case "FULFILLED":
+        case "SPEDITO":
           return "#10b981";
         case "UNFULFILLED":
+        case "IN PREPARAZIONE":
+        case "IN LAVORAZIONE":
           return "#f59e0b";
         case "PARTIALLY_FULFILLED":
+        case "PARZIALMENTE SPEDITO":
           return "#3b82f6";
         default:
           return "#94a3b8";
@@ -157,7 +169,7 @@ export const OrderDetailCard = ({ order, theme = "dark" }) => {
                 fontWeight: 700,
               }}
             >
-              #{orderNumber}
+              {`#${String(orderNumber).replace(/^#+/, "")}`}
             </h4>
             <p
               style={{
@@ -282,19 +294,6 @@ export const OrderDetailCard = ({ order, theme = "dark" }) => {
             ))}
           </div>
         )}
-
-        <div
-          style={{
-            marginTop: 16,
-            textAlign: "center",
-            fontSize: 9,
-            color: isLight ? "#94a3b8" : "rgba(255,255,255,0.15)",
-            fontFamily: "monospace",
-            letterSpacing: "0.02em",
-          }}
-        >
-          ID: {id}
-        </div>
       </div>
     </motion.div>
   );
@@ -302,26 +301,32 @@ export const OrderDetailCard = ({ order, theme = "dark" }) => {
 
 // Summary row for list view
 const OrderListRow = ({ order, index, onClick }) => {
+  const isClickable = !!onClick;
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      onClick={() => onClick(order)}
+      onClick={isClickable ? () => onClick(order) : undefined}
       style={{
         padding: "10px 12px",
         background: "rgba(255, 255, 255, 0.04)",
         border: "1px solid rgba(255, 255, 255, 0.03)",
         borderRadius: 10,
-        cursor: "pointer",
+        cursor: isClickable ? "pointer" : "default",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         gap: "12px",
       }}
-      whileHover={{
-        background: "rgba(255, 255, 255, 0.08)",
-        scale: 1.01,
-      }}
+      whileHover={
+        isClickable
+          ? {
+              background: "rgba(255, 255, 255, 0.08)",
+              scale: 1.01,
+            }
+          : {}
+      }
       transition={{
         delay: index * 0.05,
         type: "spring",
@@ -331,27 +336,42 @@ const OrderListRow = ({ order, index, onClick }) => {
     >
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span
-            style={{
-              fontWeight: 700,
-              color: "white",
-              fontSize: 13,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {order.orderNumber}
-          </span>
-          <span
-            style={{
-              fontSize: 10,
-              color: "rgba(255,255,255,0.3)",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            • {order.createdAt}
-          </span>
+          {order.orderNumber ? (
+            <>
+              <span
+                style={{
+                  fontWeight: 700,
+                  color: "white",
+                  fontSize: 13,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {`#${String(order.orderNumber).replace(/^#+/, "")}`}
+              </span>
+              <span
+                style={{
+                  fontSize: 10,
+                  color: "rgba(255,255,255,0.3)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                • {order.createdAt}
+              </span>
+            </>
+          ) : (
+            <span
+              style={{
+                fontWeight: 700,
+                color: "white",
+                fontSize: 13,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {order.createdAt}
+            </span>
+          )}
         </div>
         <div
           style={{
@@ -363,31 +383,37 @@ const OrderListRow = ({ order, index, onClick }) => {
             letterSpacing: "0.02em",
           }}
         >
-          {order.status}
+          {typeof order.status === "object"
+            ? order.status.fulfillment || "In elaborazione"
+            : order.status}
         </div>
       </div>
       <div style={{ textAlign: "right", flexShrink: 0 }}>
-        <div
-          style={{
-            fontWeight: 700,
-            color: "white",
-            fontSize: 14,
-            letterSpacing: "-0.01em",
-          }}
-        >
-          {order.total}
-        </div>
-        <div
-          style={{
-            fontSize: 9,
-            color: "rgba(255,255,255,0.2)",
-            marginTop: 1,
-            fontWeight: 700,
-            textTransform: "uppercase",
-          }}
-        >
-          Vedi →
-        </div>
+        {order.total && (
+          <div
+            style={{
+              fontWeight: 700,
+              color: "white",
+              fontSize: 14,
+              letterSpacing: "-0.01em",
+            }}
+          >
+            {order.total}
+          </div>
+        )}
+        {isClickable && (
+          <div
+            style={{
+              fontSize: 9,
+              color: "rgba(255,255,255,0.2)",
+              marginTop: 1,
+              fontWeight: 700,
+              textTransform: "uppercase",
+            }}
+          >
+            Vedi →
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -403,12 +429,14 @@ const OrderCards = ({ message, onOrderClick }) => {
     email,
   } = message;
 
-  // 1. Single Order Detail View
+  // 1. Single Order Detail View (Treat as a clickable summary in bubbles)
   if (
     type === "order_detail" ||
     (type === "order_cards" && orders.length === 1)
   ) {
     const targetOrder = order || orders[0];
+    const isClickable = !!targetOrder.orderNumber;
+
     return (
       <div style={{ width: "100%", padding: "4px 0" }}>
         {displayMessage && (
@@ -422,12 +450,20 @@ const OrderCards = ({ message, onOrderClick }) => {
             {displayMessage}
           </p>
         )}
-        <OrderDetailCard order={targetOrder} />
+        <OrderListRow
+          order={targetOrder}
+          index={0}
+          onClick={
+            isClickable && onOrderClick
+              ? () => onOrderClick(targetOrder, email)
+              : null
+          }
+        />
       </div>
     );
   }
 
-  // 2. Order List View
+  // 2. Order List View (Minimal summaries, NOT clickable)
   return (
     <div style={{ width: "100%", padding: "4px 0" }}>
       <div
@@ -487,12 +523,7 @@ const OrderCards = ({ message, onOrderClick }) => {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {orders.map((o, idx) => (
-          <OrderListRow
-            key={o.id || idx}
-            order={o}
-            index={idx}
-            onClick={() => onOrderClick?.(o.orderNumber, email)}
-          />
+          <OrderListRow key={o.id || idx} order={o} index={idx} />
         ))}
       </div>
     </div>

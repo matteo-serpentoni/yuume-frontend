@@ -62,11 +62,7 @@ const Chat = ({
   // Group messages to handle "transforming" components (like OrderLookupForm)
   const chatBlocks = useMemo(() => {
     const blocks = [];
-    const filtered = messages.filter(
-      (msg) =>
-        !msg.hidden &&
-        !["order_detail", "ORDER_DETAIL_RESPONSE"].includes(msg.type)
-    );
+    const filtered = messages.filter((msg) => !msg.hidden);
 
     for (let i = 0; i < filtered.length; i++) {
       const msg = filtered[i];
@@ -97,6 +93,7 @@ const Chat = ({
 
             if (isOrderResult || isOrderError) {
               resultIndex = j;
+              filtered[j].isResultSource = true; // Mark to skip top-level rendering
               break;
             }
           }
@@ -111,19 +108,7 @@ const Chat = ({
 
       blocks.push(msg);
     }
-    return blocks;
-  }, [messages]);
-
-  // Handle incoming order details for Drawer
-  useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    if (
-      lastMessage &&
-      ["order_detail", "ORDER_DETAIL_RESPONSE"].includes(lastMessage.type) &&
-      lastMessage.order
-    ) {
-      setActiveOrder(lastMessage.order);
-    }
+    return blocks.filter((b) => !b.isResultSource);
   }, [messages]);
 
   return (
@@ -159,6 +144,8 @@ const Chat = ({
               shopDomain={shopDomain}
               activeProduct={activeProduct}
               setActiveProduct={setActiveProduct}
+              activeOrder={activeOrder}
+              setActiveOrder={setActiveOrder}
               sendMessage={sendMessage}
               sendFeedback={sendFeedback}
             />
@@ -322,7 +309,10 @@ const Chat = ({
           <Drawer
             isOpen={!!activeOrder}
             onClose={() => setActiveOrder(null)}
-            title={`Ordine #${activeOrder.orderNumber}`}
+            title={`Ordine #${String(activeOrder.orderNumber).replace(
+              /^#+/,
+              ""
+            )}`}
           >
             <OrderDetailCard order={activeOrder} theme="light" />
           </Drawer>

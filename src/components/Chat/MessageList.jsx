@@ -19,6 +19,8 @@ const MessageList = ({
   shopDomain,
   activeProduct,
   setActiveProduct,
+  activeOrder,
+  setActiveOrder,
   sendMessage,
   sendFeedback,
 }) => {
@@ -173,10 +175,14 @@ const MessageList = ({
                 ) : (
                   <OrderCards
                     message={msg.results}
-                    onOrderClick={(orderNumber, email) => {
-                      sendMessage(`ORDER_LOOKUP:${email}:${orderNumber}`, {
-                        hidden: true,
-                      });
+                    onOrderClick={(order, email) => {
+                      if (typeof order === "object") {
+                        setActiveOrder(order);
+                      } else {
+                        sendMessage(`ORDER_LOOKUP:${email}:${order}`, {
+                          hidden: true,
+                        });
+                      }
                     }}
                   />
                 )}
@@ -209,10 +215,14 @@ const MessageList = ({
         >
           <OrderCards
             message={msg}
-            onOrderClick={(orderNumber, email) => {
-              sendMessage(`ORDER_LOOKUP:${email}:${orderNumber}`, {
-                hidden: true,
-              });
+            onOrderClick={(order, email) => {
+              if (typeof order === "object") {
+                setActiveOrder(order);
+              } else {
+                sendMessage(`ORDER_LOOKUP:${email}:${order}`, {
+                  hidden: true,
+                });
+              }
             }}
           />
           <div className="message-time" style={{ marginTop: 4 }}>
@@ -396,15 +406,27 @@ const MessageList = ({
     );
   };
 
+  // Determine if we should show the global typing indicator.
+  // We hide it if an order lookup is active via the form, as the form shows its own loader.
+  const isOrderLookupLoading =
+    loading &&
+    chatBlocks.length > 0 &&
+    chatBlocks[chatBlocks.length - 1].type === "order_form" &&
+    !chatBlocks[chatBlocks.length - 1].results;
+
   return (
     <div
-      className={`messages-area ${activeProduct ? "yuume-drawer-active" : ""}`}
+      className={`messages-area ${
+        activeProduct || activeOrder ? "yuume-drawer-active" : ""
+      }`}
     >
       {chatBlocks.map((msg) => (
         <div key={msg.id}>{renderMessage(msg)}</div>
       ))}
 
-      {loading && <TypingIndicator aiMessageColor={chatColors.aiMessage} />}
+      {loading && !isOrderLookupLoading && (
+        <TypingIndicator aiMessageColor={chatColors.aiMessage} />
+      )}
 
       <div ref={messagesEndRef} />
     </div>
