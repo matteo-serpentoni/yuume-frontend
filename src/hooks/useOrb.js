@@ -28,7 +28,17 @@ export const useOrb = (modeOverride = null) => {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [loading, setLoading] = useState(true);
   const [shopDomain, setShopDomain] = useState(() => {
-    return new URLSearchParams(window.location.search).get("shop");
+    // 1. Check URL
+    const urlShop = new URLSearchParams(window.location.search).get("shop");
+    if (urlShop) return urlShop;
+
+    // 2. Check SessionStorage (Manual Override in Dev)
+    const savedDevShop = sessionStorage.getItem("yuume_dev_shop_domain");
+    if (savedDevShop) return savedDevShop;
+
+    // 3. Check Hostname (last resort)
+    const host = window.location.hostname;
+    return host === "localhost" ? "localhost" : host;
   });
   const [isMobile, setIsMobile] = useState(false);
   const [isPreviewMobile, setIsPreviewMobile] = useState(false);
@@ -73,7 +83,24 @@ export const useOrb = (modeOverride = null) => {
       }
 
       if (event.data.type === "YUUME_SHOP_DOMAIN") {
-        setShopDomain(event.data.shopDomain);
+        const isDev = mode === "development";
+        const incomingDomain = event.data.shopDomain;
+
+        // In development, ignore incoming "localhost" if we already have something better
+        // or if we have a manual override in storage
+        if (isDev) {
+          const hasManualOverride = !!sessionStorage.getItem(
+            "yuume_dev_shop_domain"
+          );
+          if (
+            hasManualOverride ||
+            (shopDomain && incomingDomain === "localhost")
+          ) {
+            return;
+          }
+        }
+
+        setShopDomain(incomingDomain);
       }
 
       if (event.data.type === "YUUME_BG_LUMINANCE") {
@@ -91,16 +118,23 @@ export const useOrb = (modeOverride = null) => {
     return () => window.removeEventListener("message", handleMessage);
   }, [shopDomain, mode]);
 
-  // Initial Data Fetching (Production)
+  // Initial Data Fetching (Production & Development Overrides)
   useEffect(() => {
-    if (mode !== "production" || !shopDomain) {
-      if (mode !== "production") setLoading(false);
+    if (!shopDomain) {
+      setLoading(false);
       return;
     }
 
-    const siteId = "shopify_" + shopDomain.split(".")[0];
-    setLoading(true);
+    // Use the raw domain/id. The backend resolveId now supports direct domain lookup.
+    const siteId = shopDomain;
 
+    // Don't fetch if we're on localhost and no override is present
+    if (shopDomain === "localhost") {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
     getWidgetConfig(siteId)
       .then((data) => {
         if (data) setConfig(data);

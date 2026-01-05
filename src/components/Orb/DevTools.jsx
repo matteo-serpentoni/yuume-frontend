@@ -15,7 +15,9 @@ const DevTools = ({
   const [themes, setThemes] = useState([]);
   const [sites, setSites] = useState([]);
   const [selectedThemeId, setSelectedThemeId] = useState("purple-dream");
-  const [selectedSiteDomain, setSelectedSiteDomain] = useState("");
+  const [selectedSiteDomain, setSelectedSiteDomain] = useState(() => {
+    return sessionStorage.getItem("yuume_dev_shop_domain") || "";
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -45,7 +47,24 @@ const DevTools = ({
         const sitesRes = await fetch(`${API_URL}/api/customization/sites`);
         if (sitesRes.ok) {
           const sitesResult = await sitesRes.json();
-          if (sitesResult.success) setSites(sitesResult.data);
+          if (sitesResult.success) {
+            // Filter out empty or localhost domains
+            const filteredSites = sitesResult.data.filter(
+              (s) => s.domain && s.domain !== "localhost"
+            );
+            setSites(filteredSites);
+
+            // If no site is selected yet, pick the first one
+            const savedDevShop = sessionStorage.getItem(
+              "yuume_dev_shop_domain"
+            );
+            if (!savedDevShop && filteredSites.length > 0) {
+              const firstDomain = filteredSites[0].domain;
+              setSelectedSiteDomain(firstDomain);
+              sessionStorage.setItem("yuume_dev_shop_domain", firstDomain);
+              onSiteChange && onSiteChange(firstDomain);
+            }
+          }
         }
 
         // 2. Fetch Themes (Independent of site for dev robustness)
@@ -250,8 +269,14 @@ const DevTools = ({
             <select
               value={selectedSiteDomain}
               onChange={(e) => {
-                setSelectedSiteDomain(e.target.value);
-                onSiteChange && onSiteChange(e.target.value);
+                const domain = e.target.value;
+                setSelectedSiteDomain(domain);
+                if (domain) {
+                  sessionStorage.setItem("yuume_dev_shop_domain", domain);
+                } else {
+                  sessionStorage.removeItem("yuume_dev_shop_domain");
+                }
+                onSiteChange && onSiteChange(domain);
               }}
               style={{
                 width: "100%",
@@ -262,9 +287,8 @@ const DevTools = ({
                 padding: "4px",
               }}
             >
-              <option value="">Default (Shopify Test)</option>
               {sites.map((s) => (
-                <option key={s._id} value={s.domain}>
+                <option key={s._id || s.siteId} value={s.domain}>
                   {s.domain}
                 </option>
               ))}

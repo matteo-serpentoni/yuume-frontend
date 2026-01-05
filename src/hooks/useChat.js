@@ -9,7 +9,7 @@ import { io } from "socket.io-client";
 const STORAGE_KEYS = {
   SESSION_ID: "yuume_session_id",
   MESSAGES: "yuume_messages",
-  SHOP_DOMAIN: "yuume_shop_domain",
+  SHOP_DOMAIN: "yuume_dev_shop_domain", // Unified with DevTools and useOrb
   SESSION_TIME: "yuume_session_time",
   SESSION_STATUS: "yuume_session_status",
 };
@@ -103,30 +103,97 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     };
   }, [disabled]);
 
-  const [assignedTo, setAssignedTo] = useState(null); // ✅ New state for human assignment
-
+  const [assignedTo, setAssignedTo] = useState(null);
   const [loading, setLoading] = useState(false);
   const socketRef = useRef(null);
 
   const [shopDomain, setShopDomain] = useState(() => {
     if (disabled) return "preview-shop.myshopify.com";
-    // ✅ Priorità a devShopDomain se presente
-    if (devShopDomain) return devShopDomain;
-
     return (
+      devShopDomain ||
       sessionStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) ||
       window.location.hostname
     );
   });
 
-  // ✅ Aggiorna shopDomain se cambia devShopDomain
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // HELPER FUNCTIONS (Defined before usage in Effects)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  const clearChat = useCallback(() => {
+    const welcomeMsg = {
+      id: Date.now(),
+      sender: "assistant",
+      text: "Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?",
+      timestamp: new Date().toISOString(),
+      disableFeedback: true,
+    };
+
+    const newSessionId = generateSessionId();
+    sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
+    sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
+    sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
+    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, "active");
+
+    setSessionId(newSessionId);
+    setMessages([welcomeMsg]);
+    setSessionStatus("active");
+    setAssignedTo(null);
+  }, []);
+
+  const addUserMessage = useCallback(
+    (text, id = Date.now(), hidden = false) => {
+      const userMessage = {
+        id,
+        sender: "user",
+        text,
+        timestamp: new Date().toISOString(),
+        hidden,
+      };
+      setMessages((prev) => [...prev, userMessage]);
+      return userMessage;
+    },
+    []
+  );
+
+  const addAssistantMessage = useCallback((data) => {
+    const assistantMessage = {
+      id: data.id || Date.now() + 1,
+      sender: "assistant",
+      timestamp: new Date().toISOString(),
+      text: data.message || data.text,
+      ...data,
+    };
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === assistantMessage.id)) return prev;
+      return [...prev, assistantMessage];
+    });
+    return assistantMessage;
+  }, []);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // EFFECTS
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  // ✅ Reset session when shopDomain changes (Site Switching)
+  const prevShopDomain = useRef(shopDomain);
   useEffect(() => {
-    if (disabled) return;
-    if (devShopDomain) {
-      setShopDomain(devShopDomain);
-      sessionStorage.setItem(STORAGE_KEYS.SHOP_DOMAIN, devShopDomain);
+    if (
+      shopDomain &&
+      prevShopDomain.current &&
+      shopDomain !== prevShopDomain.current
+    ) {
+      clearChat();
     }
-  }, [devShopDomain, disabled]);
+    prevShopDomain.current = shopDomain;
+  }, [shopDomain, clearChat]);
+
+  // ✅ Sync internal shopDomain when prop changes
+  useEffect(() => {
+    if (devShopDomain && devShopDomain !== shopDomain) {
+      setShopDomain(devShopDomain);
+    }
+  }, [devShopDomain, shopDomain]);
 
   useEffect(() => {
     if (disabled) return;
@@ -142,45 +209,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     if (disabled) return;
     sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, sessionStatus);
   }, [sessionStatus, disabled]);
-
-  useEffect(() => {
-    if (disabled) return;
-    const handleMessage = (event) => {
-      if (event.data.type === "YUUME_SHOP_DOMAIN") {
-        setShopDomain(event.data.shopDomain);
-        sessionStorage.setItem(STORAGE_KEYS.SHOP_DOMAIN, event.data.shopDomain);
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    window.parent.postMessage({ type: "REQUEST_SHOP_DOMAIN" }, "*");
-
-    return () => window.removeEventListener("message", handleMessage);
-  }, [disabled]);
-
-  const clearChat = useCallback(() => {
-    // Reset to welcome message instead of empty array
-    const welcomeMsg = {
-      id: Date.now(),
-      sender: "assistant",
-      text: "Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?",
-      timestamp: new Date().toISOString(),
-      disableFeedback: true,
-    };
-
-    // Save new session with welcome message immediately
-    const newSessionId = generateSessionId();
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
-    sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, "active");
-
-    // Update State
-    setSessionId(newSessionId);
-    setMessages([welcomeMsg]);
-    setSessionStatus("active");
-    setAssignedTo(null);
-  }, []);
 
   useEffect(() => {
     if (disabled) return;
@@ -289,38 +317,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     };
   }, [sessionId]);
 
-  const addUserMessage = useCallback(
-    (text, id = Date.now(), hidden = false) => {
-      const userMessage = {
-        id,
-        sender: "user",
-        text,
-        timestamp: new Date().toISOString(),
-        hidden, // ✅ Usa il flag passato esplicitamente o rilevato
-      };
-      setMessages((prev) => [...prev, userMessage]);
-      return userMessage;
-    },
-    []
-  );
-
-  const addAssistantMessage = useCallback((data) => {
-    const assistantMessage = {
-      id: data.id || Date.now() + 1, // Use backend ID if available
-      sender: "assistant",
-      timestamp: new Date().toISOString(),
-      text: data.message || data.text,
-      ...data,
-    };
-
-    setMessages((prev) => {
-      // Deduplicate
-      if (prev.some((m) => m.id === assistantMessage.id)) return prev;
-      return [...prev, assistantMessage];
-    });
-    return assistantMessage;
-  }, []);
-
   const sendChatMessage = useCallback(
     async (text, options = {}) => {
       if (!text.trim() || loading) return;
@@ -355,7 +351,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         const response = await sendMessage(
           text,
           currentSessionId, // Use the correct ID (current or new)
-          shopDomain,
+          devShopDomain || shopDomain,
           {
             customer,
             ...options,
@@ -428,10 +424,11 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       sessionId,
       loading,
       shopDomain,
+      devShopDomain, // Added prop dependency
       addUserMessage,
       addAssistantMessage,
       customer,
-      sessionStatus, // Added dependency
+      sessionStatus,
       setSessionId,
       setSessionStatus,
       setMessages,
