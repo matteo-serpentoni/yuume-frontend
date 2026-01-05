@@ -108,7 +108,7 @@ const MessageList = ({
       );
     }
     // 3. Order Lookup Form (with results)
-    else if (msg.type === "order_form") {
+    else if (msg.type === "order_form" || msg.type === "ORDER_FORM_REQUEST") {
       const hasResults = !!msg.results;
 
       bubbleContent = (
@@ -201,7 +201,14 @@ const MessageList = ({
       );
     }
     // 4. Order Details/Lists
-    else if (["order_detail", "order_list", "order_cards"].includes(msg.type)) {
+    else if (
+      ["order_detail", "order_list", "order_cards"].includes(msg.type) ||
+      [
+        "ORDER_DETAIL_RESPONSE",
+        "ORDER_LIST_RESPONSE",
+        "ORDER_RESPONSE",
+      ].includes(msg.type)
+    ) {
       bubbleContent = (
         <div
           className={`message-bubble ${msg.sender} order-cards-bubble`}
