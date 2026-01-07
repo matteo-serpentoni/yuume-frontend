@@ -16,3 +16,17 @@ export const hexToVec3 = (hex) => {
     parseFloat((b / 255).toFixed(6)),
   ];
 };
+
+/**
+ * Converts a hex color to an RGB string "r, g, b" for CSS variables.
+ * @param {string} hex
+ * @returns {string} "r, g, b"
+ */
+export const hexToRgb = (hex) => {
+  if (!hex) return "0, 0, 0";
+  const cleaned = hex.replace("#", "");
+  const r = parseInt(cleaned.substring(0, 2), 16);
+  const g = parseInt(cleaned.substring(2, 4), 16);
+  const b = parseInt(cleaned.substring(4, 6), 16);
+  return `${r}, ${g}, ${b}`;
+};

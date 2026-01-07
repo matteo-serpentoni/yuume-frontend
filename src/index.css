@@ -1,13 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Inter:wght@400;500&display=swap");
+
+:root {
+  --orb-size: 763px;
+  --orb-minimized-size: 132px;
+  --bg-color: #050505;
+  --user-msg-bg: linear-gradient(135deg, #6366f1, #a855f7);
+  --user-msg-text: white;
+  --bot-msg-bg: rgba(255, 255, 255, 0.08);
+  --bot-msg-text: #f3f4f6;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  font-family: "Outfit", sans-serif;
+  color: white;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }

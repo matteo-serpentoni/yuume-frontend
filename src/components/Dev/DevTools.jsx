@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { hexToVec3 } from "../../utils/colorUtils";
+import "./DevTools.css";
 
 /**
  * DevTools
@@ -23,6 +24,18 @@ const DevTools = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [forceMobile, setForceMobile] = useState(false);
+
+  // Storefront Preview State
+  const [showStorefront, setShowStorefront] = useState(() => {
+    return sessionStorage.getItem("yuume_dev_show_storefront") === "true";
+  });
+  const [storefrontTheme, setStorefrontTheme] = useState(() => {
+    return sessionStorage.getItem("yuume_dev_storefront_theme") || "light";
+  });
+
+  const dispatchDevUpdate = () => {
+    window.dispatchEvent(new CustomEvent("yuume_dev_update"));
+  };
 
   // Mobile detection for DevTools UI
   useEffect(() => {
@@ -209,6 +222,7 @@ const DevTools = ({
 
   return (
     <div
+      className="yuume-dev-tools"
       style={{
         position: "fixed",
         top: isMobile ? "auto" : "20px",
@@ -222,9 +236,11 @@ const DevTools = ({
         color: "white",
         fontFamily: "system-ui, sans-serif",
         maxWidth: isMobile ? "calc(100vw - 40px)" : "300px",
-        maxHeight: isMobile ? "50vh" : "auto",
+        maxHeight: isMobile ? "50vh" : "calc(100vh - 40px)",
         backdropFilter: "blur(10px)",
         overflowY: "auto",
+        scrollbarWidth: "none" /* Firefox */,
+        msOverflowStyle: "none" /* IE/Edge */,
       }}
     >
       <div
@@ -365,6 +381,90 @@ const DevTools = ({
               ? "📱 Forced Mobile View"
               : "🖥️ Desktop View (Default)"}
           </button>
+
+          <div style={{ height: "1px", background: "#333", margin: "4px 0" }} />
+
+          {/* Storefront Preview */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <label style={{ fontSize: "11px", color: "#8b92a7" }}>
+              Experimental Preview
+            </label>
+            <button
+              onClick={() => {
+                const newVal = !showStorefront;
+                setShowStorefront(newVal);
+                sessionStorage.setItem("yuume_dev_show_storefront", newVal);
+                dispatchDevUpdate();
+              }}
+              style={{
+                padding: "8px",
+                background: showStorefront ? "#48bb78" : "#4a5568",
+                border: "none",
+                borderRadius: "4px",
+                color: "white",
+                fontSize: "12px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              {showStorefront
+                ? "✅ Mock Storefront ON"
+                : "🏠 Background: Neutral"}
+            </button>
+
+            {showStorefront && (
+              <div style={{ display: "flex", gap: "4px" }}>
+                <button
+                  onClick={() => {
+                    setStorefrontTheme("light");
+                    sessionStorage.setItem(
+                      "yuume_dev_storefront_theme",
+                      "light"
+                    );
+                    dispatchDevUpdate();
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "6px",
+                    background: storefrontTheme === "light" ? "#fff" : "#333",
+                    color: storefrontTheme === "light" ? "#000" : "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    fontSize: "11px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Light Mode
+                </button>
+                <button
+                  onClick={() => {
+                    setStorefrontTheme("dark");
+                    sessionStorage.setItem(
+                      "yuume_dev_storefront_theme",
+                      "dark"
+                    );
+                    dispatchDevUpdate();
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "6px",
+                    background: storefrontTheme === "dark" ? "#333" : "#000",
+                    color: "#fff",
+                    border:
+                      storefrontTheme === "dark" ? "1px solid #667eea" : "none",
+                    borderRadius: "4px",
+                    fontSize: "11px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Dark Mode
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

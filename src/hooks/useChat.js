@@ -240,18 +240,58 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           // Sync message history if available
           if (statusData.messages && statusData.messages.length > 0) {
             setMessages((prev) => {
-              // Keep welcome message if it was the only one
-              const hasWelcome = prev.length === 1 && prev[0].disableFeedback;
+              const serverMessages = statusData.messages;
 
-              // Build new list, ensuring we don't have duplicates
-              const newMessages = [...statusData.messages];
+              // 1. Create a map of server messages for fast lookup
+              const serverMsgMap = new Map();
+              serverMessages.forEach((msg) => {
+                serverMsgMap.set(msg.id, msg);
+                if (msg.clientMessageId) {
+                  serverMsgMap.set(msg.clientMessageId, msg);
+                }
+              });
 
-              // If we had local messages that aren't in the synced list (unlikely but possible)
-              // we could merge them, but syncing with server is safer.
-              // For now, let's just use server messages but keep the welcome if it's the very first session
-              if (newMessages.length === 0 && hasWelcome) return prev;
+              // 2. Identify local messages that SHOULD be preserved:
+              // - Technical errors (title: "Errore" or "Sessione scaduta")
+              // - Initial welcome message (disableFeedback: true)
+              // - Any message not yet present on server (by ID and clientMessageId)
+              const localToKeep = prev.filter((localMsg) => {
+                // If it's already on the server, don't keep the local copy (server is source of truth)
+                const existsOnServer =
+                  serverMsgMap.has(localMsg.id) ||
+                  (localMsg.id && serverMsgMap.has(localMsg.id.toString()));
 
-              return newMessages;
+                if (existsOnServer) return false;
+
+                // Keep if it's a specific frontend-only message
+                const isError =
+                  localMsg.title === "Errore" ||
+                  localMsg.title === "Sessione scaduta";
+                const isWelcome = localMsg.disableFeedback === true;
+
+                return isError || isWelcome || !existsOnServer;
+              });
+
+              // 3. Merge and sort
+              const merged = [...localToKeep, ...serverMessages].sort(
+                (a, b) => {
+                  const timeA = new Date(a.timestamp || 0).getTime();
+                  const timeB = new Date(b.timestamp || 0).getTime();
+                  return timeA - timeB;
+                }
+              );
+
+              // 4. Final deduplication by ID just in case
+              const final = [];
+              const seenIds = new Set();
+              merged.forEach((m) => {
+                if (!seenIds.has(m.id)) {
+                  final.push(m);
+                  seenIds.add(m.id);
+                }
+              });
+
+              return final;
             });
           }
         }

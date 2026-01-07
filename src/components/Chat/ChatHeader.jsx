@@ -1,5 +1,5 @@
 import React from "react";
-import "../Orb/Orb.css";
+import "./ChatHeader.css";
 
 /**
  * ChatHeader
@@ -9,12 +9,12 @@ const ChatHeader = ({ connectionStatus = "online" }) => {
   const getStatusConfig = () => {
     switch (connectionStatus) {
       case "offline":
-        return { text: "Nessuna connessione", class: "status-offline" };
+        return { text: "OFFLINE", class: "status-offline" };
       case "reconnecting":
-        return { text: "Riconnessione...", class: "status-reconnecting" };
+        return { text: "RECONNECTING", class: "status-reconnecting" };
       case "online":
       default:
-        return { text: "Online", class: "status-online" };
+        return { text: "ONLINE", class: "status-online" };
     }
   };
 

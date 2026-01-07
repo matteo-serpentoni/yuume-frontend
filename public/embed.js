@@ -123,8 +123,10 @@
     // L'iframe è 250x250, l'orb è al centro.
     // In posizione minimizzata è in basso a destra.
     var rect = iframe.getBoundingClientRect();
-    var x = rect.left + rect.width / 2;
-    var y = rect.top + rect.height / 2;
+    // Targeted coordinates: Bottom-right area where the Orb minimized actually sits
+    // (Iframe is 250x250, Orb is offset 32px from bottom/right)
+    var x = rect.right - 70;
+    var y = rect.bottom - 70;
 
     // Nascondi momentaneamente l'iframe per vedere cosa c'è sotto
     var prevDisplay = iframe.style.display;

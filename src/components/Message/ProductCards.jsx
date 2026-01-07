@@ -52,74 +52,61 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
         }
       }}
     >
-      <div className="yuume-product-card-main-row">
-        <div className="yuume-product-image-container">
-          {image ? (
-            <img src={image.url || image} alt={name} />
-          ) : (
-            <div className="yuume-product-placeholder">🎁</div>
-          )}
-        </div>
-
-        <div className="yuume-product-info-column">
-          <h3 className="yuume-product-name">{name}</h3>
-          <div className="yuume-product-meta-stack">
-            <div
-              className={`yuume-availability-status ${
-                isAvailable ? "available" : "unavailable"
-              }`}
-            >
-              <span className="yuume-status-dot"></span>
-              {isAvailable ? "Disponibile" : "Esaurito"}
-            </div>
-            <span className="yuume-current-price">
-              {formatPrice(price, currency)}
-            </span>
-          </div>
-        </div>
-
-        {hasVariants && (
-          <div className="yuume-product-action-arrow">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </div>
+      <div className="yuume-product-image-container">
+        {image ? (
+          <img src={image.url || image} alt={name} />
+        ) : (
+          <div className="yuume-product-placeholder">🎁</div>
         )}
       </div>
 
-      {isAvailable && (variants[0] || product.variantId) && (
+      <div className="yuume-product-info">
+        <h3 className="yuume-product-name">{name}</h3>
+        <div className="yuume-product-price-row">
+          <span className="yuume-current-price">
+            {formatPrice(price, currency)}
+          </span>
+          <div
+            className={`yuume-availability-status ${
+              isAvailable ? "available" : "unavailable"
+            }`}
+          >
+            <span className="yuume-status-dot"></span>
+            {isAvailable ? "In stock" : "Out of stock"}
+          </div>
+        </div>
+      </div>
+
+      {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
         <div
           className="yuume-product-card-footer"
           onClick={(e) => e.stopPropagation()}
         >
-          {hasVariants && (
+          {hasVariants ? (
             <button
               className="yuume-options-btn"
               aria-label={`Seleziona opzioni per ${product.name}`}
               onClick={(e) => {
-                e.stopPropagation(); // Essential to prevent card onClick from firing
+                e.stopPropagation();
                 e.preventDefault();
                 onOpen(product);
               }}
             >
-              Opzioni
+              Customize
             </button>
+          ) : (
+            <div className="yuume-card-spacer" />
           )}
-          <AddToCartButton
-            variantId={variants[0]?.id || product.variantId}
-            shopDomain={shopDomain}
-            quantity={1}
-            compact={true}
-          />
+          {isAvailable && (variants[0] || product.variantId) && (
+            <AddToCartButton
+              variantId={variants[0]?.id || product.variantId}
+              shopDomain={shopDomain}
+              quantity={1}
+              compact={true}
+            />
+          )}
         </div>
-      )}
+      ) : null}
     </motion.div>
   );
 });
@@ -267,8 +254,44 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
 
 const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
   const { products = [], message: displayMessage, meta = {} } = message;
+  const scrollRef = React.useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = React.useState(false);
+  const [showRightArrow, setShowRightArrow] = React.useState(true);
 
-  React.useEffect(() => {}, [activeProduct]);
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowLeftArrow(scrollLeft > 10);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (el) {
+      el.addEventListener("scroll", checkScroll);
+      // Initial check
+      checkScroll();
+      return () => el.removeEventListener("scroll", checkScroll);
+    }
+  }, [products]);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const cardWidth =
+        container.querySelector(".yuume-product-card-minimal")?.offsetWidth ||
+        240;
+      const gap = 12;
+      const scrollAmount =
+        direction === "next" ? cardWidth + gap : -(cardWidth + gap);
+
+      container.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
 
   if (!Array.isArray(products) || products.length === 0) {
     return (
@@ -284,16 +307,56 @@ const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
         <div className="yuume-products-header-message">{displayMessage}</div>
       )}
 
-      <div className="yuume-products-list">
-        {products.map((product, index) => (
-          <ProductCard
-            key={product.id || index}
-            product={product}
-            index={index}
-            onOpen={onOpen}
-            shopDomain={shopDomain}
-          />
-        ))}
+      <div className="yuume-carousel-wrapper">
+        {showLeftArrow && (
+          <button
+            className="yuume-carousel-nav-btn prev"
+            onClick={() => scroll("prev")}
+            aria-label="Prodotto precedente"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+        )}
+
+        <div className="yuume-products-list" ref={scrollRef}>
+          {products.map((product, index) => (
+            <ProductCard
+              key={product.id || index}
+              product={product}
+              index={index}
+              onOpen={onOpen}
+              shopDomain={shopDomain}
+            />
+          ))}
+        </div>
+
+        {showRightArrow && products.length > 1 && (
+          <button
+            className="yuume-carousel-nav-btn next"
+            onClick={() => scroll("next")}
+            aria-label="Prodotto successivo"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        )}
       </div>
 
       {meta.totalCount > meta.displayCount && (

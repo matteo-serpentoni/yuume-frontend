@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 import { Renderer, Program, Mesh, Triangle, Vec3 } from "ogl";
 import Chat from "../Chat/Chat";
 import ChatPreview from "../Chat/ChatPreview";
-import DevTools from "./DevTools";
+import DevTools from "../Dev/DevTools";
 import { useOrb } from "../../hooks/useOrb";
 import "./Orb.css";
 
@@ -410,101 +410,9 @@ const Orb = memo(
     })`;
 
     return (
-      <div
-        ref={containerRef}
-        role="button"
-        tabIndex={0}
-        aria-label={
-          isMinimized ? "Apri assistente Yuume" : "Widget Yuume attivo"
-        }
-        className={`orb-container ${isMinimized ? "minimized" : ""} ${
-          isMobileView ? "mobile-device" : ""
-        } ${mode === "preview" ? "preview-mode" : ""}`}
-        onClick={handleExpand}
-        onKeyDown={handleKeyDown}
-        style={{
-          "--orb-theme-color": themeColor,
-          opacity: loading ? 0.6 : 1,
-        }}
-      >
-        {/* Loading Placeholder */}
-        {loading && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.05)",
-              animation: "pulse 2s infinite",
-            }}
-          />
-        )}
-
-        {/* Chat Layer - Rendered once loaded, visibility handled by CSS classes */}
-        {!loading && (
-          <div className="orb-chat-layer">
-            {mode === "preview" ? (
-              <ChatPreview chatColors={chatColors} />
-            ) : (
-              <Chat
-                chatColors={chatColors}
-                devShopDomain={shopDomain}
-                onTyping={setIsTyping}
-                onMinimize={() => {
-                  setEnlarged(false);
-                  // Wait for animation (600ms) before resizing iframe
-                  setTimeout(() => {
-                    window.parent?.postMessage(
-                      { type: "resize", enlarged: false },
-                      "*"
-                    );
-                  }, 600);
-                }}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Minimized Text */}
-        {isMinimized && (
-          <div
-            key={currentMessageIndex} // Force re-render to restart animations
-            className="minimized-text"
-            style={{
-              color:
-                textColorMode === "light" ? chatColors.userMessage : "white",
-            }}
-          >
-            {messages[currentMessageIndex]
-              .split("\n")
-              .map((line, lineIndex) => (
-                <div key={lineIndex} className="minimized-text-line">
-                  {Array.from(line).map((char, charIndex) => {
-                    // Calculate global index for continuous delay
-                    const previousCharsCount = messages[currentMessageIndex]
-                      .split("\n")
-                      .slice(0, lineIndex)
-                      .join("").length;
-                    const globalIndex = previousCharsCount + charIndex;
-
-                    return (
-                      <span
-                        key={charIndex}
-                        style={{ animationDelay: `${globalIndex * 0.03}s` }}
-                      >
-                        {char === " " ? "\u00A0" : char}
-                      </span>
-                    );
-                  })}
-                </div>
-              ))}
-          </div>
-        )}
-
-        {/* ✅ FUNZIONALITÀ: Children support */}
-        {children}
-
+      <>
         {/* ✅ FUNZIONALITÀ: Dev Tools (Solo in sviluppo locale e non preview) */}
+        {/* Rendered outside the orb-container to avoid mobile clipping/centering issues */}
         {mode === "development" && (
           <DevTools
             currentConfig={config}
@@ -514,18 +422,113 @@ const Orb = memo(
           />
         )}
 
-        {/* Liquid Glass Background - Between chat and canvas */}
-        <div className="orb-glass-mask-wrapper">
-          <div className="orb-glass-layer">
-            <div className="glass-blobs" />
-            <div className="glass-noise" />
-            <div className="glass-shine" />
-          </div>
-        </div>
+        <div
+          ref={containerRef}
+          role="button"
+          tabIndex={0}
+          aria-label={
+            isMinimized ? "Apri assistente Yuume" : "Widget Yuume attivo"
+          }
+          className={`orb-container ${isMinimized ? "minimized" : ""} ${
+            isMobileView ? "mobile-device" : ""
+          } ${mode === "preview" ? "preview-mode" : ""}`}
+          onClick={handleExpand}
+          onKeyDown={handleKeyDown}
+          style={{
+            "--orb-theme-color": themeColor,
+            opacity: loading ? 0.6 : 1,
+          }}
+        >
+          {/* Loading Placeholder */}
+          {loading && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.05)",
+                animation: "pulse 2s infinite",
+              }}
+            />
+          )}
 
-        {/* WebGL Canvas Layer - On top visually, but pointer-events: none to allow clicks through */}
-        <div ref={canvasContainerRef} className="orb-canvas-layer" />
-      </div>
+          {/* Chat Layer - Rendered once loaded, visibility handled by CSS classes */}
+          {!loading && (
+            <div className="orb-chat-layer">
+              {mode === "preview" ? (
+                <ChatPreview chatColors={chatColors} />
+              ) : (
+                <Chat
+                  chatColors={chatColors}
+                  devShopDomain={shopDomain}
+                  onTyping={setIsTyping}
+                  onMinimize={() => {
+                    setEnlarged(false);
+                    // Wait for animation (600ms) before resizing iframe
+                    setTimeout(() => {
+                      window.parent?.postMessage(
+                        { type: "resize", enlarged: false },
+                        "*"
+                      );
+                    }, 600);
+                  }}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Minimized Text */}
+          {isMinimized && (
+            <div
+              key={currentMessageIndex} // Force re-render to restart animations
+              className="minimized-text"
+              style={{
+                color:
+                  textColorMode === "light" ? chatColors.userMessage : "white",
+              }}
+            >
+              {messages[currentMessageIndex]
+                .split("\n")
+                .map((line, lineIndex) => (
+                  <div key={lineIndex} className="minimized-text-line">
+                    {Array.from(line).map((char, charIndex) => {
+                      // Calculate global index for continuous delay
+                      const previousCharsCount = messages[currentMessageIndex]
+                        .split("\n")
+                        .slice(0, lineIndex)
+                        .join("").length;
+                      const globalIndex = previousCharsCount + charIndex;
+
+                      return (
+                        <span
+                          key={charIndex}
+                          style={{ animationDelay: `${globalIndex * 0.03}s` }}
+                        >
+                          {char === " " ? "\u00A0" : char}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ))}
+            </div>
+          )}
+
+          {/* ✅ FUNZIONALITÀ: Children support */}
+          {children}
+
+          {/* Liquid Glass Background - Between chat and canvas */}
+          <div className="orb-glass-mask-wrapper">
+            <div className="orb-glass-layer">
+              <div className="glass-blobs" />
+              <div className="glass-noise" />
+              <div className="glass-shine" />
+            </div>
+          </div>
+
+          {/* WebGL Canvas Layer - On top visually, but pointer-events: none to allow clicks through */}
+          <div ref={canvasContainerRef} className="orb-canvas-layer" />
+        </div>
+      </>
     );
   }
 );

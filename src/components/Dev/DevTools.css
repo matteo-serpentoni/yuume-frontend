@@ -1,0 +1,26 @@
+/* Dev Tools specific styles - Loaded only in development */
+.yuume-dev-tools::-webkit-scrollbar {
+  display: none;
+}
+
+.yuume-mock-storefront {
+  scroll-behavior: smooth;
+}
+
+/* Specific scrollbar styling for the mock storefront to make it obvious it's scrollable */
+.yuume-mock-storefront::-webkit-scrollbar {
+  width: 8px;
+}
+
+.yuume-mock-storefront::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.yuume-mock-storefront::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] .yuume-mock-storefront::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}

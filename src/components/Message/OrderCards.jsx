@@ -391,25 +391,42 @@ const OrderListRow = ({ order, index, onClick }) => {
 
 const OrderCards = ({ message, onOrderClick }) => {
   const {
-    type,
-    orders = [],
-    order,
-    title,
-    message: displayMessage,
-    email,
+    type: directType,
+    orders: directOrders = [],
+    order: directOrder,
+    title: directTitle,
+    message: directMessage,
+    text: historicalText,
+    email: directEmail,
+    data = {},
   } = message;
 
-  // 1. Single Order Detail View (Treat as a clickable summary in bubbles)
+  // Normalize data and type from potential history structure
+  const orders = directOrders.length ? directOrders : data.orders || [];
+  const order = directOrder || data.order;
+  const title = directTitle || data.title;
+  const email = directEmail || data.email;
+  const finalDisplayMessage = directMessage || historicalText || data.message;
+  const type = (directType || data.type || "").toLowerCase();
+
+  // 1. Single Order Detail View
+  // We show the detail/row view if:
+  // - type is order_detail or its uppercase variant
+  // - OR it's a list with exactly one order
+  // - OR it contains a single 'order' object
   if (
-    type === "order_detail" ||
-    (type === "order_cards" && orders.length === 1)
+    type.includes("order_detail") ||
+    (type.includes("order_cards") && orders.length === 1) ||
+    (!orders.length && order)
   ) {
     const targetOrder = order || orders[0];
+    if (!targetOrder) return null;
+
     const isClickable = !!targetOrder.orderNumber;
 
     return (
       <div style={{ width: "100%", padding: "4px 0" }}>
-        {displayMessage && (
+        {finalDisplayMessage && (
           <p
             style={{
               color: "rgba(255,255,255,0.9)",
@@ -417,7 +434,7 @@ const OrderCards = ({ message, onOrderClick }) => {
               marginBottom: 12,
             }}
           >
-            {displayMessage}
+            {finalDisplayMessage}
           </p>
         )}
         <OrderListRow
@@ -478,7 +495,7 @@ const OrderCards = ({ message, onOrderClick }) => {
         </div>
       </div>
 
-      {displayMessage && (
+      {finalDisplayMessage && (
         <p
           style={{
             color: "rgba(255,255,255,0.8)",
@@ -487,7 +504,7 @@ const OrderCards = ({ message, onOrderClick }) => {
             fontWeight: 500,
           }}
         >
-          {displayMessage.replace("1 ordini", "1 ordine")}
+          {String(finalDisplayMessage).replace("1 ordini", "1 ordine")}
         </p>
       )}
 

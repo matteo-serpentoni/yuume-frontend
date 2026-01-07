@@ -1,25 +1,4 @@
-/* src/styles/Orb.css */
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Inter:wght@400;500&display=swap");
-
-:root {
-  --orb-size: 600px;
-  --orb-minimized-size: 120px;
-  --bg-color: #050505;
-  --user-msg-bg: linear-gradient(135deg, #6366f1, #a855f7);
-  --user-msg-text: white;
-  --bot-msg-bg: rgba(255, 255, 255, 0.08);
-  --bot-msg-text: #f3f4f6;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background-color: var(--bg-color);
-  font-family: "Outfit", sans-serif;
-  color: white;
-  overflow: hidden;
-}
+/* src/components/Orb/Orb.css */
 
 /* ORB CONTAINER */
 .orb-container {
@@ -76,20 +55,24 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 75%;
-  height: 75%;
+  /* UNIFIED DESKTOP SIZE: Compensated to 78% for 763px container expansion */
+  /* (Locks absolute pixel size to previous ~595px) */
+  width: 78%;
+  height: 78%;
   z-index: 3;
   pointer-events: none;
-  border-radius: 50%;
 
-  /* Apply the mask here - Softer fade to avoid hard edge */
-  mask-image: radial-gradient(circle, black 0%, black 30%, transparent 85%);
-  -webkit-mask-image: radial-gradient(
-    circle,
-    black 0%,
-    black 30%,
-    transparent 85%
-  );
+  /* PERFECT LIQUID GLASS: Hard clipping for sharp solid edges */
+  border-radius: 50%;
+  overflow: hidden;
+
+  /* Luminous sharp border defining the perimenter */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-sizing: border-box;
+
+  /* No more soft masks here to keep edges crisp */
+  mask-image: none;
+  -webkit-mask-image: none;
 
   will-change: transform;
   transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -102,16 +85,19 @@ body {
   border-radius: 50%;
   overflow: hidden;
 
-  /* Base Blur & Mask */
-  backdrop-filter: blur(60px) saturate(160%) brightness(1.1);
-  -webkit-backdrop-filter: blur(60px) saturate(160%) brightness(1.1);
+  /* PERFECT SYNC: Mirror mobile for premium aesthetics */
+  backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
 
-  /* No mask here, handled by wrapper */
-  border: none;
+  /* Subtle inner depth */
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+
+  /* MIRROR MOBILE GRADIENT: Elegant and misty */
   background: radial-gradient(
     circle at 50% 50%,
-    color-mix(in srgb, var(--orb-theme-color, #6464ff), transparent 40%),
-    transparent 85%
+    color-mix(in srgb, var(--orb-theme-color, #6464ff), transparent 30%),
+    rgba(255, 255, 255, 0.05) 80%,
+    transparent 100%
   );
 }
 
@@ -161,9 +147,14 @@ body {
   animation: floatBlob2 10s ease-in-out infinite alternate;
 }
 
-/* 2. NOISE TEXTURE - Removed for cleaner, premium look */
+/* 2. NOISE TEXTURE */
 .glass-noise {
-  display: none;
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
 }
 
 /* ANIMATIONS */
@@ -222,10 +213,21 @@ body {
   line-height: 1.1;
 }
 
+/* MESSAGES AREA */
+.messages-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Upscaled for 726px orb (was 18px) */
+  padding: 0 var(--orb-h-padding-messages, 20px) 15px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+
 .minimized-text-line {
   display: flex;
   justify-content: center;
-  gap: 0.5px;
 }
 
 .minimized-text span {
@@ -258,191 +260,54 @@ body {
   }
 }
 
-/* CHAT LAYER */
+.orb-container.minimized .orb-chat-layer {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .orb-chat-layer {
   position: absolute;
   z-index: 5;
-  /* Visually behind canvas */
-  width: 55%;
-  /* Reduced to ensure it stays well within the orb */
-  height: 65%;
+
+  /* LAYOUT VARIABLES: Centralized management of safe zones */
+  --orb-v-padding-top: 8%;
+  --orb-v-padding-bottom: 8%;
+  --orb-h-padding-header: 25%;
+  --orb-h-padding-messages: 18%;
+  --orb-h-padding-legal: 25%;
+  --orb-input-width: 100%;
+
+  /* UNIFIED DESKTOP SIZE: Compensated to 78% for 763px container expansion */
+  width: 78%;
+  height: 78%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  box-sizing: border-box;
 
-  /* Transparent background */
-  background: transparent;
-  border-radius: 30px;
+  /* SAFE ZONE: Uses variables for dynamic platform-aware centering */
+  padding: var(--orb-v-padding-top) 0 var(--orb-v-padding-bottom) 0;
+
+  /* PERFECT MESH SYNC: Reverting to mobile's dark mesh for total identity */
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  overflow: hidden;
+
+  /* Remove filters from this layer (they are on .orb-glass-layer behind) */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: none;
 
   pointer-events: auto;
   transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.orb-container.minimized .orb-chat-layer {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* CHAT INTERFACE */
-.chat-inner {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 20px 20px 5px 20px;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.messages-area {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-bottom: 10px;
-  padding-top: 10px;
-  scrollbar-width: none;
-  /* Mask is the only one responsible for the fade-out effect */
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 15%,
-    black 90%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 15%,
-    black 90%,
-    transparent 100%
-  );
-}
-
-.messages-area::-webkit-scrollbar {
-  display: none;
-}
-
-.message-bubble {
-  width: fit-content;
-  max-width: 85%;
-  padding: 10px 16px;
-  border-radius: 18px;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  position: relative;
-  word-wrap: break-word;
-  text-align: left;
-  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  /* Layout interno per testo + timestamp */
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 8px;
-
-  /* Subtle shadow for depth */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1),
-    0 8px 24px rgba(0, 0, 0, 0.05);
-
-  /* Enable text selection */
-  user-select: text;
-  -webkit-user-select: text;
-  cursor: text;
-  transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Apply selective darkening ONLY to bubbles when a drawer is open */
-.yuume-drawer-active .message-bubble {
-  filter: brightness(0.4) saturate(0.8);
-}
-
-/* SELECTION STYLES */
-.message-bubble *::selection {
-  background: rgba(255, 255, 255, 0.3);
-  color: white;
-}
-
-.message-bubble.user *::selection {
-  background: rgba(255, 255, 255, 0.4);
-}
-
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.message-bubble.user {
-  align-self: flex-end;
-  margin-left: auto;
-  background: var(--user-msg-bg);
-  color: var(--user-msg-text);
-  border-bottom-right-radius: 4px;
-}
-
-.message-bubble.bot,
-.message-bubble.ai {
-  align-self: flex-start;
-  margin-right: auto;
-  background: var(--bot-msg-bg);
-  color: var(--bot-msg-text);
-  border-bottom-left-radius: 4px;
-}
-
-/* MESSAGE CONTENT & TIMESTAMP - WhatsApp Style */
-.message-content {
-  flex: 1;
-  min-width: 0; /* Allow text to wrap */
-  padding-right: 4px; /* Spazio per evitare sovrapposizione con timestamp */
-}
-
-/* MARKDOWN STYLES */
-.message-content p {
-  margin: 0;
-}
-
-.message-content strong {
-  font-weight: 600;
-}
-
-.message-content ul,
-.message-content ol {
-  margin: 4px 0;
-  padding-left: 20px;
-}
-
-.message-content li {
-  margin-bottom: 2px;
-}
-
-.message-content a {
-  color: inherit;
-  text-decoration: underline;
-}
-
-.message-time {
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 400;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  align-self: flex-end;
-  margin-top: 2px;
-  margin-left: auto; /* Allineato a destra */
+/* DESKTOP-ONLY LIGHTER GLASS */
+.orb-container:not(.mobile-device) .orb-chat-layer {
+  background: rgba(0, 0, 0, 0.35); /* More luminous than mobile card */
 }
 
 /* TYPING INDICATOR */
@@ -486,130 +351,6 @@ body {
   }
 }
 
-/* INPUT AREA */
-.input-area {
-  display: flex;
-  gap: 8px;
-  padding-top: 15px;
-  margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.chat-input {
-  flex: 1;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 12px 16px;
-  outline: none;
-  font-size: 0.95rem;
-  color: white;
-  transition: all 0.3s ease;
-}
-
-.chat-input:focus {
-  background: rgba(0, 0, 0, 0.5);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.send-button {
-  background: var(--user-msg-bg);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.send-button:hover {
-  transform: scale(1.05);
-}
-
-.send-button:disabled {
-  background: #333;
-  cursor: default;
-  transform: none;
-  opacity: 0.5;
-}
-
-@keyframes gradient-flow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.profile-button-gradient-border {
-  position: relative !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  background-clip: padding-box !important; /* Keep bg inside border */
-  border: 1px solid transparent !important; /* Match close button 1px */
-  border-radius: 50% !important;
-  box-shadow: none !important;
-  z-index: 1; /* Create stacking context */
-}
-
-.profile-button-gradient-border::before {
-  content: "";
-  position: absolute;
-  inset: -1px; /* Cover the 1px border area */
-  border-radius: 50%;
-  padding: 1px; /* 1px thickness */
-  background: linear-gradient(270deg, #ff00cc, #3333ff, #00ccff, #ff00cc);
-  background-size: 300% 300%;
-  animation: gradient-flow 4s ease infinite;
-  z-index: -1; /* Place behind the button */
-
-  /* Mask to create the ring */
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-
-  pointer-events: none;
-}
-/* CLOSE BUTTON */
-.close-button {
-  position: relative;
-  margin: 15px auto 0;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: var(--orb-theme-color, white);
-  border-color: color-mix(
-    in srgb,
-    var(--orb-theme-color, white),
-    transparent 80%
-  );
-}
-
-.close-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
-}
-
-.close-button svg {
-  width: 20px;
-  height: 20px;
-}
-
 /* TYPING INDICATOR ANIMATION */
 @keyframes typing-bounce {
   0%,
@@ -634,7 +375,7 @@ body {
 /* This allows forcing mobile view in iframe preview regardless of width */
 /* @media (max-width: 600px) { - REMOVED, relying on class */
 .orb-container.mobile-device:not(.minimized) {
-  /* Center on screen */
+  /* Restore "perfetto" centering method */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -642,7 +383,7 @@ body {
   /* Maximized card dimensions with MORE margin */
   /* Use svh (Small Viewport Height) to avoid browser bars issues */
   width: 90vw;
-  height: 80svh;
+  height: 85svh;
 
   /* Ensure it doesn't get too crazy tall or wide */
   max-width: 400px;
@@ -650,25 +391,56 @@ body {
 
   /* Card look */
   border-radius: 24px;
+  overflow: hidden; /* CLIP BLOBS AND GLOWS */
 
+  /* Force fixed positioning and reset corner anchors */
+  position: fixed;
   bottom: auto;
   right: auto;
 
   /* Optimize performance */
   will-change: width, height, top, left, transform, border-radius;
-  /* Use a smoother easing without overshoot for mobile to prevent layout thrashing */
-  /* Reduced duration to 0.4s for snappier feel */
+  /* NO transition on top/left/transform for mobile to prevent jumping during layout updates */
   transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
     height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-    top 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-    left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
     border-radius 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Hide WebGL sphere in card mode */
 .orb-container.mobile-device:not(.minimized) .orb-canvas-layer {
   display: none;
+}
+
+/* MOBILE CARD LAYOUT RESTORATION */
+.orb-container.mobile-device:not(.minimized) .orb-chat-layer {
+  /* Restore card dimensions and shape for mobile devices */
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  width: auto;
+  height: auto;
+  transform: none;
+
+  /* MOBILE LAYOUT VARIABLES: Polished card spacing */
+  --orb-v-padding-top: 10px;
+  --orb-v-padding-bottom: 5px;
+  --orb-h-padding-header: 20px;
+  --orb-h-padding-messages: 18px;
+  --orb-h-padding-legal: 15px;
+  --orb-input-width: 100%;
+
+  /* Padding is handled by components via variables */
+  padding: 0 !important;
+
+  /* Semi-transparent background */
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+
+  /* Slightly smaller radius to nest perfectly */
+  border-radius: 20px;
 }
 
 /* Expand glass background to fill card */
@@ -683,297 +455,35 @@ body {
   transform: none;
 }
 
+.orb-container:not(.mobile-device) .chat-mobile-header h3 {
+  font-size: 1.65rem; /* Upscaled for 726px orb (was 1.5rem) */
+  font-weight: 700;
+  letter-spacing: 1.2px; /* Upscaled from 1px */
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+}
+
 .orb-container.mobile-device:not(.minimized) .orb-glass-layer {
   border-radius: 24px;
   /* Boost brightness/saturation for mobile to make it pop */
-  filter: brightness(1.3) saturate(1.2);
+  filter: brightness(1.2) saturate(1.4);
 
-  /* PERFORMANCE: Remove backdrop-filter on mobile */
-  /* Animating a large area with blur is very expensive */
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  /* RESTORE BACKDROP BLUR for Premium Feel */
+  backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
 
-  /* Compensate with a slightly darker/stronger background */
+  /* Glass Edge - Subtle luminous border */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-sizing: border-box;
+
+  /* Enhanced Gradient: More opaque center for legibility, milky fade */
   background: radial-gradient(
     circle at 50% 50%,
-    color-mix(in srgb, var(--orb-theme-color, #6464ff), transparent 20%),
-    transparent 90%
-  );
-}
-
-/* Speed up animation on mobile for more dynamism */
-.orb-container.mobile-device:not(.minimized) .glass-blobs {
-  animation-duration: 10s;
-}
-
-/* Expand chat layer to fill card but with inset for border */
-.orb-container.mobile-device:not(.minimized) .orb-chat-layer {
-  /* Create the border effect by making this slightly smaller than container */
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  right: 4px;
-  bottom: 4px;
-  width: auto;
-  height: auto;
-  transform: none; /* Reset center transform */
-
-  /* Semi-transparent background to let glass effect show through */
-  /* This creates a "tinted glass" look for the chat area */
-  background: rgba(0, 0, 0, 0.5);
-
-  /* REMOVED backdrop-filter on mobile for performance */
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-
-  /* Slightly smaller radius to nest perfectly */
-  border-radius: 20px;
-
-  /* RIMOSSO: padding-top: 10px; - sarà gestito dal chat-inner */
-}
-
-/* Rimuovere il padding-top dal chat-inner su mobile per far funzionare l'header sticky */
-.orb-container.mobile-device:not(.minimized) .chat-inner {
-  padding-top: 0;
-}
-
-/* Scale down internal elements for mobile */
-.orb-container.mobile-device:not(.minimized) .message-bubble {
-  font-size: 0.9rem;
-  padding: 10px 14px;
-  border-radius: 16px;
-}
-
-.orb-container.mobile-device:not(.minimized) .chat-input {
-  font-size: 0.9rem;
-  padding: 10px 14px;
-  height: 40px;
-}
-
-.orb-container.mobile-device:not(.minimized) .send-button {
-  width: 40px;
-  height: 40px;
-}
-
-.orb-container.mobile-device:not(.minimized) .close-button {
-  width: 36px;
-  height: 36px;
-  /* Position close button safely */
-  margin-top: 10px;
-  margin-bottom: 15px; /* Extra bottom margin for safety */
-}
-
-.orb-container.mobile-device:not(.minimized) .close-button svg {
-  width: 18px;
-  height: 18px;
-}
-
-.orb-container.mobile-device:not(.minimized) .typing-indicator {
-  padding: 10px 12px;
-}
-
-.orb-container.mobile-device:not(.minimized) .typing-indicator span {
-  width: 5px;
-  height: 5px;
-}
-
-/* Adjust minimized position if needed, or keep default bottom-right */
-.orb-container.mobile-device.minimized {
-  bottom: 20px;
-  right: 20px;
-}
-
-/* Rimuovere solo il fade superiore, mantenere quello inferiore */
-.orb-container.mobile-device:not(.minimized) .messages-area {
-  mask-image: linear-gradient(to bottom, black 0%, black 95%, transparent 100%);
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    black 95%,
+    color-mix(in srgb, var(--orb-theme-color, #6464ff), transparent 30%),
+    rgba(255, 255, 255, 0.05) 80%,
     transparent 100%
   );
-  padding-top: 20px;
-  padding-bottom: 20px;
 }
 
-/* MOBILE HEADER STYLES */
-.orb-container.mobile-device:not(.minimized) .chat-mobile-header {
-  display: flex !important; /* Force display on mobile */
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0; /* Prevent header from shrinking */
-  height: 60px; /* Fixed height for better look */
-  padding: 0 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-
-  /* Fully transparent header - Role is just to space the text */
-  background: transparent;
-  border-radius: 20px 20px 0 0;
-
-  /* Sticky positioning */
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  pointer-events: none; /* Let scrolls pass through */
-
-  margin: 0 -20px 0 -20px;
-  padding-bottom: 5px;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-bottom: none;
-}
-
-.orb-container:not(.minimized) .header-content {
-  display: flex;
-  flex-direction: column; /* Vertical su mobile */
-  align-items: center;
-  gap: 2px;
-  opacity: 1; /* Opaco su mobile */
-}
-
-.orb-container:not(.minimized) .chat-mobile-header h3 {
-  margin: 0;
-  font-size: 1.2rem; /* Più grande su mobile */
-  font-weight: 600;
-  color: white;
-  letter-spacing: 0.5px;
-}
-
-.orb-container:not(.minimized) .online-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.orb-container:not(.minimized) .status-dot.status-online {
-  background-color: #10b981;
-  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  animation: pulse-green 2s infinite;
-}
-
-.orb-container:not(.minimized) .status-dot.status-offline {
-  background-color: #9ca3af;
-  box-shadow: none;
-  animation: none;
-}
-
-.orb-container:not(.minimized) .status-dot.status-reconnecting {
-  background-color: #f59e0b;
-  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-  animation: pulse-orange 2s infinite;
-}
-
-/* KEYFRAMES (Global scope to ensure they work) */
-@keyframes pulse-green {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
-}
-
-/* DESKTOP HEADER STYLES */
-/* Header ultra-minimale - quasi invisibile */
-.chat-mobile-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  height: 24px; /* Ultra sottile */
-  padding: 0;
-
-  /* Quasi invisibile, ma con un lieve accenno del colore */
-  border: none;
-  /* DESKTOP HEADER - Transparent */
-  background: transparent;
-
-  /* Sticky positioning */
-  position: sticky;
-  top: -20px;
-  z-index: 100;
-
-  margin: -20px -20px 0 -20px;
-  padding-bottom: 10px;
-  pointer-events: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-bottom: none;
-}
-
-.header-content {
-  display: flex;
-  flex-direction: row; /* Horizontal layout */
-  align-items: center;
-  gap: 6px;
-  opacity: 0.5; /* Semi-trasparente */
-}
-
-.chat-mobile-header h3 {
-  margin: 0;
-  font-size: 0.9rem; /* Più leggibile */
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 0.5px;
-}
-
-.online-status {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.75rem; /* Più leggibile */
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.status-dot {
-  width: 6px; /* Leggermente più grande */
-  height: 6px;
-  border-radius: 50%;
-  transition: background-color 0.3s ease;
-}
-
-.status-dot.status-online {
-  background-color: #10b981;
-  animation: pulse-green 2s infinite;
-}
-
-.status-dot.status-offline {
-  background-color: #9ca3af;
-}
-
-.status-dot.status-reconnecting {
-  background-color: #f59e0b;
-  animation: pulse-orange 2s infinite;
-}
-
-@keyframes pulse-orange {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
-  }
-}
 /* FEEDBACK ANIMATION */
 @keyframes thumb-pop {
   0% {

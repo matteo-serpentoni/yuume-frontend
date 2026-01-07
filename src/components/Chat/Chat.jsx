@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useChat } from "../../hooks/useChat";
-import "../Orb/Orb.css";
+import "./Chat.css";
 
 import { AnimatePresence } from "framer-motion";
 import MessageInput from "./MessageInput";
@@ -100,7 +100,21 @@ const Chat = ({
         }
 
         if (resultIndex !== -1) {
-          blocks.push({ ...msg, results: filtered[resultIndex] });
+          const results = { ...filtered[resultIndex] };
+
+          // Inherit email from the user's lookup message (somewhere between form and results)
+          if (!results.email) {
+            for (let k = i + 1; k < resultIndex; k++) {
+              const prevMsg = filtered[k];
+              if (prevMsg.text?.startsWith("ORDER_LOOKUP:")) {
+                const parts = prevMsg.text.split(":");
+                if (parts[1]) results.email = parts[1];
+                break;
+              }
+            }
+          }
+
+          blocks.push({ ...msg, results });
           i = resultIndex; // Skip everything until the result
           continue;
         }
@@ -127,16 +141,7 @@ const Chat = ({
         />
       ) : (
         <>
-          {/* Unified container for messages and input, clipping the drawer at the very bottom edge */}
-          <div
-            style={{
-              position: "relative",
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
+          <div className="chat-content-wrapper">
             <MessageList
               chatBlocks={chatBlocks}
               chatColors={chatColors}
@@ -152,35 +157,13 @@ const Chat = ({
 
             {/* Conversation Ended Separator & Rating */}
             {sessionStatus === "completed" && (
-              <div style={{ padding: "0 16px 24px 16px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    margin: "24px 0",
-                    color: "rgba(255, 255, 255, 0.4)",
-                    fontSize: "12px",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  <div
-                    style={{
-                      flex: 1,
-                      height: "1px",
-                      background: "rgba(255, 255, 255, 0.1)",
-                    }}
-                  />
-                  <span style={{ padding: "0 12px" }}>
+              <div className="conversation-ended-container">
+                <div className="conversation-ended-separator">
+                  <div className="separator-line" />
+                  <span className="separator-text">
                     Conversazione Terminata
                   </span>
-                  <div
-                    style={{
-                      flex: 1,
-                      height: "1px",
-                      background: "rgba(255, 255, 255, 0.1)",
-                    }}
-                  />
+                  <div className="separator-line" />
                 </div>
 
                 <StarRating
@@ -205,35 +188,22 @@ const Chat = ({
                   : "Scrivi qualcosa..."
               }
               connectionStatus={connectionStatus}
-              disabled={sessionStatus === "escalated" && !assignedTo} // ✅ Enable if assigned
+              disabled={sessionStatus === "escalated" && !assignedTo}
               sendButtonColor={chatColors.sendButton}
               inputBorderColor={chatColors.inputBorder}
               inputFocusColor={chatColors.inputFocus}
               previewMode={isPreview}
-              onProfileClick={isPreview ? null : () => setView("profile")} // ✅ Passa handler
+              onProfileClick={isPreview ? null : () => setView("profile")}
             />
 
             {/* Legal Disclaimer */}
-            <div
-              style={{
-                fontSize: "10px",
-                color: "rgba(255, 255, 255, 0.4)",
-                textAlign: "center",
-                marginTop: "8px",
-                padding: "0 10px",
-                lineHeight: "1.3",
-                marginBottom: "8px",
-              }}
-            >
+            <div className="legal-disclaimer">
               Chattando accetti la{" "}
               <a
                 href="/policies/privacy-policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  color: "rgba(255, 255, 255, 0.6)",
-                  textDecoration: "underline",
-                }}
+                className="legal-link"
               >
                 Privacy Policy
               </a>{" "}
@@ -242,26 +212,14 @@ const Chat = ({
                 href="/policies/cookie-policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  color: "rgba(255, 255, 255, 0.6)",
-                  textDecoration: "underline",
-                }}
+                className="legal-link"
               >
                 Cookie Policy
               </a>
               .
             </div>
 
-            {/* ✅ Portaled Drawer now sits on top of MessageInput because it's a sibling inside the relative wrapper */}
-            <div
-              id="yuume-drawer-portal"
-              style={{
-                position: "absolute",
-                inset: 0,
-                pointerEvents: "none",
-                zIndex: 1000,
-              }}
-            />
+            <div id="yuume-drawer-portal" className="drawer-portal-container" />
           </div>
         </>
       )}

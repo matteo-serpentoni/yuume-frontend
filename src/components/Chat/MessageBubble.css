@@ -1,0 +1,249 @@
+.message-bubble-wrapper {
+  display: flex;
+  width: 100%;
+  margin-bottom: 12px;
+  position: relative;
+  /* Smoother organic growth curve */
+  animation: bubble-pop-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.message-bubble-wrapper.user {
+  justify-content: flex-end;
+  transform-origin: bottom right; /* Grow from user corner */
+}
+
+.message-bubble-wrapper.ai {
+  justify-content: flex-start;
+  transform-origin: bottom left; /* Grow from bot corner */
+}
+
+/* Base Bubble Style: The Liquid Glass Look */
+.message-bubble {
+  position: relative;
+  max-width: 85%;
+  min-width: 40px;
+  padding: 12px 16px;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+
+  /* Restoration of the smooth shadow transition */
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Internal layout for WhatsApp style (text + timestamp) */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+  word-wrap: break-word;
+  text-align: left;
+}
+
+/* User Bubble: Vibrant Primary Tint */
+.message-bubble-wrapper.user .message-bubble {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--user-msg-color-rgb), 0.7) 0%,
+    rgba(var(--user-msg-color-rgb), 0.4) 100%
+  );
+  color: #ffffff;
+  border-radius: 18px 18px 2px 18px; /* Sharp bottom-right */
+  border-color: rgba(var(--user-msg-color-rgb), 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* AI Bubble: Neutral Frosted Glass */
+.message-bubble-wrapper.ai .message-bubble,
+.message-bubble-wrapper.assistant .message-bubble {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  color: var(--bot-msg-text); /* Fallback to CSS var */
+  border-radius: 18px 18px 18px 2px; /* Sharp bottom-left */
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* DARK MODE ADJUSTMENT for AI Bubble */
+[data-theme="dark"] .message-bubble-wrapper.ai .message-bubble,
+[data-theme="dark"] .message-bubble-wrapper.assistant .message-bubble {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+}
+
+/* Metadata: Time and Status */
+.bubble-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.message-bubble-wrapper.user .bubble-meta {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.message-bubble-wrapper.ai .bubble-meta,
+.message-bubble-wrapper.assistant .bubble-meta {
+  color: rgba(255, 255, 255, 0.5);
+  justify-content: space-between; /* Spread feedback and time */
+  width: 100%;
+}
+
+.feedback-inline {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.feedback-btn {
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+}
+
+.feedback-btn:hover {
+  color: rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.feedback-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.feedback-btn.active[title="Utile"] {
+  color: #00ffbc; /* Vibrant Neon Emerald */
+  filter: drop-shadow(0 0 5px rgba(0, 255, 188, 0.6));
+}
+
+.feedback-btn.active[title="Non utile"] {
+  color: #ff3333; /* Vibrant Neon Red */
+  filter: drop-shadow(0 0 5px rgba(255, 51, 51, 0.6));
+}
+
+/* Typing Indicator Styles */
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 12px;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes typing-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Pop-in Animation */
+@keyframes bubble-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5); /* Start smaller for a more distinct growth effect */
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Special types overrides */
+.message-bubble.full-width {
+  max-width: 100%;
+  width: 100%;
+  padding: 12px 16px; /* Back to standard bubble padding */
+}
+
+.message-bubble.auto-width {
+  max-width: 85%;
+  width: fit-content;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .message-bubble {
+    max-width: 90%;
+    padding: 10px 14px;
+  }
+}
+
+/* MESSAGE CONTENT & MARKDOWN STYLES */
+.message-content {
+  flex: 1;
+  min-width: 0;
+  padding-right: 4px;
+}
+
+.message-content p {
+  margin: 0;
+}
+
+.message-content strong {
+  font-weight: 600;
+}
+
+.message-content ul,
+.message-content ol {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.message-content li {
+  margin-bottom: 2px;
+}
+
+.message-content a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* SELECTION STYLES */
+.message-bubble *::selection {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.message-bubble.user *::selection {
+  background: rgba(255, 255, 255, 0.4);
+}
