@@ -1,6 +1,6 @@
-import React from "react";
-import { motion } from "framer-motion";
-import "./CategoryCards.css";
+import React from 'react';
+import { motion } from 'framer-motion';
+import './CategoryCards.css';
 
 const CategoryCard = ({ category, index, onCategoryClick }) => {
   const { title, count, image } = category;
@@ -12,7 +12,7 @@ const CategoryCard = ({ category, index, onCategoryClick }) => {
       transition={{ delay: index * 0.08, duration: 0.3 }}
       onClick={() => onCategoryClick(title)}
       className="yuume-category-card"
-      whileHover={{ scale: 1.02, boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }}
+      whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
       whileTap={{ scale: 0.98 }}
     >
       {/* Category Image / Icon */}
@@ -28,7 +28,7 @@ const CategoryCard = ({ category, index, onCategoryClick }) => {
       <div className="yuume-category-info">
         <div className="yuume-category-name">{title}</div>
         <div className="yuume-category-count">
-          {count} {count === 1 ? "prodotto" : "prodotti"}
+          {count} {count === 1 ? 'prodotto' : 'prodotti'}
         </div>
       </div>
 
@@ -61,9 +61,7 @@ const CategoryCards = ({ message, onCategoryClick }) => {
   return (
     <div className="yuume-category-cards-container">
       {/* Intro Message */}
-      <div className="yuume-category-intro">
-        {displayMessage || "Seleziona una categoria:"}
-      </div>
+      <div className="yuume-category-intro">{displayMessage || 'Seleziona una categoria:'}</div>
 
       {/* Cards List */}
       <div className="yuume-category-list">
@@ -78,9 +76,7 @@ const CategoryCards = ({ message, onCategoryClick }) => {
       </div>
 
       {/* Help text */}
-      <div className="yuume-category-help-text">
-        Clicca su una categoria per vedere i prodotti
-      </div>
+      <div className="yuume-category-help-text">Clicca su una categoria per vedere i prodotti</div>
     </div>
   );
 };

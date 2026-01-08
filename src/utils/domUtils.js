@@ -10,7 +10,7 @@
  * @returns {string} The variable value or default.
  */
 export const getCssVariable = (name, defaultValue) => {
-  if (typeof window === "undefined") return defaultValue;
+  if (typeof window === 'undefined') return defaultValue;
 
   const style = getComputedStyle(document.documentElement);
   const value = style.getPropertyValue(name).trim();

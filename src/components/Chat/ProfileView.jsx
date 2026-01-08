@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { getProfile, updateProfile } from "../../services/chatApi";
-import "./ProfileView.css";
+import React, { useState, useEffect } from 'react';
+import { getProfile, updateProfile } from '../../services/chatApi';
+import './ProfileView.css';
 
 const ProfileView = ({
   onBack,
   sessionId,
   shopDomain,
   colors = {
-    header: "#667eea",
-    sendButton: "#667eea",
-    inputFocus: "#4CC2E9",
+    header: '#667eea',
+    sendButton: '#667eea',
+    inputFocus: '#4CC2E9',
   },
 }) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
@@ -28,8 +28,8 @@ const ProfileView = ({
     setLoading(true);
     const data = await getProfile(sessionId, shopDomain);
     if (data) {
-      setName(data.name || "");
-      setEmail(data.email || "");
+      setName(data.name || '');
+      setEmail(data.email || '');
       setIsIdentified(!!data.isIdentified);
     }
     setLoading(false);
@@ -40,14 +40,14 @@ const ProfileView = ({
 
     // Validazione
     if (!name.trim() || !email.trim()) {
-      setMessage({ type: "error", text: "Nome ed email obbligatori." });
+      setMessage({ type: 'error', text: 'Nome ed email obbligatori.' });
       setTimeout(() => setMessage(null), 3000);
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setMessage({ type: "error", text: "Inserisci un'email valida." });
+      setMessage({ type: 'error', text: "Inserisci un'email valida." });
       setTimeout(() => setMessage(null), 3000);
       return;
     }
@@ -62,13 +62,13 @@ const ProfileView = ({
       });
       setSaving(false);
       setIsIdentified(true);
-      setMessage({ type: "success", text: "Profilo salvato!" });
+      setMessage({ type: 'success', text: 'Profilo salvato!' });
       setTimeout(() => {
         onBack();
       }, 1500);
     } catch (error) {
       setSaving(false);
-      setMessage({ type: "error", text: "Errore durante il salvataggio." });
+      setMessage({ type: 'error', text: 'Errore durante il salvataggio.' });
       setTimeout(() => {
         setMessage(null);
       }, 3000);
@@ -80,17 +80,17 @@ const ProfileView = ({
     setSaving(true);
     try {
       await updateProfile(sessionId, shopDomain, { reset: true });
-      setName("");
-      setEmail("");
+      setName('');
+      setEmail('');
       setIsIdentified(false);
       setSaving(false);
-      setMessage({ type: "success", text: "Dati rimossi." });
+      setMessage({ type: 'success', text: 'Dati rimossi.' });
       setTimeout(() => {
         setMessage(null);
       }, 2000);
     } catch (error) {
       setSaving(false);
-      setMessage({ type: "error", text: "Errore durante il reset." });
+      setMessage({ type: 'error', text: 'Errore durante il reset.' });
     }
   };
 
@@ -98,8 +98,8 @@ const ProfileView = ({
     <div
       className="profile-view"
       style={{
-        "--profile-header-color": colors.header,
-        "--profile-send-button-color": colors.sendButton,
+        '--profile-header-color': colors.header,
+        '--profile-send-button-color': colors.sendButton,
       }}
     >
       <div className="profile-header">
@@ -122,7 +122,7 @@ const ProfileView = ({
 
       <p className="profile-description">
         {isIdentified
-          ? "I tuoi dati sono salvati. Puoi modificarli o rimuoverli in qualsiasi momento."
+          ? 'I tuoi dati sono salvati. Puoi modificarli o rimuoverli in qualsiasi momento.'
           : "Inserisci i tuoi dati per ricevere un'assistenza migliore e offerte personalizzate."}
       </p>
 
@@ -146,15 +146,12 @@ const ProfileView = ({
           </div>
           <h4 className="profile-confirm-title">Sei sicuro?</h4>
           <p className="profile-confirm-text">
-            Rimuoveremo il tuo nome e la tua email. Non potrai più gestire il
-            tuo profilo fino a nuova identificazione.
+            Rimuoveremo il tuo nome e la tua email. Non potrai più gestire il tuo profilo fino a
+            nuova identificazione.
           </p>
 
           <div className="profile-confirm-actions">
-            <button
-              onClick={() => setShowConfirm(false)}
-              className="profile-btn-cancel"
-            >
+            <button onClick={() => setShowConfirm(false)} className="profile-btn-cancel">
               Annulla
             </button>
             <button onClick={handleReset} className="profile-btn-confirm">
@@ -191,20 +188,16 @@ const ProfileView = ({
               type="submit"
               disabled={saving || message}
               className={`profile-btn-save ${
-                message
-                  ? message.type === "success"
-                    ? "success"
-                    : "error"
-                  : ""
+                message ? (message.type === 'success' ? 'success' : 'error') : ''
               }`}
             >
               {message
                 ? message.text
                 : saving
-                ? "..."
-                : isIdentified
-                ? "Aggiorna Profilo"
-                : "Salva Profilo"}
+                  ? '...'
+                  : isIdentified
+                    ? 'Aggiorna Profilo'
+                    : 'Salva Profilo'}
             </button>
 
             {isIdentified && !message && (

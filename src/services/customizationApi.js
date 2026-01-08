@@ -4,7 +4,7 @@
  */
 
 // Usa variabile d'ambiente per l'URL del backend
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 /**
  * Recupera la configurazione del widget per un sito
@@ -13,15 +13,12 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
  */
 export async function getWidgetConfig(siteId) {
   try {
-    const response = await fetch(
-      `${API_URL}/api/customization/widget/${siteId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch(`${API_URL}/api/customization/widget/${siteId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -30,24 +27,24 @@ export async function getWidgetConfig(siteId) {
     const result = await response.json();
 
     if (!result.success) {
-      throw new Error(result.message || "Failed to fetch widget config");
+      throw new Error(result.message || 'Failed to fetch widget config');
     }
 
     return result.data;
   } catch (error) {
-    console.error("❌ Error fetching widget config:", error);
+    console.error('❌ Error fetching widget config:', error);
     // Ritorna configurazione di default in caso di errore
     return {
       orbTheme: {
-        id: "purple-dream",
-        name: "Purple Dream",
+        id: 'purple-dream',
+        name: 'Purple Dream',
         baseColor1: [0.611765, 0.262745, 0.996078],
         baseColor2: [0.298039, 0.760784, 0.913725],
         baseColor3: [0.062745, 0.078431, 0.6],
       },
       chatColors: {
-        header: "#667eea",
-        sendButton: "#667eea",
+        header: '#667eea',
+        sendButton: '#667eea',
       },
     };
   }
@@ -61,11 +58,11 @@ export async function getWidgetConfig(siteId) {
 export async function getCustomization(siteId) {
   try {
     const response = await fetch(`${API_URL}/api/customization/${siteId}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
-      credentials: "include", // Include cookies per autenticazione
+      credentials: 'include', // Include cookies per autenticazione
     });
 
     if (!response.ok) {
@@ -75,12 +72,12 @@ export async function getCustomization(siteId) {
     const result = await response.json();
 
     if (!result.success) {
-      throw new Error(result.message || "Failed to fetch customization");
+      throw new Error(result.message || 'Failed to fetch customization');
     }
 
     return result.data;
   } catch (error) {
-    console.error("❌ Error fetching customization:", error);
+    console.error('❌ Error fetching customization:', error);
     throw error;
   }
 }
@@ -94,11 +91,11 @@ export async function getCustomization(siteId) {
 export async function updateCustomization(siteId, customization) {
   try {
     const response = await fetch(`${API_URL}/api/customization/${siteId}`, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
-      credentials: "include", // Include cookies per autenticazione
+      credentials: 'include', // Include cookies per autenticazione
       body: JSON.stringify(customization),
     });
 
@@ -110,12 +107,12 @@ export async function updateCustomization(siteId, customization) {
     const result = await response.json();
 
     if (!result.success) {
-      throw new Error(result.message || "Failed to update customization");
+      throw new Error(result.message || 'Failed to update customization');
     }
 
     return result.data;
   } catch (error) {
-    console.error("❌ Error updating customization:", error);
+    console.error('❌ Error updating customization:', error);
     throw error;
   }
 }
@@ -127,16 +124,13 @@ export async function updateCustomization(siteId, customization) {
  */
 export async function getAllThemesWithAccess(siteId) {
   try {
-    const response = await fetch(
-      `${API_URL}/api/customization/themes/${siteId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      }
-    );
+    const response = await fetch(`${API_URL}/api/customization/themes/${siteId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -145,12 +139,12 @@ export async function getAllThemesWithAccess(siteId) {
     const result = await response.json();
 
     if (!result.success) {
-      throw new Error(result.message || "Failed to fetch themes");
+      throw new Error(result.message || 'Failed to fetch themes');
     }
 
     return result.data;
   } catch (error) {
-    console.error("❌ Error fetching themes:", error);
+    console.error('❌ Error fetching themes:', error);
     throw error;
   }
 }
@@ -162,16 +156,13 @@ export async function getAllThemesWithAccess(siteId) {
  */
 export async function resetCustomization(siteId) {
   try {
-    const response = await fetch(
-      `${API_URL}/api/customization/${siteId}/reset`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      }
-    );
+    const response = await fetch(`${API_URL}/api/customization/${siteId}/reset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -180,12 +171,12 @@ export async function resetCustomization(siteId) {
     const result = await response.json();
 
     if (!result.success) {
-      throw new Error(result.message || "Failed to reset customization");
+      throw new Error(result.message || 'Failed to reset customization');
     }
 
     return result.data;
   } catch (error) {
-    console.error("❌ Error resetting customization:", error);
+    console.error('❌ Error resetting customization:', error);
     throw error;
   }
 }
@@ -197,7 +188,7 @@ export async function resetCustomization(siteId) {
  */
 export function hexToVec3(hex) {
   // Rimuovi il # se presente
-  hex = hex.replace("#", "");
+  hex = hex.replace('#', '');
 
   // Parse RGB
   const r = parseInt(hex.substring(0, 2), 16) / 255;

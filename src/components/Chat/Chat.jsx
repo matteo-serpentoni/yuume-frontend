@@ -1,28 +1,28 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
-import { useChat } from "../../hooks/useChat";
-import "./Chat.css";
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { useChat } from '../../hooks/useChat';
+import './Chat.css';
 
-import { AnimatePresence } from "framer-motion";
-import MessageInput from "./MessageInput";
-import ChatHeader from "./ChatHeader";
-import MessageList from "./MessageList";
-import { ProductDrawer } from "../Message/ProductCards";
-import { OrderDetailCard } from "../Message/OrderCards";
-import { normalizeOrderNumber } from "../../utils/shopifyUtils";
-import Drawer from "../UI/Drawer";
-import ProfileView from "./ProfileView";
-import StarRating from "./StarRating";
+import { AnimatePresence } from 'framer-motion';
+import MessageInput from './MessageInput';
+import ChatHeader from './ChatHeader';
+import MessageList from './MessageList';
+import { ProductDrawer } from '../Message/ProductCards';
+import { OrderDetailCard } from '../Message/OrderCards';
+import { normalizeOrderNumber } from '../../utils/shopifyUtils';
+import Drawer from '../UI/Drawer';
+import ProfileView from './ProfileView';
+import StarRating from './StarRating';
 
 const Chat = ({
   onTyping,
   onMinimize,
   chatColors = {
-    header: "#667eea",
-    sendButton: "#667eea",
-    userMessage: "#667eea",
-    aiMessage: "#4CC2E9",
-    inputBorder: "#667eea",
-    inputFocus: "#4CC2E9",
+    header: '#667eea',
+    sendButton: '#667eea',
+    userMessage: '#667eea',
+    aiMessage: '#4CC2E9',
+    inputBorder: '#667eea',
+    inputFocus: '#4CC2E9',
   },
   devShopDomain,
   isPreview = false,
@@ -31,9 +31,9 @@ const Chat = ({
   sessionStatus: previewSessionStatus,
   assignedTo: previewAssignedTo,
   shopDomain: previewShopDomain,
-  connectionStatus: previewConnectionStatus = "online",
+  connectionStatus: previewConnectionStatus = 'online',
 }) => {
-  const [view, setView] = useState("chat"); // 'chat' | 'profile'
+  const [view, setView] = useState('chat'); // 'chat' | 'profile'
   const [activeProduct, setActiveProduct] = useState(null);
   const [activeOrder, setActiveOrder] = useState(null);
 
@@ -43,19 +43,11 @@ const Chat = ({
   // ✅ Source of truth: use host props if preview, otherwise use live hook results
   const messages = isPreview ? previewMessages || [] : liveChat.messages;
   const loading = isPreview ? previewLoading || false : liveChat.loading;
-  const shopDomain = isPreview
-    ? previewShopDomain || "preview-shop"
-    : liveChat.shopDomain;
-  const sessionId = isPreview ? "preview-session" : liveChat.sessionId;
-  const sessionStatus = isPreview
-    ? previewSessionStatus || "active"
-    : liveChat.sessionStatus;
-  const connectionStatus = isPreview
-    ? previewConnectionStatus
-    : liveChat.connectionStatus;
-  const assignedTo = isPreview
-    ? previewAssignedTo || null
-    : liveChat.assignedTo;
+  const shopDomain = isPreview ? previewShopDomain || 'preview-shop' : liveChat.shopDomain;
+  const sessionId = isPreview ? 'preview-session' : liveChat.sessionId;
+  const sessionStatus = isPreview ? previewSessionStatus || 'active' : liveChat.sessionStatus;
+  const connectionStatus = isPreview ? previewConnectionStatus : liveChat.connectionStatus;
+  const assignedTo = isPreview ? previewAssignedTo || null : liveChat.assignedTo;
 
   const sendMessage = isPreview ? () => {} : liveChat.sendMessage;
   const sendFeedback = isPreview ? () => {} : liveChat.sendFeedback;
@@ -69,28 +61,28 @@ const Chat = ({
       const msg = filtered[i];
 
       // Try to merge order_form with its subsequent response
-      if (msg.type === "order_form") {
+      if (msg.type === 'order_form') {
         let resultIndex = -1;
 
         // Look ahead for the next response from assistant/ai
         // We look ahead up to 3 messages to find a result or an error
         for (let j = i + 1; j < Math.min(i + 4, filtered.length); j++) {
           const next = filtered[j];
-          if (next.sender === "assistant" || next.sender === "ai") {
+          if (next.sender === 'assistant' || next.sender === 'ai') {
             const isOrderResult = [
-              "order_list",
-              "order_detail",
-              "order_cards",
-              "ORDER_LIST_RESPONSE",
-              "ORDER_DETAIL_RESPONSE",
+              'order_list',
+              'order_detail',
+              'order_cards',
+              'ORDER_LIST_RESPONSE',
+              'ORDER_DETAIL_RESPONSE',
             ].includes(next.type);
 
             const isOrderError =
-              (next.type === "text" || !next.type) &&
+              (next.type === 'text' || !next.type) &&
               next.text &&
-              (next.text.toLowerCase().includes("non ho trovato") ||
-                next.text.toLowerCase().includes("spiacenti") ||
-                next.text.toLowerCase().includes("a questa email")); // Added context from user screenshot
+              (next.text.toLowerCase().includes('non ho trovato') ||
+                next.text.toLowerCase().includes('spiacenti') ||
+                next.text.toLowerCase().includes('a questa email')); // Added context from user screenshot
 
             if (isOrderResult || isOrderError) {
               resultIndex = j;
@@ -107,8 +99,8 @@ const Chat = ({
           if (!results.email) {
             for (let k = i + 1; k < resultIndex; k++) {
               const prevMsg = filtered[k];
-              if (prevMsg.text?.startsWith("ORDER_LOOKUP:")) {
-                const parts = prevMsg.text.split(":");
+              if (prevMsg.text?.startsWith('ORDER_LOOKUP:')) {
+                const parts = prevMsg.text.split(':');
                 if (parts[1]) results.email = parts[1];
                 break;
               }
@@ -127,15 +119,12 @@ const Chat = ({
   }, [messages]);
 
   return (
-    <div
-      className="chat-inner"
-      style={{ "--chat-header-color": chatColors.header }}
-    >
+    <div className="chat-inner" style={{ '--chat-header-color': chatColors.header }}>
       <ChatHeader connectionStatus={connectionStatus} />
 
-      {view === "profile" ? (
+      {view === 'profile' ? (
         <ProfileView
-          onBack={() => setView("chat")}
+          onBack={() => setView('chat')}
           sessionId={sessionId}
           shopDomain={shopDomain}
           colors={chatColors}
@@ -157,21 +146,15 @@ const Chat = ({
             />
 
             {/* Conversation Ended Separator & Rating */}
-            {sessionStatus === "completed" && (
+            {sessionStatus === 'completed' && (
               <div className="conversation-ended-container">
                 <div className="conversation-ended-separator">
                   <div className="separator-line" />
-                  <span className="separator-text">
-                    Conversazione Terminata
-                  </span>
+                  <span className="separator-text">Conversazione Terminata</span>
                   <div className="separator-line" />
                 </div>
 
-                <StarRating
-                  onRate={(rating) =>
-                    sendFeedback(null, rating, null, "conversation")
-                  }
-                />
+                <StarRating onRate={(rating) => sendFeedback(null, rating, null, 'conversation')} />
               </div>
             )}
 
@@ -184,22 +167,22 @@ const Chat = ({
               }}
               loading={loading}
               placeholder={
-                sessionStatus === "escalated" && !assignedTo
+                sessionStatus === 'escalated' && !assignedTo
                   ? "Attendi l'intervento."
-                  : "Scrivi qualcosa..."
+                  : 'Scrivi qualcosa...'
               }
               connectionStatus={connectionStatus}
-              disabled={sessionStatus === "escalated" && !assignedTo}
+              disabled={sessionStatus === 'escalated' && !assignedTo}
               sendButtonColor={chatColors.sendButton}
               inputBorderColor={chatColors.inputBorder}
               inputFocusColor={chatColors.inputFocus}
               previewMode={isPreview}
-              onProfileClick={isPreview ? null : () => setView("profile")}
+              onProfileClick={isPreview ? null : () => setView('profile')}
             />
 
             {/* Legal Disclaimer */}
             <div className="legal-disclaimer">
-              Chattando accetti la{" "}
+              Chattando accetti la{' '}
               <a
                 href="/policies/privacy-policy"
                 target="_blank"
@@ -207,8 +190,8 @@ const Chat = ({
                 className="legal-link"
               >
                 Privacy Policy
-              </a>{" "}
-              e la{" "}
+              </a>{' '}
+              e la{' '}
               <a
                 href="/policies/cookie-policy"
                 target="_blank"
@@ -226,7 +209,7 @@ const Chat = ({
       )}
 
       {/* Close button - Hidden in profile view */}
-      {view !== "profile" && (
+      {view !== 'profile' && (
         <button
           className="close-button"
           aria-label="Riduci chat"

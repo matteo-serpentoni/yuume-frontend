@@ -1,23 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { hexToVec3 } from "../../utils/colorUtils";
-import "./DevTools.css";
+import React, { useState, useEffect } from 'react';
+import { hexToVec3 } from '../../utils/colorUtils';
+import './DevTools.css';
 
 /**
  * DevTools
  * Componente per lo sviluppo che permette di cambiare tema al volo.
  * Usato solo in modalità 'development'.
  */
-const DevTools = ({
-  currentConfig,
-  onConfigChange,
-  onSiteChange,
-  onMobileToggle,
-}) => {
+const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle }) => {
   const [themes, setThemes] = useState([]);
   const [sites, setSites] = useState([]);
-  const [selectedThemeId, setSelectedThemeId] = useState("purple-dream");
+  const [selectedThemeId, setSelectedThemeId] = useState('purple-dream');
   const [selectedSiteDomain, setSelectedSiteDomain] = useState(() => {
-    return sessionStorage.getItem("yuume_dev_shop_domain") || "";
+    return sessionStorage.getItem('yuume_dev_shop_domain') || '';
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,23 +22,22 @@ const DevTools = ({
 
   // Storefront Preview State
   const [showStorefront, setShowStorefront] = useState(() => {
-    return sessionStorage.getItem("yuume_dev_show_storefront") === "true";
+    return sessionStorage.getItem('yuume_dev_show_storefront') === 'true';
   });
   const [storefrontTheme, setStorefrontTheme] = useState(() => {
-    return sessionStorage.getItem("yuume_dev_storefront_theme") || "light";
+    return sessionStorage.getItem('yuume_dev_storefront_theme') || 'light';
   });
 
   const dispatchDevUpdate = () => {
-    window.dispatchEvent(new CustomEvent("yuume_dev_update"));
+    window.dispatchEvent(new CustomEvent('yuume_dev_update'));
   };
 
   // Mobile detection for DevTools UI
   useEffect(() => {
     const checkMobile = () => {
-      const isMob =
-        /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-          navigator.userAgent
-        );
+      const isMob = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+        navigator.userAgent,
+      );
       setIsMobile(isMob);
       setIsCollapsed(isMob);
     };
@@ -54,7 +48,7 @@ const DevTools = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
         // 1. Fetch Sites (for site switching)
         const sitesRes = await fetch(`${API_URL}/api/customization/sites`);
@@ -63,18 +57,16 @@ const DevTools = ({
           if (sitesResult.success) {
             // Filter out empty or localhost domains
             const filteredSites = sitesResult.data.filter(
-              (s) => s.domain && s.domain !== "localhost"
+              (s) => s.domain && s.domain !== 'localhost',
             );
             setSites(filteredSites);
 
             // If no site is selected yet, pick the first one
-            const savedDevShop = sessionStorage.getItem(
-              "yuume_dev_shop_domain"
-            );
+            const savedDevShop = sessionStorage.getItem('yuume_dev_shop_domain');
             if (!savedDevShop && filteredSites.length > 0) {
               const firstDomain = filteredSites[0].domain;
               setSelectedSiteDomain(firstDomain);
-              sessionStorage.setItem("yuume_dev_shop_domain", firstDomain);
+              sessionStorage.setItem('yuume_dev_shop_domain', firstDomain);
               onSiteChange && onSiteChange(firstDomain);
             }
           }
@@ -85,57 +77,52 @@ const DevTools = ({
         if (themesRes.ok) {
           const themesResult = await themesRes.json();
           if (themesResult.success) {
-            const allThemes = [
-              ...themesResult.data.available,
-              ...themesResult.data.locked,
-            ];
+            const allThemes = [...themesResult.data.available, ...themesResult.data.locked];
             setThemes(allThemes);
           }
         } else {
           // 🛠️ FAILSAFE: Hardcoded fallback themes if API is down
-          console.warn(
-            "⚠️ [DevTools] API templates failed, using hardcoded fallback"
-          );
+          console.warn('⚠️ [DevTools] API templates failed, using hardcoded fallback');
           setThemes([
             {
-              id: "purple-dream",
-              name: "Purple Dream (Fallback)",
+              id: 'purple-dream',
+              name: 'Purple Dream (Fallback)',
               colors: {
-                primary: "#9C43FE",
-                secondary: "#4CC2E9",
-                accent: "#101499",
+                primary: '#9C43FE',
+                secondary: '#4CC2E9',
+                accent: '#101499',
               },
               chatColors: {
-                header: "#9C43FE",
-                sendButton: "#9C43FE",
-                userMessage: "#9C43FE",
-                aiMessage: "#4CC2E9",
-                inputBorder: "#9C43FE",
-                inputFocus: "#4CC2E9",
+                header: '#9C43FE',
+                sendButton: '#9C43FE',
+                userMessage: '#9C43FE',
+                aiMessage: '#4CC2E9',
+                inputBorder: '#9C43FE',
+                inputFocus: '#4CC2E9',
               },
             },
             {
-              id: "ocean-blue",
-              name: "Ocean Blue (Fallback)",
+              id: 'ocean-blue',
+              name: 'Ocean Blue (Fallback)',
               colors: {
-                primary: "#D1DBE6",
-                secondary: "#99CCF2",
-                accent: "#345779",
+                primary: '#D1DBE6',
+                secondary: '#99CCF2',
+                accent: '#345779',
               },
               chatColors: {
-                header: "#99CCF2",
-                sendButton: "#345779",
-                userMessage: "#345779",
-                aiMessage: "#99CCF2",
-                inputBorder: "#99CCF2",
-                inputFocus: "#345779",
+                header: '#99CCF2',
+                sendButton: '#345779',
+                userMessage: '#345779',
+                aiMessage: '#99CCF2',
+                inputBorder: '#99CCF2',
+                inputFocus: '#345779',
               },
             },
           ]);
         }
         setLoading(false);
       } catch (err) {
-        console.error("❌ [DevTools] Error:", err);
+        console.error('❌ [DevTools] Error:', err);
         setError(err.message);
         setLoading(false);
       }
@@ -151,22 +138,19 @@ const DevTools = ({
       if (!site) return;
 
       try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
         const themesRes = await fetch(
-          `${API_URL}/api/customization/themes/all?siteId=${site.siteId}`
+          `${API_URL}/api/customization/themes/all?siteId=${site.siteId}`,
         );
         if (themesRes.ok) {
           const themesResult = await themesRes.json();
           if (themesResult.success) {
-            const allThemes = [
-              ...themesResult.data.available,
-              ...themesResult.data.locked,
-            ];
+            const allThemes = [...themesResult.data.available, ...themesResult.data.locked];
             setThemes(allThemes);
           }
         }
       } catch (err) {
-        console.error("❌ [DevTools] Error updating themes:", err);
+        console.error('❌ [DevTools] Error updating themes:', err);
       }
     };
 
@@ -196,23 +180,23 @@ const DevTools = ({
       <button
         onClick={() => setIsCollapsed(false)}
         style={{
-          position: "fixed",
-          bottom: isMobile ? "80px" : "20px",
-          left: "20px",
+          position: 'fixed',
+          bottom: isMobile ? '80px' : '20px',
+          left: '20px',
           zIndex: 9999,
-          width: "48px",
-          height: "48px",
-          borderRadius: "50%",
-          background: "rgba(102, 126, 234, 0.9)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          color: "white",
-          fontSize: "20px",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backdropFilter: "blur(10px)",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          width: '48px',
+          height: '48px',
+          borderRadius: '50%',
+          background: 'rgba(102, 126, 234, 0.9)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          color: 'white',
+          fontSize: '20px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
         }}
       >
         🛠️
@@ -224,60 +208,58 @@ const DevTools = ({
     <div
       className="yuume-dev-tools"
       style={{
-        position: "fixed",
-        top: isMobile ? "auto" : "20px",
-        bottom: isMobile ? "20px" : "auto",
-        left: "20px",
+        position: 'fixed',
+        top: isMobile ? 'auto' : '20px',
+        bottom: isMobile ? '20px' : 'auto',
+        left: '20px',
         zIndex: 9999,
-        background: "rgba(0,0,0,0.9)",
-        padding: "15px",
-        borderRadius: "12px",
-        border: "1px solid rgba(255,255,255,0.1)",
-        color: "white",
-        fontFamily: "system-ui, sans-serif",
-        maxWidth: isMobile ? "calc(100vw - 40px)" : "300px",
-        maxHeight: isMobile ? "50vh" : "calc(100vh - 40px)",
-        backdropFilter: "blur(10px)",
-        overflowY: "auto",
-        scrollbarWidth: "none" /* Firefox */,
-        msOverflowStyle: "none" /* IE/Edge */,
+        background: 'rgba(0,0,0,0.9)',
+        padding: '15px',
+        borderRadius: '12px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        color: 'white',
+        fontFamily: 'system-ui, sans-serif',
+        maxWidth: isMobile ? 'calc(100vw - 40px)' : '300px',
+        maxHeight: isMobile ? '50vh' : 'calc(100vh - 40px)',
+        backdropFilter: 'blur(10px)',
+        overflowY: 'auto',
+        scrollbarWidth: 'none' /* Firefox */,
+        msOverflowStyle: 'none' /* IE/Edge */,
       }}
     >
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "10px",
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '10px',
         }}
       >
-        <h3 style={{ margin: 0, fontSize: "14px", color: "#667eea" }}>
-          🛠️ Dev Tools
-        </h3>
+        <h3 style={{ margin: 0, fontSize: '14px', color: '#667eea' }}>🛠️ Dev Tools</h3>
         <button
           onClick={() => setIsCollapsed(true)}
           style={{
-            background: "none",
-            border: "none",
-            color: "white",
-            cursor: "pointer",
+            background: 'none',
+            border: 'none',
+            color: 'white',
+            cursor: 'pointer',
           }}
         >
           ✕
         </button>
       </div>
 
-      {loading && <div style={{ fontSize: "12px" }}>Loading...</div>}
+      {loading && <div style={{ fontSize: '12px' }}>Loading...</div>}
 
       {!loading && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Site Selector */}
           <div>
             <label
               style={{
-                display: "block",
-                fontSize: "11px",
-                color: "#8b92a7",
-                marginBottom: "4px",
+                display: 'block',
+                fontSize: '11px',
+                color: '#8b92a7',
+                marginBottom: '4px',
               }}
             >
               Site Domain
@@ -288,19 +270,19 @@ const DevTools = ({
                 const domain = e.target.value;
                 setSelectedSiteDomain(domain);
                 if (domain) {
-                  sessionStorage.setItem("yuume_dev_shop_domain", domain);
+                  sessionStorage.setItem('yuume_dev_shop_domain', domain);
                 } else {
-                  sessionStorage.removeItem("yuume_dev_shop_domain");
+                  sessionStorage.removeItem('yuume_dev_shop_domain');
                 }
                 onSiteChange && onSiteChange(domain);
               }}
               style={{
-                width: "100%",
-                background: "#222",
-                color: "white",
-                border: "1px solid #444",
-                borderRadius: "4px",
-                padding: "4px",
+                width: '100%',
+                background: '#222',
+                color: 'white',
+                border: '1px solid #444',
+                borderRadius: '4px',
+                padding: '4px',
               }}
             >
               {sites.map((s) => (
@@ -315,40 +297,38 @@ const DevTools = ({
           <div>
             <label
               style={{
-                display: "block",
-                fontSize: "11px",
-                color: "#8b92a7",
-                marginBottom: "4px",
+                display: 'block',
+                fontSize: '11px',
+                color: '#8b92a7',
+                marginBottom: '4px',
               }}
             >
               Active Theme
             </label>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-            >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {themes.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setSelectedThemeId(t.id)}
                   style={{
-                    padding: "6px 8px",
-                    background: selectedThemeId === t.id ? "#667eea" : "#333",
-                    border: "none",
-                    borderRadius: "4px",
-                    color: "white",
-                    textAlign: "left",
-                    fontSize: "12px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
+                    padding: '6px 8px',
+                    background: selectedThemeId === t.id ? '#667eea' : '#333',
+                    border: 'none',
+                    borderRadius: '4px',
+                    color: 'white',
+                    textAlign: 'left',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                   }}
                 >
                   <div
                     style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
                       background: `linear-gradient(135deg, ${t.colors.primary}, ${t.colors.secondary})`,
                     }}
                   />
@@ -358,7 +338,7 @@ const DevTools = ({
             </div>
           </div>
 
-          <div style={{ height: "1px", background: "#333", margin: "4px 0" }} />
+          <div style={{ height: '1px', background: '#333', margin: '4px 0' }} />
 
           {/* View Toggle */}
           <button
@@ -368,96 +348,83 @@ const DevTools = ({
               onMobileToggle && onMobileToggle(newVal);
             }}
             style={{
-              padding: "8px",
-              background: forceMobile ? "#f6ad55" : "#4a5568",
-              border: "none",
-              borderRadius: "4px",
-              color: "white",
-              fontSize: "12px",
-              cursor: "pointer",
+              padding: '8px',
+              background: forceMobile ? '#f6ad55' : '#4a5568',
+              border: 'none',
+              borderRadius: '4px',
+              color: 'white',
+              fontSize: '12px',
+              cursor: 'pointer',
             }}
           >
-            {forceMobile
-              ? "📱 Forced Mobile View"
-              : "🖥️ Desktop View (Default)"}
+            {forceMobile ? '📱 Forced Mobile View' : '🖥️ Desktop View (Default)'}
           </button>
 
-          <div style={{ height: "1px", background: "#333", margin: "4px 0" }} />
+          <div style={{ height: '1px', background: '#333', margin: '4px 0' }} />
 
           {/* Storefront Preview */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontSize: "11px", color: "#8b92a7" }}>
-              Experimental Preview
-            </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '11px', color: '#8b92a7' }}>Experimental Preview</label>
             <button
               onClick={() => {
                 const newVal = !showStorefront;
                 setShowStorefront(newVal);
-                sessionStorage.setItem("yuume_dev_show_storefront", newVal);
+                sessionStorage.setItem('yuume_dev_show_storefront', newVal);
                 dispatchDevUpdate();
               }}
               style={{
-                padding: "8px",
-                background: showStorefront ? "#48bb78" : "#4a5568",
-                border: "none",
-                borderRadius: "4px",
-                color: "white",
-                fontSize: "12px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
+                padding: '8px',
+                background: showStorefront ? '#48bb78' : '#4a5568',
+                border: 'none',
+                borderRadius: '4px',
+                color: 'white',
+                fontSize: '12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
             >
-              {showStorefront
-                ? "✅ Mock Storefront ON"
-                : "🏠 Background: Neutral"}
+              {showStorefront ? '✅ Mock Storefront ON' : '🏠 Background: Neutral'}
             </button>
 
             {showStorefront && (
-              <div style={{ display: "flex", gap: "4px" }}>
+              <div style={{ display: 'flex', gap: '4px' }}>
                 <button
                   onClick={() => {
-                    setStorefrontTheme("light");
-                    sessionStorage.setItem(
-                      "yuume_dev_storefront_theme",
-                      "light"
-                    );
+                    setStorefrontTheme('light');
+                    sessionStorage.setItem('yuume_dev_storefront_theme', 'light');
                     dispatchDevUpdate();
                   }}
                   style={{
                     flex: 1,
-                    padding: "6px",
-                    background: storefrontTheme === "light" ? "#fff" : "#333",
-                    color: storefrontTheme === "light" ? "#000" : "#fff",
-                    border: "none",
-                    borderRadius: "4px",
-                    fontSize: "11px",
-                    cursor: "pointer",
+                    padding: '6px',
+                    background: storefrontTheme === 'light' ? '#fff' : '#333',
+                    color: storefrontTheme === 'light' ? '#000' : '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    cursor: 'pointer',
                   }}
                 >
                   Light Mode
                 </button>
                 <button
                   onClick={() => {
-                    setStorefrontTheme("dark");
-                    sessionStorage.setItem(
-                      "yuume_dev_storefront_theme",
-                      "dark"
-                    );
+                    setStorefrontTheme('dark');
+                    sessionStorage.setItem('yuume_dev_storefront_theme', 'dark');
                     dispatchDevUpdate();
                   }}
                   style={{
                     flex: 1,
-                    padding: "6px",
-                    background: storefrontTheme === "dark" ? "#333" : "#000",
-                    color: "#fff",
-                    border:
-                      storefrontTheme === "dark" ? "1px solid #667eea" : "none",
-                    borderRadius: "4px",
-                    fontSize: "11px",
-                    cursor: "pointer",
+                    padding: '6px',
+                    background: storefrontTheme === 'dark' ? '#333' : '#000',
+                    color: '#fff',
+                    border: storefrontTheme === 'dark' ? '1px solid #667eea' : 'none',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    cursor: 'pointer',
                   }}
                 >
                   Dark Mode

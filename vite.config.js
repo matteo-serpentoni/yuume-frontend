@@ -1,21 +1,21 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "/widget/",
+  base: '/widget/',
   build: {
-    minify: "esbuild",
+    minify: 'esbuild',
   },
   esbuild: {
-    drop: ["console", "debugger"],
+    drop: ['console', 'debugger'],
   },
   server: {
     host: true,
     allowedHosts: [
-      "localhost",
-      ".trycloudflare.com", // Accetta tutti i domini cloudflare
+      'localhost',
+      '.trycloudflare.com', // Accetta tutti i domini cloudflare
     ],
   },
 });

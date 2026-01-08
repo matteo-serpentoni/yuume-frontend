@@ -1,20 +1,20 @@
-import React from "react";
-import "./ChatHeader.css";
+import React from 'react';
+import './ChatHeader.css';
 
 /**
  * ChatHeader
  * Unified header component used in both Chat and ChatPreview.
  */
-const ChatHeader = ({ connectionStatus = "online" }) => {
+const ChatHeader = ({ connectionStatus = 'online' }) => {
   const getStatusConfig = () => {
     switch (connectionStatus) {
-      case "offline":
-        return { text: "OFFLINE", class: "status-offline" };
-      case "reconnecting":
-        return { text: "RECONNECTING", class: "status-reconnecting" };
-      case "online":
+      case 'offline':
+        return { text: 'OFFLINE', class: 'status-offline' };
+      case 'reconnecting':
+        return { text: 'RECONNECTING', class: 'status-reconnecting' };
+      case 'online':
       default:
-        return { text: "ONLINE", class: "status-online" };
+        return { text: 'ONLINE', class: 'status-online' };
     }
   };
 

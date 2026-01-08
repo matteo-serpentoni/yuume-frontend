@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
-import "./MessageBubble.css";
-import { formatTime } from "../../utils/messageHelpers";
-import { hexToRgb } from "../../utils/colorUtils";
+import { motion } from 'framer-motion';
+import './MessageBubble.css';
+import { formatTime } from '../../utils/messageHelpers';
+import { hexToRgb } from '../../utils/colorUtils';
 
 /**
  * MessageBubble
@@ -12,21 +12,21 @@ const MessageBubble = ({
   children,
   sender,
   timestamp,
-  type = "default",
+  type = 'default',
   chatColors = {},
-  className = "",
+  className = '',
   feedback = null,
   onFeedback = null,
   showFeedback = false,
 }) => {
-  const isUser = sender === "user";
+  const isUser = sender === 'user';
   const isBot = !isUser;
 
   // Custom styles for dynamic colors
   const bubbleStyles = {
     ...(isUser &&
       chatColors.userMessage && {
-        "--user-msg-color-rgb": hexToRgb(chatColors.userMessage),
+        '--user-msg-color-rgb': hexToRgb(chatColors.userMessage),
       }),
   };
 
@@ -34,9 +34,9 @@ const MessageBubble = ({
     <div className={`message-bubble-wrapper ${sender} ${className}`}>
       <div
         className={`message-bubble ${sender} ${
-          ["category_cards", "product_cards", "order_cards"].includes(type)
-            ? "full-width"
-            : "auto-width"
+          ['category_cards', 'product_cards', 'order_cards'].includes(type)
+            ? 'full-width'
+            : 'auto-width'
         }`}
         style={bubbleStyles}
       >
@@ -49,10 +49,8 @@ const MessageBubble = ({
                 <motion.button
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => onFeedback?.("positive")}
-                  className={`feedback-btn ${
-                    feedback === "positive" ? "active" : ""
-                  }`}
+                  onClick={() => onFeedback?.('positive')}
+                  className={`feedback-btn ${feedback === 'positive' ? 'active' : ''}`}
                   title="Utile"
                 >
                   <svg
@@ -71,10 +69,8 @@ const MessageBubble = ({
                 <motion.button
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => onFeedback?.("negative")}
-                  className={`feedback-btn ${
-                    feedback === "negative" ? "active" : ""
-                  }`}
+                  onClick={() => onFeedback?.('negative')}
+                  className={`feedback-btn ${feedback === 'negative' ? 'active' : ''}`}
                   title="Non utile"
                 >
                   <svg
@@ -92,9 +88,7 @@ const MessageBubble = ({
                 </motion.button>
               </div>
             )}
-            {timestamp && (
-              <span className="message-time">{formatTime(timestamp)}</span>
-            )}
+            {timestamp && <span className="message-time">{formatTime(timestamp)}</span>}
           </div>
         </div>
       </div>

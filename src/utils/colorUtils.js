@@ -5,7 +5,7 @@
  */
 export const hexToVec3 = (hex) => {
   if (!hex) return [0, 0, 0];
-  const cleaned = hex.replace("#", "");
+  const cleaned = hex.replace('#', '');
   const r = parseInt(cleaned.substring(0, 2), 16);
   const g = parseInt(cleaned.substring(2, 4), 16);
   const b = parseInt(cleaned.substring(4, 6), 16);
@@ -23,8 +23,8 @@ export const hexToVec3 = (hex) => {
  * @returns {string} "r, g, b"
  */
 export const hexToRgb = (hex) => {
-  if (!hex) return "0, 0, 0";
-  const cleaned = hex.replace("#", "");
+  if (!hex) return '0, 0, 0';
+  const cleaned = hex.replace('#', '');
   const r = parseInt(cleaned.substring(0, 2), 16);
   const g = parseInt(cleaned.substring(2, 4), 16);
   const b = parseInt(cleaned.substring(4, 6), 16);

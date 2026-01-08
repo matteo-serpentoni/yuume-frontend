@@ -1,21 +1,17 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import {
-  sendMessage,
-  ChatApiError,
-  getSessionStatus,
-} from "../services/chatApi";
-import { io } from "socket.io-client";
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { sendMessage, ChatApiError, getSessionStatus } from '../services/chatApi';
+import { io } from 'socket.io-client';
 
 const STORAGE_KEYS = {
-  SESSION_ID: "yuume_session_id",
-  MESSAGES: "yuume_messages",
-  SHOP_DOMAIN: "yuume_dev_shop_domain", // Unified with DevTools and useOrb
-  SESSION_TIME: "yuume_session_time",
-  SESSION_STATUS: "yuume_session_status",
+  SESSION_ID: 'yuume_session_id',
+  MESSAGES: 'yuume_messages',
+  SHOP_DOMAIN: 'yuume_dev_shop_domain', // Unified with DevTools and useOrb
+  SESSION_TIME: 'yuume_session_time',
+  SESSION_STATUS: 'yuume_session_status',
 };
 
 const SESSION_TIMEOUT = 30 * 60 * 1000;
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const generateSessionId = () => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -25,7 +21,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   const { disabled = false } = options;
 
   const [sessionId, setSessionId] = useState(() => {
-    if (disabled) return "preview-session";
+    if (disabled) return 'preview-session';
     let id = sessionStorage.getItem(STORAGE_KEYS.SESSION_ID);
     const savedTime = sessionStorage.getItem(STORAGE_KEYS.SESSION_TIME);
 
@@ -49,9 +45,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   const [messages, setMessages] = useState(() => {
     try {
-      const saved = !disabled
-        ? sessionStorage.getItem(STORAGE_KEYS.MESSAGES)
-        : null;
+      const saved = !disabled ? sessionStorage.getItem(STORAGE_KEYS.MESSAGES) : null;
       if (saved) {
         return JSON.parse(saved);
       }
@@ -60,46 +54,44 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       return [
         {
           id: Date.now(),
-          sender: "assistant",
-          text: "Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?",
+          sender: 'assistant',
+          text: 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?',
           timestamp: new Date().toISOString(),
           disableFeedback: true, // Disable feedback for welcome message
         },
       ];
     } catch (error) {
-      console.error("Errore caricamento messaggi:", error);
+      console.error('Errore caricamento messaggi:', error);
       return [];
     }
   });
 
   // ✅ Session Status State
   const [sessionStatus, setSessionStatus] = useState(() => {
-    if (disabled) return "active";
-    return sessionStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || "active";
+    if (disabled) return 'active';
+    return sessionStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || 'active';
   });
 
   // ✅ Connection Status logic
-  const [connectionStatus, setConnectionStatus] = useState("online");
+  const [connectionStatus, setConnectionStatus] = useState('online');
 
   useEffect(() => {
     if (disabled) return;
 
     const updateStatus = () => {
       if (!window.navigator.onLine) {
-        setConnectionStatus("offline");
+        setConnectionStatus('offline');
       }
     };
 
-    window.addEventListener("online", () => setConnectionStatus("online"));
-    window.addEventListener("offline", () => setConnectionStatus("offline"));
+    window.addEventListener('online', () => setConnectionStatus('online'));
+    window.addEventListener('offline', () => setConnectionStatus('offline'));
 
     updateStatus();
 
     return () => {
-      window.removeEventListener("online", () => setConnectionStatus("online"));
-      window.removeEventListener("offline", () =>
-        setConnectionStatus("offline")
-      );
+      window.removeEventListener('online', () => setConnectionStatus('online'));
+      window.removeEventListener('offline', () => setConnectionStatus('offline'));
     };
   }, [disabled]);
 
@@ -108,11 +100,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   const socketRef = useRef(null);
 
   const [shopDomain, setShopDomain] = useState(() => {
-    if (disabled) return "preview-shop.myshopify.com";
+    if (disabled) return 'preview-shop.myshopify.com';
     return (
-      devShopDomain ||
-      sessionStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) ||
-      window.location.hostname
+      devShopDomain || sessionStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) || window.location.hostname
     );
   });
 
@@ -123,8 +113,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   const clearChat = useCallback(() => {
     const welcomeMsg = {
       id: Date.now(),
-      sender: "assistant",
-      text: "Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?",
+      sender: 'assistant',
+      text: 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?',
       timestamp: new Date().toISOString(),
       disableFeedback: true,
     };
@@ -133,33 +123,30 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
     sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
     sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, "active");
+    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, 'active');
 
     setSessionId(newSessionId);
     setMessages([welcomeMsg]);
-    setSessionStatus("active");
+    setSessionStatus('active');
     setAssignedTo(null);
   }, []);
 
-  const addUserMessage = useCallback(
-    (text, id = Date.now(), hidden = false) => {
-      const userMessage = {
-        id,
-        sender: "user",
-        text,
-        timestamp: new Date().toISOString(),
-        hidden,
-      };
-      setMessages((prev) => [...prev, userMessage]);
-      return userMessage;
-    },
-    []
-  );
+  const addUserMessage = useCallback((text, id = Date.now(), hidden = false) => {
+    const userMessage = {
+      id,
+      sender: 'user',
+      text,
+      timestamp: new Date().toISOString(),
+      hidden,
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    return userMessage;
+  }, []);
 
   const addAssistantMessage = useCallback((data) => {
     const assistantMessage = {
       id: data.id || Date.now() + 1,
-      sender: "assistant",
+      sender: 'assistant',
       timestamp: new Date().toISOString(),
       text: data.message || data.text,
       ...data,
@@ -178,11 +165,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   // ✅ Reset session when shopDomain changes (Site Switching)
   const prevShopDomain = useRef(shopDomain);
   useEffect(() => {
-    if (
-      shopDomain &&
-      prevShopDomain.current &&
-      shopDomain !== prevShopDomain.current
-    ) {
+    if (shopDomain && prevShopDomain.current && shopDomain !== prevShopDomain.current) {
       clearChat();
     }
     prevShopDomain.current = shopDomain;
@@ -200,7 +183,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     try {
       sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
     } catch (error) {
-      console.error("Errore salvataggio messaggi:", error);
+      console.error('Errore salvataggio messaggi:', error);
     }
   }, [messages, disabled]);
 
@@ -265,21 +248,18 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
                 // Keep if it's a specific frontend-only message
                 const isError =
-                  localMsg.title === "Errore" ||
-                  localMsg.title === "Sessione scaduta";
+                  localMsg.title === 'Errore' || localMsg.title === 'Sessione scaduta';
                 const isWelcome = localMsg.disableFeedback === true;
 
                 return isError || isWelcome || !existsOnServer;
               });
 
               // 3. Merge and sort
-              const merged = [...localToKeep, ...serverMessages].sort(
-                (a, b) => {
-                  const timeA = new Date(a.timestamp || 0).getTime();
-                  const timeB = new Date(b.timestamp || 0).getTime();
-                  return timeA - timeB;
-                }
-              );
+              const merged = [...localToKeep, ...serverMessages].sort((a, b) => {
+                const timeA = new Date(a.timestamp || 0).getTime();
+                const timeB = new Date(b.timestamp || 0).getTime();
+                return timeA - timeB;
+              });
 
               // 4. Final deduplication by ID just in case
               const final = [];
@@ -302,7 +282,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
     // Connect Socket with Reconnection Logic
     const socket = io(API_URL, {
-      transports: ["websocket", "polling"],
+      transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
@@ -311,33 +291,33 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     });
     socketRef.current = socket;
 
-    socket.on("connect", () => {
-      setConnectionStatus("online");
-      socket.emit("join_session", sessionId);
+    socket.on('connect', () => {
+      setConnectionStatus('online');
+      socket.emit('join_session', sessionId);
     });
 
-    socket.on("disconnect", (reason) => {
+    socket.on('disconnect', (reason) => {
       // If client is still online, means it's a server/socket issue
       if (window.navigator.onLine) {
-        setConnectionStatus("reconnecting");
+        setConnectionStatus('reconnecting');
       }
     });
 
-    socket.on("reconnect_attempt", () => {
+    socket.on('reconnect_attempt', () => {
       if (window.navigator.onLine) {
-        setConnectionStatus("reconnecting");
+        setConnectionStatus('reconnecting');
       }
     });
 
-    socket.on("connect_error", () => {
+    socket.on('connect_error', () => {
       if (window.navigator.onLine) {
-        setConnectionStatus("reconnecting");
+        setConnectionStatus('reconnecting');
       }
     });
 
-    socket.on("message:received", (message) => {
+    socket.on('message:received', (message) => {
       // ✅ SAFETY FILTER: Never show system messages to the end user
-      if (message.sender === "system" || message.role === "system") {
+      if (message.sender === 'system' || message.role === 'system') {
         return;
       }
 
@@ -347,12 +327,12 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         return [...prev, message];
       });
       // If message is from assistant/human, stop loading
-      if (message.sender === "assistant") {
+      if (message.sender === 'assistant') {
         setLoading(false);
       }
     });
 
-    socket.on("session:updated", (data) => {
+    socket.on('session:updated', (data) => {
       if (data.status) setSessionStatus(data.status);
       if (data.assignedTo !== undefined) setAssignedTo(data.assignedTo);
     });
@@ -369,19 +349,19 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       let currentSessionId = sessionId;
 
       // 🔥 AUTO-START NEW SESSION IF COMPLETED
-      if (sessionStatus === "completed" || sessionStatus === "abandoned") {
+      if (sessionStatus === 'completed' || sessionStatus === 'abandoned') {
         // 1. Generate new ID
         const newId = generateSessionId();
         currentSessionId = newId; // Use new ID for this request
 
         // 2. Update Storage
         sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newId);
-        sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, "active");
+        sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, 'active');
         sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([]));
 
         // 3. Update State (Soft Reset)
         setSessionId(newId);
-        setSessionStatus("active");
+        setSessionStatus('active');
         setMessages([]); // Clear previous messages
         setAssignedTo(null);
       }
@@ -401,7 +381,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
             customer,
             ...options,
           },
-          userMsgId
+          userMsgId,
         );
 
         if (response.message) {
@@ -431,20 +411,17 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           // But usually we expect a message or empty message
         }
       } catch (error) {
-        console.error("Chat error:", error);
+        console.error('Chat error:', error);
 
-        if (
-          error.status === 410 ||
-          error.message?.includes("session_expired")
-        ) {
+        if (error.status === 410 || error.message?.includes('session_expired')) {
           sessionStorage.clear();
 
           addAssistantMessage({
-            type: "text",
-            title: "Sessione scaduta",
+            type: 'text',
+            title: 'Sessione scaduta',
             message:
-              "La tua sessione è scaduta per inattività. Ricarica la pagina per iniziare una nuova conversazione.",
-            format: "plain",
+              'La tua sessione è scaduta per inattività. Ricarica la pagina per iniziare una nuova conversazione.',
+            format: 'plain',
           });
 
           return;
@@ -452,14 +429,14 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
         const errorMessage =
           error instanceof ChatApiError
-            ? "Errore di connessione. Riprova tra poco."
-            : "Si è verificato un errore inaspettato.";
+            ? 'Errore di connessione. Riprova tra poco.'
+            : 'Si è verificato un errore inaspettato.';
 
         addAssistantMessage({
-          type: "text",
-          title: "Errore",
+          type: 'text',
+          title: 'Errore',
           message: errorMessage,
-          format: "plain",
+          format: 'plain',
         });
       } finally {
         setLoading(false);
@@ -478,27 +455,25 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       setSessionStatus,
       setMessages,
       setAssignedTo,
-    ]
+    ],
   );
 
   const sendFeedback = useCallback(
-    async (messageId, rating, aiMessageText, type = "message") => {
+    async (messageId, rating, aiMessageText, type = 'message') => {
       // 1. Optimistic UI Update (Only for message feedback)
-      if (type === "message") {
+      if (type === 'message') {
         setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === messageId ? { ...msg, feedback: rating } : msg
-          )
+          prev.map((msg) => (msg.id === messageId ? { ...msg, feedback: rating } : msg)),
         );
       }
 
       // 2. Find context (user query)
-      let userQuery = "N/A";
-      if (type === "message") {
+      let userQuery = 'N/A';
+      if (type === 'message') {
         const messageIndex = messages.findIndex((m) => m.id === messageId);
         if (messageIndex > 0) {
           const prevMsg = messages[messageIndex - 1];
-          if (prevMsg.sender === "user") {
+          if (prevMsg.sender === 'user') {
             userQuery = prevMsg.text;
           }
         }
@@ -507,9 +482,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       // 3. Send to backend
       try {
         await fetch(`${API_URL}/api/feedback`, {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             shopDomain,
@@ -522,10 +497,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           }),
         });
       } catch (error) {
-        console.error("Error sending feedback:", error);
+        console.error('Error sending feedback:', error);
       }
     },
-    [messages, shopDomain, sessionId]
+    [messages, shopDomain, sessionId],
   );
 
   return {

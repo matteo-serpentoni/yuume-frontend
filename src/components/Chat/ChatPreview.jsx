@@ -1,4 +1,4 @@
-import Chat from "./Chat";
+import Chat from './Chat';
 
 /**
  * ChatPreview
@@ -8,21 +8,21 @@ import Chat from "./Chat";
 // 🎭 Mock data per la preview nel dashboard (stabile fuori dal component)
 const MOCK_MESSAGES = [
   {
-    id: "preview-1",
-    sender: "assistant",
+    id: 'preview-1',
+    sender: 'assistant',
     text: "Ciao! 👋 Sono l'assistente Yuume. Posso aiutarti a trovare prodotti o tracciare un ordine?",
     timestamp: new Date().toISOString(),
   },
   {
-    id: "preview-2",
-    sender: "user",
-    text: "Sì, vorrei vedere gli ultimi arrivi.",
+    id: 'preview-2',
+    sender: 'user',
+    text: 'Sì, vorrei vedere gli ultimi arrivi.',
     timestamp: new Date().toISOString(),
   },
   {
-    id: "preview-3",
-    sender: "assistant",
-    text: "Certamente! Ecco alcune delle categorie più popolari questa settimana.",
+    id: 'preview-3',
+    sender: 'assistant',
+    text: 'Certamente! Ecco alcune delle categorie più popolari questa settimana.',
     timestamp: new Date().toISOString(),
   },
 ];

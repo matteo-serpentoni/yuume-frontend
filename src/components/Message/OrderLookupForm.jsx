@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
-import { normalizeOrderNumber } from "../../utils/shopifyUtils";
-import "./OrderLookupForm.css";
+import React, { useState } from 'react';
+import { motion } from 'framer-motion'; // eslint-disable-line no-unused-vars
+import { normalizeOrderNumber } from '../../utils/shopifyUtils';
+import './OrderLookupForm.css';
 
 /**
  * OrderLookupForm Component
@@ -10,8 +10,8 @@ import "./OrderLookupForm.css";
  * Follows the "Ethereal" design system.
  */
 const OrderLookupForm = ({ onSubmit, isLoading }) => {
-  const [email, setEmail] = useState("");
-  const [orderNumber, setOrderNumber] = useState("");
+  const [email, setEmail] = useState('');
+  const [orderNumber, setOrderNumber] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -63,12 +63,8 @@ const OrderLookupForm = ({ onSubmit, isLoading }) => {
           />
         </div>
 
-        <button
-          type="submit"
-          className="yuume-order-form-submit"
-          disabled={!email || isLoading}
-        >
-          {isLoading ? <span className="yuume-loader-small" /> : "Cerca ordine"}
+        <button type="submit" className="yuume-order-form-submit" disabled={!email || isLoading}>
+          {isLoading ? <span className="yuume-loader-small" /> : 'Cerca ordine'}
         </button>
       </form>
     </motion.div>

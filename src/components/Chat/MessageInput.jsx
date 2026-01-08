@@ -1,30 +1,30 @@
-import { useState, useRef } from "react";
-import "./MessageInput.css";
+import { useState, useRef } from 'react';
+import './MessageInput.css';
 
 const MessageInput = ({
   onSendMessage,
   disabled: propDisabled,
   loading,
-  placeholder = "Scrivi un messaggio…",
-  sendButtonColor = "#a259ff",
-  inputBorderColor = "#a259ff",
-  inputFocusColor = "#4CC2E9",
+  placeholder = 'Scrivi un messaggio…',
+  sendButtonColor = '#a259ff',
+  inputBorderColor = '#a259ff',
+  inputFocusColor = '#4CC2E9',
   previewMode = false,
   onProfileClick,
-  connectionStatus = "online",
+  connectionStatus = 'online',
 }) => {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
 
-  const isDisconnected = connectionStatus !== "online";
+  const isDisconnected = connectionStatus !== 'online';
   const disabled = propDisabled || loading || isDisconnected;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (message.trim() && !disabled) {
       onSendMessage(message);
-      setMessage("");
+      setMessage('');
     }
   };
 
@@ -33,13 +33,13 @@ const MessageInput = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`message-input-container ${previewMode ? "preview" : ""} ${
-        isFocused ? "focused" : ""
-      } ${disabled ? "disabled" : ""}`}
+      className={`message-input-container ${previewMode ? 'preview' : ''} ${
+        isFocused ? 'focused' : ''
+      } ${disabled ? 'disabled' : ''}`}
       style={{
-        "--send-btn-color": sendButtonColor,
-        "--input-border-color": inputBorderColor,
-        "--input-focus-color": inputFocusColor,
+        '--send-btn-color': sendButtonColor,
+        '--input-border-color': inputBorderColor,
+        '--input-focus-color': inputFocusColor,
       }}
     >
       <div className="input-wrapper">
@@ -48,11 +48,11 @@ const MessageInput = ({
           type="text"
           className="chat-input"
           placeholder={
-            connectionStatus === "offline"
-              ? "Nessuna connessione..."
-              : connectionStatus === "reconnecting"
-              ? "Riconnessione..."
-              : placeholder
+            connectionStatus === 'offline'
+              ? 'Nessuna connessione...'
+              : connectionStatus === 'reconnecting'
+                ? 'Riconnessione...'
+                : placeholder
           }
           aria-label="Messaggio da inviare"
           value={message}
@@ -63,11 +63,7 @@ const MessageInput = ({
           maxLength={2000}
         />
         {shouldShowButton && (
-          <button
-            type="submit"
-            aria-label="Invia messaggio"
-            className="chat-send-btn"
-          >
+          <button type="submit" aria-label="Invia messaggio" className="chat-send-btn">
             <svg
               width="20"
               height="20"

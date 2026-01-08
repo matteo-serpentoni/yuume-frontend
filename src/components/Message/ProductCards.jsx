@@ -1,13 +1,10 @@
-import React, { memo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import AddToCartButton from "./AddToCartButton";
-import Drawer from "../UI/Drawer";
-import { formatPrice } from "../../utils/messageHelpers";
-import {
-  normalizeStorefrontProduct,
-  isDefaultVariant,
-} from "../../utils/shopifyUtils";
-import "./ProductCards.css";
+import React, { memo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import AddToCartButton from './AddToCartButton';
+import Drawer from '../UI/Drawer';
+import { formatPrice } from '../../utils/messageHelpers';
+import { normalizeStorefrontProduct, isDefaultVariant } from '../../utils/shopifyUtils';
+import './ProductCards.css';
 
 const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
   // Normalize product data using unified utility
@@ -33,7 +30,7 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
       transition={{ delay: index * 0.1 }}
       onClick={hasVariants ? () => onOpen(product) : undefined}
       onKeyDown={(e) => {
-        if (hasVariants && (e.key === "Enter" || e.key === " ")) {
+        if (hasVariants && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault();
           onOpen(product);
         }
@@ -50,25 +47,16 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
       <div className="yuume-product-info">
         <h3 className="yuume-product-name">{name}</h3>
         <div className="yuume-product-price-row">
-          <span className="yuume-current-price">
-            {formatPrice(price, currency)}
-          </span>
-          <div
-            className={`yuume-availability-status ${
-              isAvailable ? "available" : "unavailable"
-            }`}
-          >
+          <span className="yuume-current-price">{formatPrice(price, currency)}</span>
+          <div className={`yuume-availability-status ${isAvailable ? 'available' : 'unavailable'}`}>
             <span className="yuume-status-dot"></span>
-            {isAvailable ? "In stock" : "Out of stock"}
+            {isAvailable ? 'In stock' : 'Out of stock'}
           </div>
         </div>
       </div>
 
       {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
-        <div
-          className="yuume-product-card-footer"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="yuume-product-card-footer" onClick={(e) => e.stopPropagation()}>
           {hasVariants ? (
             <button
               className="yuume-options-btn"
@@ -125,17 +113,13 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
     return initial;
   });
 
-  const [currentVariant, setCurrentVariant] = React.useState(
-    normalized.variants[0] || null
-  );
+  const [currentVariant, setCurrentVariant] = React.useState(normalized.variants[0] || null);
 
   React.useEffect(() => {
     const found = normalized.variants.find(
       (v) =>
         v.selectedOptions &&
-        v.selectedOptions.every(
-          (opt) => selectedOptions[opt.name] === opt.value
-        )
+        v.selectedOptions.every((opt) => selectedOptions[opt.name] === opt.value),
     );
     if (found) setCurrentVariant(found);
   }, [selectedOptions, normalized.variants]);
@@ -144,9 +128,7 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
     setSelectedOptions((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isAvailableResult = currentVariant
-    ? currentVariant.available
-    : isAvailable;
+  const isAvailableResult = currentVariant ? currentVariant.available : isAvailable;
 
   const currentPrice = currentVariant?.price || initialPrice;
 
@@ -183,7 +165,7 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
                         <button
                           key={val}
                           className={`yuume-pill ${
-                            selectedOptions[opt.name] === val ? "active" : ""
+                            selectedOptions[opt.name] === val ? 'active' : ''
                           }`}
                           onClick={() => handleOptionChange(opt.name, val)}
                         >
@@ -194,10 +176,8 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
                   ) : (
                     <select
                       className="yuume-variant-select"
-                      value={selectedOptions[opt.name] || ""}
-                      onChange={(e) =>
-                        handleOptionChange(opt.name, e.target.value)
-                      }
+                      value={selectedOptions[opt.name] || ''}
+                      onChange={(e) => handleOptionChange(opt.name, e.target.value)}
                     >
                       {opt.values.map((val) => (
                         <option key={val} value={val}>
@@ -232,26 +212,23 @@ const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
   React.useEffect(() => {
     const el = scrollRef.current;
     if (el) {
-      el.addEventListener("scroll", checkScroll);
+      el.addEventListener('scroll', checkScroll);
       // Initial check
       checkScroll();
-      return () => el.removeEventListener("scroll", checkScroll);
+      return () => el.removeEventListener('scroll', checkScroll);
     }
   }, [products]);
 
   const scroll = (direction) => {
     if (scrollRef.current) {
       const container = scrollRef.current;
-      const cardWidth =
-        container.querySelector(".yuume-product-card-minimal")?.offsetWidth ||
-        240;
+      const cardWidth = container.querySelector('.yuume-product-card-minimal')?.offsetWidth || 240;
       const gap = 12;
-      const scrollAmount =
-        direction === "next" ? cardWidth + gap : -(cardWidth + gap);
+      const scrollAmount = direction === 'next' ? cardWidth + gap : -(cardWidth + gap);
 
       container.scrollBy({
         left: scrollAmount,
-        behavior: "smooth",
+        behavior: 'smooth',
       });
     }
   };
@@ -266,15 +243,13 @@ const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
 
   return (
     <div className="yuume-products-container">
-      {displayMessage && (
-        <div className="yuume-products-header-message">{displayMessage}</div>
-      )}
+      {displayMessage && <div className="yuume-products-header-message">{displayMessage}</div>}
 
       <div className="yuume-carousel-wrapper">
         {showLeftArrow && (
           <button
             className="yuume-carousel-nav-btn prev"
-            onClick={() => scroll("prev")}
+            onClick={() => scroll('prev')}
             aria-label="Prodotto precedente"
           >
             <svg
@@ -305,7 +280,7 @@ const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
         {showRightArrow && products.length > 1 && (
           <button
             className="yuume-carousel-nav-btn next"
-            onClick={() => scroll("next")}
+            onClick={() => scroll('next')}
             aria-label="Prodotto successivo"
           >
             <svg
@@ -325,9 +300,7 @@ const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
       {meta.totalCount > meta.displayCount && (
         <div className="yuume-products-footer-link">
           <a
-            href={`https://${shopDomain}/search?q=${encodeURIComponent(
-              displayMessage || ""
-            )}`}
+            href={`https://${shopDomain}/search?q=${encodeURIComponent(displayMessage || '')}`}
             target="_blank"
             rel="noopener noreferrer"
           >

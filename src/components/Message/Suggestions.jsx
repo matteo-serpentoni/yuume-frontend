@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import "./Suggestions.css";
+import { motion } from 'framer-motion';
+import './Suggestions.css';
 
 /**
  * Suggestions
@@ -19,7 +19,7 @@ const Suggestions = ({ suggestions, onSuggestionClick }) => {
           transition={{
             duration: 0.4,
             delay: 0.2 + idx * 0.05,
-            ease: "easeOut",
+            ease: 'easeOut',
           }}
           onClick={() => onSuggestionClick(s.value || s.label)}
           whileHover={{

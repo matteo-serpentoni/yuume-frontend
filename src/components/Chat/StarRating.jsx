@@ -1,5 +1,5 @@
-import { useState, memo } from "react";
-import "./StarRating.css";
+import { useState, memo } from 'react';
+import './StarRating.css';
 
 const StarRating = memo(({ onRate, disabled = false }) => {
   const [rating, setRating] = useState(0);
@@ -17,9 +17,7 @@ const StarRating = memo(({ onRate, disabled = false }) => {
     return (
       <div className="star-rating-container">
         <div className="star-rating-submitted-icon">🎉</div>
-        <div className="star-rating-submitted-text">
-          Grazie per il feedback!
-        </div>
+        <div className="star-rating-submitted-text">Grazie per il feedback!</div>
       </div>
     );
   }
@@ -27,19 +25,15 @@ const StarRating = memo(({ onRate, disabled = false }) => {
   return (
     <div className="star-rating-container">
       <div className="star-rating-title">Come valuti questa conversazione?</div>
-      <div
-        className="star-group"
-        role="group"
-        aria-label="Valutazione stelline"
-      >
+      <div className="star-group" role="group" aria-label="Valutazione stelline">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
             type="button"
             aria-label={`Valuta ${star} stelle su 5`}
             className={`star-button ${
-              star <= (hover || rating) ? "active" : ""
-            } ${star <= hover ? "hover" : ""} ${disabled ? "disabled" : ""}`}
+              star <= (hover || rating) ? 'active' : ''
+            } ${star <= hover ? 'hover' : ''} ${disabled ? 'disabled' : ''}`}
             onClick={() => handleRate(star)}
             onMouseEnter={() => !disabled && setHover(star)}
             onMouseLeave={() => !disabled && setHover(rating)}

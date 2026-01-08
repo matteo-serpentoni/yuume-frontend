@@ -24,13 +24,7 @@
   scrollbar-width: none !important; /* Firefox */
   -ms-overflow-style: none !important; /* IE and Edge */
 
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 10%,
-    black 90%,
-    transparent 100%
-  );
+  mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0%,
@@ -120,11 +114,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   color: var(--orb-theme-color, white);
-  border-color: color-mix(
-    in srgb,
-    var(--orb-theme-color, white),
-    transparent 80%
-  );
+  border-color: color-mix(in srgb, var(--orb-theme-color, white), transparent 80%);
 }
 
 .close-button:hover {

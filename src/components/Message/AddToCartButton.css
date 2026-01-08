@@ -33,13 +33,13 @@
   margin: 0;
   cursor: pointer;
   position: relative;
-  font-family: "Inter", Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   transform: scale(0.9); /* Slightly smaller overall */
   transform-origin: center center;
 }
 
 .add-to-cart:before {
-  content: "";
+  content: '';
   display: block;
   position: absolute;
   top: 0;
@@ -47,7 +47,9 @@
   bottom: 0;
   left: 0;
   border-radius: 5px;
-  transition: background 0.25s, transform 0.15s;
+  transition:
+    background 0.25s,
+    transform 0.15s;
   background: #17171b;
   transform: scaleX(var(--background-scale)) translateZ(0);
 }
@@ -67,7 +69,9 @@
   color: var(--text-color);
   opacity: var(--text-o);
   transform: translateX(var(--text-x)) translateZ(0);
-  transition: opacity 0.3s, transform 0.25s;
+  transition:
+    opacity 0.3s,
+    transform 0.25s;
 }
 
 .add-to-cart svg {
@@ -128,12 +132,7 @@
 .package svg.second {
   --svg-fill: var(--package-second-color);
   --svg-position: absolute;
-  clip-path: polygon(
-    0 var(--package-second-y),
-    24px var(--package-second-y),
-    24px 24px,
-    0 24px
-  );
+  clip-path: polygon(0 var(--package-second-y), 24px var(--package-second-y), 24px 24px, 0 24px);
   transition: clip-path 0.12s;
 }
 
@@ -149,12 +148,14 @@
   margin-left: -18px;
   transform: translate(var(--cart-x), var(--cart-y)) rotate(var(--cart-rotate))
     scale(var(--cart-scale)) translateZ(0);
-  transition: transform 0.2s, opacity 0.1s;
+  transition:
+    transform 0.2s,
+    opacity 0.1s;
   opacity: var(--cart-opacity);
 }
 
 .cart:before {
-  content: "";
+  content: '';
   display: block;
   width: 22px;
   height: 12px;

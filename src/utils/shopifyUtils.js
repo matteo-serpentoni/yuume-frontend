@@ -25,23 +25,18 @@ export const normalizeStorefrontProduct = (product) => {
       Array.isArray(rawImages) && rawImages.length > 0
         ? rawImages
         : fallbackImage
-        ? [fallbackImage]
-        : [],
+          ? [fallbackImage]
+          : [],
     // Primary image for display
     primaryImage: (Array.isArray(rawImages) && rawImages[0]) || fallbackImage,
     // Unified availability boolean
-    isAvailable:
-      initialAvailable !== undefined ? initialAvailable : fallbackAvailable,
+    isAvailable: initialAvailable !== undefined ? initialAvailable : fallbackAvailable,
     // Ensure variants is an array
     variants: Array.isArray(variants) ? variants : [],
     // Determine if there are real variants to customize
     hasVariants: (product.options || []).some(
       (opt) =>
-        !(
-          opt.name === "Title" &&
-          opt.values.length === 1 &&
-          opt.values[0] === "Default Title"
-        )
+        !(opt.name === 'Title' && opt.values.length === 1 && opt.values[0] === 'Default Title'),
     ),
   };
 };
@@ -52,9 +47,7 @@ export const normalizeStorefrontProduct = (product) => {
 export const isDefaultVariant = (option) => {
   if (!option) return false;
   return (
-    option.name === "Title" &&
-    option.values.length === 1 &&
-    option.values[0] === "Default Title"
+    option.name === 'Title' && option.values.length === 1 && option.values[0] === 'Default Title'
   );
 };
 
@@ -62,32 +55,32 @@ export const isDefaultVariant = (option) => {
  * Normalizes an order number by removing any leading '#' characters.
  */
 export const normalizeOrderNumber = (orderNumber) => {
-  if (!orderNumber) return "";
-  return String(orderNumber).replace(/^#+/, "");
+  if (!orderNumber) return '';
+  return String(orderNumber).replace(/^#+/, '');
 };
 
 /**
  * Maps Shopify status values (fulfillment or financial) to CSS class names.
  */
 export const getOrderStatusClass = (statusValue) => {
-  if (!statusValue) return "default";
+  if (!statusValue) return 'default';
 
-  const val = String(statusValue).toLowerCase().replace(/\s+/g, "_");
+  const val = String(statusValue).toLowerCase().replace(/\s+/g, '_');
   const allowed = [
-    "paid",
-    "pending",
-    "authorized",
-    "refunded",
-    "voided",
-    "annullato",
-    "fulfilled",
-    "unfulfilled",
-    "in_preparazione",
-    "in_lavorazione",
-    "partially_fulfilled",
+    'paid',
+    'pending',
+    'authorized',
+    'refunded',
+    'voided',
+    'annullato',
+    'fulfilled',
+    'unfulfilled',
+    'in_preparazione',
+    'in_lavorazione',
+    'partially_fulfilled',
   ];
 
-  return allowed.includes(val) ? val : "default";
+  return allowed.includes(val) ? val : 'default';
 };
 
 /**
@@ -99,10 +92,10 @@ export const extractVariantId = (variantId) => {
   if (!variantId) return null;
 
   // If already a number, return it
-  if (typeof variantId === "number") return variantId;
+  if (typeof variantId === 'number') return variantId;
 
   // If it's a numeric string, convert it
-  if (typeof variantId === "string" && !variantId.includes("/")) {
+  if (typeof variantId === 'string' && !variantId.includes('/')) {
     const parsed = parseInt(variantId, 10);
     return isNaN(parsed) ? null : parsed;
   }

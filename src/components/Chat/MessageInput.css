@@ -62,9 +62,10 @@
   font-size: 0.95rem;
   font-family: inherit;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(35, 36, 58, 0.2);
-  border: 2px solid
-    color-mix(in srgb, var(--input-border-color) 20%, transparent);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(35, 36, 58, 0.2);
+  border: 2px solid color-mix(in srgb, var(--input-border-color) 20%, transparent);
 }
 
 .message-input-container.focused .chat-input {
@@ -83,8 +84,7 @@
 
 /* DESKTOP FOCUS GLOW */
 .orb-container:not(.mobile-device) .chat-input:focus {
-  box-shadow: 0 0 15px
-    color-mix(in srgb, var(--orb-theme-color) 40%, transparent);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--orb-theme-color) 40%, transparent);
 }
 
 .chat-send-btn {
@@ -106,8 +106,7 @@
     var(--send-btn-color) 0%,
     color-mix(in srgb, var(--send-btn-color), black 15%) 100%
   );
-  box-shadow: 0 2px 8px
-    color-mix(in srgb, var(--send-btn-color) 30%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--send-btn-color) 30%, transparent);
 }
 
 .chat-send-btn:hover {
@@ -164,7 +163,7 @@
 }
 
 .profile-button-gradient-border::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: -1px;
   border-radius: 50%;
@@ -173,8 +172,12 @@
   background-size: 300% 300%;
   animation: gradient-flow 4s ease infinite;
   z-index: -1;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;

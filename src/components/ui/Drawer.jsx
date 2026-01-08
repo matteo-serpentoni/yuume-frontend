@@ -1,7 +1,7 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import "./Drawer.css";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import './Drawer.css';
 
 /**
  * Generic Ethereal Drawer Component
@@ -18,7 +18,7 @@ const Drawer = ({
   title, // Added title prop
   children,
   footer,
-  portalId = "yuume-drawer-portal",
+  portalId = 'yuume-drawer-portal',
 }) => {
   const [target, setTarget] = React.useState(null);
 
@@ -27,9 +27,7 @@ const Drawer = ({
     if (el) {
       setTarget(el);
     } else {
-      console.warn(
-        `⚠️ [Drawer] Portal target #${portalId} not found, falling back to body`
-      );
+      console.warn(`⚠️ [Drawer] Portal target #${portalId} not found, falling back to body`);
       setTarget(document.body);
     }
   }, [portalId]);
@@ -52,12 +50,12 @@ const Drawer = ({
           {/* Drawer Shell */}
           <motion.div
             className="yuume-drawer"
-            initial={{ y: "100%" }}
+            initial={{ y: '100%' }}
             animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
-            <div className={`yuume-drawer-header ${title ? "has-title" : ""}`}>
+            <div className={`yuume-drawer-header ${title ? 'has-title' : ''}`}>
               <div className="yuume-drawer-handle" onClick={onClose} />
               {title && <h3 className="yuume-drawer-title">{title}</h3>}
               <button className="yuume-drawer-close" onClick={onClose}>

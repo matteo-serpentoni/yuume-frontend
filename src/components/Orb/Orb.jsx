@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState, useCallback, memo } from "react";
-import { Renderer, Program, Mesh, Triangle, Vec3 } from "ogl";
-import Chat from "../Chat/Chat";
-import ChatPreview from "../Chat/ChatPreview";
-import DevTools from "../Dev/DevTools";
-import { useOrb } from "../../hooks/useOrb";
-import { getCssVariable } from "../../utils/domUtils";
-import { vec3ToRgbString } from "../../utils/colorUtils";
-import "./Orb.css";
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
+import { Renderer, Program, Mesh, Triangle, Vec3 } from 'ogl';
+import Chat from '../Chat/Chat';
+import ChatPreview from '../Chat/ChatPreview';
+import DevTools from '../Dev/DevTools';
+import { useOrb } from '../../hooks/useOrb';
+import { getCssVariable } from '../../utils/domUtils';
+import { vec3ToRgbString } from '../../utils/colorUtils';
+import './Orb.css';
 
 const Orb = memo(
   ({
@@ -39,8 +39,7 @@ const Orb = memo(
     const isMinimized = !enlarged;
 
     // Actual mobile state (UA detection + potential override)
-    const isMobileView =
-      mobileOverride || forcedMobile || isPreviewMobile || isMobile;
+    const isMobileView = mobileOverride || forcedMobile || isPreviewMobile || isMobile;
 
     // Extracted from config for easier access
     const { orbTheme, chatColors } = config;
@@ -228,7 +227,7 @@ const Orb = memo(
         alpha: true,
         premultipliedAlpha: false,
         antialias: true,
-        powerPreference: "high-performance",
+        powerPreference: 'high-performance',
       });
       const gl = renderer.gl;
       gl.clearColor(0, 0, 0, 0);
@@ -241,11 +240,7 @@ const Orb = memo(
         uniforms: {
           iTime: { value: 0 },
           iResolution: {
-            value: new Vec3(
-              gl.canvas.width,
-              gl.canvas.height,
-              gl.canvas.width / gl.canvas.height
-            ),
+            value: new Vec3(gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height),
           },
           hue: { value: hue },
           hover: { value: 0 },
@@ -262,7 +257,7 @@ const Orb = memo(
 
       // ✅ Helper per ottenere la dimensione massima dell'orb dalle variabili CSS
       const getMaxOrbSize = () => {
-        return parseInt(getCssVariable("--orb-size", "600"), 10);
+        return parseInt(getCssVariable('--orb-size', '600'), 10);
       };
 
       function resize() {
@@ -280,16 +275,16 @@ const Orb = memo(
 
         // Non serve impostare style.width/height perché gestito dal CSS (width: 100% !important)
         // ma lo impostiamo per coerenza con la risoluzione logica
-        gl.canvas.style.width = width + "px";
-        gl.canvas.style.height = height + "px";
+        gl.canvas.style.width = width + 'px';
+        gl.canvas.style.height = height + 'px';
 
         program.uniforms.iResolution.value.set(
           gl.canvas.width,
           gl.canvas.height,
-          gl.canvas.width / gl.canvas.height
+          gl.canvas.width / gl.canvas.height,
         );
       }
-      window.addEventListener("resize", resize);
+      window.addEventListener('resize', resize);
       resize();
 
       let targetHover = 0;
@@ -320,8 +315,8 @@ const Orb = memo(
         targetHover = 0;
       };
 
-      container.addEventListener("mousemove", handleMouseMove);
-      container.addEventListener("mouseleave", handleMouseLeave);
+      container.addEventListener('mousemove', handleMouseMove);
+      container.addEventListener('mouseleave', handleMouseLeave);
 
       let rafId;
       const update = (t) => {
@@ -338,8 +333,7 @@ const Orb = memo(
         program.uniforms.baseColor3.value.set(...color3Ref.current);
 
         const effectiveHover = forceHoverState ? 1 : targetHover;
-        program.uniforms.hover.value +=
-          (effectiveHover - program.uniforms.hover.value) * 0.1;
+        program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.1;
 
         if (rotateOnHover && effectiveHover > 0.5) {
           currentRot += dt * rotationSpeed;
@@ -352,47 +346,47 @@ const Orb = memo(
 
       return () => {
         cancelAnimationFrame(rafId);
-        window.removeEventListener("resize", resize);
-        container.removeEventListener("mousemove", handleMouseMove);
-        container.removeEventListener("mouseleave", handleMouseLeave);
+        window.removeEventListener('resize', resize);
+        container.removeEventListener('mousemove', handleMouseMove);
+        container.removeEventListener('mouseleave', handleMouseLeave);
         canvasContainer.removeChild(gl.canvas);
-        gl.getExtension("WEBGL_lose_context")?.loseContext();
+        gl.getExtension('WEBGL_lose_context')?.loseContext();
       };
       // ✅ Aggiunte dipendenze per colori dinamici
     }, [hue, hoverIntensity, rotateOnHover, forceHoverState]);
 
     // ✅ FUNZIONALITÀ: Analytics events
     useEffect(() => {
-      if (mode === "preview") return; // Skip in preview mode
+      if (mode === 'preview') return; // Skip in preview mode
 
       if (enlarged) {
-        window.parent?.postMessage({ type: "YUUME_CHAT_OPENED" }, "*");
+        window.parent?.postMessage({ type: 'YUUME_CHAT_OPENED' }, '*');
       } else {
-        window.parent?.postMessage({ type: "YUUME_CHAT_CLOSED" }, "*");
+        window.parent?.postMessage({ type: 'YUUME_CHAT_CLOSED' }, '*');
       }
     }, [enlarged, mode]);
 
     // ✅ FUNZIONALITÀ: Gestione click per espandere
     const handleExpand = useCallback(() => {
-      if (isMinimized && mode !== "preview") {
+      if (isMinimized && mode !== 'preview') {
         setEnlarged(true);
-        window.parent?.postMessage({ type: "resize", enlarged: true }, "*");
+        window.parent?.postMessage({ type: 'resize', enlarged: true }, '*');
       }
     }, [isMinimized, mode, setEnlarged]);
 
     const handleKeyDown = useCallback(
       (e) => {
         // Only intercept Enter/Space if the orb is minimized (acting as a button)
-        if (isMinimized && (e.key === "Enter" || e.key === " ")) {
+        if (isMinimized && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault();
           handleExpand();
         }
       },
-      [handleExpand, isMinimized]
+      [handleExpand, isMinimized],
     );
 
     // ✅ FUNZIONALITÀ: Messaggi a rotazione
-    const messages = ["Ciao! 👋", "Serve\naiuto? 💬", "Chiedimi\ntutto ✨"];
+    const messages = ['Ciao! 👋', 'Serve\naiuto? 💬', 'Chiedimi\ntutto ✨'];
     const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
 
     useEffect(() => {
@@ -410,7 +404,7 @@ const Orb = memo(
       <>
         {/* ✅ FUNZIONALITÀ: Dev Tools (Solo in sviluppo locale e non preview) */}
         {/* Rendered outside the orb-container to avoid mobile clipping/centering issues */}
-        {mode === "development" && (
+        {mode === 'development' && (
           <DevTools
             currentConfig={config}
             onConfigChange={setConfig}
@@ -423,18 +417,14 @@ const Orb = memo(
           ref={containerRef}
           role="button"
           tabIndex={0}
-          aria-label={
-            isMinimized ? "Apri assistente Yuume" : "Widget Yuume attivo"
-          }
-          className={`orb-container ${isMinimized ? "minimized" : ""} ${
-            isMobileView ? "mobile-device" : ""
-          } ${mode === "preview" ? "preview-mode" : ""} ${
-            loading ? "loading" : ""
-          }`}
+          aria-label={isMinimized ? 'Apri assistente Yuume' : 'Widget Yuume attivo'}
+          className={`orb-container ${isMinimized ? 'minimized' : ''} ${
+            isMobileView ? 'mobile-device' : ''
+          } ${mode === 'preview' ? 'preview-mode' : ''} ${loading ? 'loading' : ''}`}
           onClick={handleExpand}
           onKeyDown={handleKeyDown}
           style={{
-            "--orb-theme-color": themeColor,
+            '--orb-theme-color': themeColor,
           }}
         >
           {/* Loading Placeholder */}
@@ -443,7 +433,7 @@ const Orb = memo(
           {/* Chat Layer - Rendered once loaded, visibility handled by CSS classes */}
           {!loading && (
             <div className="orb-chat-layer">
-              {mode === "preview" ? (
+              {mode === 'preview' ? (
                 <ChatPreview chatColors={chatColors} />
               ) : (
                 <Chat
@@ -454,10 +444,7 @@ const Orb = memo(
                     setEnlarged(false);
                     // Wait for animation (600ms) before resizing iframe
                     setTimeout(() => {
-                      window.parent?.postMessage(
-                        { type: "resize", enlarged: false },
-                        "*"
-                      );
+                      window.parent?.postMessage({ type: 'resize', enlarged: false }, '*');
                     }, 600);
                   }}
                 />
@@ -471,33 +458,28 @@ const Orb = memo(
               key={currentMessageIndex} // Force re-render to restart animations
               className="minimized-text"
               style={{
-                "--minimized-text-color":
-                  textColorMode === "light" ? chatColors.userMessage : "white",
+                '--minimized-text-color':
+                  textColorMode === 'light' ? chatColors.userMessage : 'white',
               }}
             >
-              {messages[currentMessageIndex]
-                .split("\n")
-                .map((line, lineIndex) => (
-                  <div key={lineIndex} className="minimized-text-line">
-                    {Array.from(line).map((char, charIndex) => {
-                      // Calculate global index for continuous delay
-                      const previousCharsCount = messages[currentMessageIndex]
-                        .split("\n")
-                        .slice(0, lineIndex)
-                        .join("").length;
-                      const globalIndex = previousCharsCount + charIndex;
+              {messages[currentMessageIndex].split('\n').map((line, lineIndex) => (
+                <div key={lineIndex} className="minimized-text-line">
+                  {Array.from(line).map((char, charIndex) => {
+                    // Calculate global index for continuous delay
+                    const previousCharsCount = messages[currentMessageIndex]
+                      .split('\n')
+                      .slice(0, lineIndex)
+                      .join('').length;
+                    const globalIndex = previousCharsCount + charIndex;
 
-                      return (
-                        <span
-                          key={charIndex}
-                          style={{ animationDelay: `${globalIndex * 0.03}s` }}
-                        >
-                          {char === " " ? "\u00A0" : char}
-                        </span>
-                      );
-                    })}
-                  </div>
-                ))}
+                    return (
+                      <span key={charIndex} style={{ animationDelay: `${globalIndex * 0.03}s` }}>
+                        {char === ' ' ? '\u00A0' : char}
+                      </span>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           )}
 
@@ -518,7 +500,7 @@ const Orb = memo(
         </div>
       </>
     );
-  }
+  },
 );
 
 export default Orb;
