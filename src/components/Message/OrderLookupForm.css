@@ -72,7 +72,8 @@
 }
 
 .yuume-form-group input::placeholder {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.45);
+  opacity: 1; /* Override Chrome default */
 }
 
 .yuume-order-form-submit {

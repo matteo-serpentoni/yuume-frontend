@@ -68,6 +68,11 @@
   border: 2px solid color-mix(in srgb, var(--input-border-color) 20%, transparent);
 }
 
+.chat-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+  opacity: 1; /* Override Chrome default */
+}
+
 .message-input-container.focused .chat-input {
   border-color: color-mix(in srgb, var(--input-focus-color) 60%, transparent);
 }
