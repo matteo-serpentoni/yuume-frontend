@@ -5,24 +5,28 @@
   const currentScript =
     document.currentScript || document.querySelector('script[src*="embed.js"]');
   const scriptUrl = currentScript?.src;
-  const urlParams = new URLSearchParams(scriptUrl?.split("?")[1] || "");
-  const SHOP_DOMAIN = urlParams.get("shop") || window.location.hostname;
 
-  // Genera session ID univoco
-  const SESSION_ID = generateSessionId();
+  let shopParam = "";
+  let siteIdParam = "";
 
-  // Ottieni siteId (puoi passarlo come parametro o fare lookup)
-  const SITE_ID =
-    urlParams.get("siteId") || "shopify_" + SHOP_DOMAIN.split(".")[0];
+  if (scriptUrl) {
+    try {
+      const url = new URL(scriptUrl);
+      shopParam = url.searchParams.get("shop");
+      siteIdParam = url.searchParams.get("siteId");
+    } catch (e) {
+      // Error parsing script URL
+    }
+  }
 
-  var isDevelopment =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname === "" ||
-    window.location.port === "8080" ||
-    window.location.port === "3000";
+  const SHOP_DOMAIN = shopParam || window.location.hostname;
+  const SITE_ID = siteIdParam || "shopify_" + SHOP_DOMAIN.split(".")[0];
 
-  var config = {
+  const isDevelopment =
+    ["localhost", "127.0.0.1", ""].includes(window.location.hostname) ||
+    ["8080", "3000"].includes(window.location.port);
+
+  const config = {
     development: {
       widgetUrl: "http://localhost:3000/?embed=true",
       apiUrl: "http://localhost:5001",
@@ -33,8 +37,13 @@
     },
   };
 
-  var env = isDevelopment ? "development" : "production";
-  var API_URL = config[env].apiUrl;
+  const env = isDevelopment ? "development" : "production";
+  const API_URL = config[env].apiUrl;
+  const WIDGET_URL = config[env].widgetUrl;
+  const WIDGET_ORIGIN = new URL(WIDGET_URL).origin;
+
+  // Genera session ID univoco
+  const SESSION_ID = generateSessionId();
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // UTILITY FUNCTIONS
@@ -69,7 +78,7 @@
         currentPage: window.location.pathname,
         visitorId: getVisitorId(),
       }),
-    }).catch((err) => console.error("❌ Heartbeat failed:", err));
+    }).catch(() => {});
   }
 
   function notifyChatStart() {
@@ -77,7 +86,7 @@
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sessionId: SESSION_ID }),
-    }).catch((err) => console.error("❌ Chat start failed:", err));
+    }).catch(() => {});
   }
 
   function notifyChatEnd() {
@@ -85,7 +94,7 @@
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sessionId: SESSION_ID }),
-    }).catch((err) => console.error("❌ Chat end failed:", err));
+    }).catch(() => {});
   }
 
   function notifyLeave() {
@@ -101,7 +110,7 @@
         headers: { "Content-Type": "application/json" },
         body: data,
         keepalive: true,
-      }).catch((err) => console.error("❌ Leave failed:", err));
+      }).catch(() => {});
     }
   }
 
@@ -109,7 +118,7 @@
   // BACKGROUND DETECTION
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   function getLuminance(r, g, b) {
-    var a = [r, g, b].map(function (v) {
+    const a = [r, g, b].map((v) => {
       v /= 255;
       return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
     });
@@ -119,30 +128,26 @@
   function checkBackgroundColor() {
     if (!iframe) return;
 
-    // Coordinate del centro dell'orb (approssimativamente)
-    // L'iframe è 250x250, l'orb è al centro.
-    // In posizione minimizzata è in basso a destra.
-    var rect = iframe.getBoundingClientRect();
+    const rect = iframe.getBoundingClientRect();
     // Targeted coordinates: Bottom-right area where the Orb minimized actually sits
-    // (Iframe is 250x250, Orb is offset 32px from bottom/right)
-    var x = rect.right - 70;
-    var y = rect.bottom - 70;
+    const x = rect.right - 70;
+    const y = rect.bottom - 70;
 
-    // Nascondi momentaneamente l'iframe per vedere cosa c'è sotto
-    var prevDisplay = iframe.style.display;
-    iframe.style.display = "none";
+    // Use pointer-events to "see through" the iframe without hiding it
+    const prevPointerEvents = iframe.style.pointerEvents;
+    iframe.style.pointerEvents = "none";
 
-    var element = document.elementFromPoint(x, y);
+    let element = document.elementFromPoint(x, y);
 
-    iframe.style.display = prevDisplay;
+    iframe.style.pointerEvents = prevPointerEvents;
 
     if (!element) return;
 
     // Risali il DOM per trovare un colore di sfondo non trasparente
-    var bgColor = "rgba(0, 0, 0, 0)";
+    let bgColor = "rgba(0, 0, 0, 0)";
     while (element) {
-      var style = window.getComputedStyle(element);
-      var color = style.backgroundColor;
+      const style = window.getComputedStyle(element);
+      const color = style.backgroundColor;
 
       // Check se non è trasparente
       if (color && color !== "rgba(0, 0, 0, 0)" && color !== "transparent") {
@@ -153,35 +158,33 @@
     }
 
     // Parse RGB/RGBA
-    var rgb = bgColor.match(/\d+/g);
+    const rgb = bgColor.match(/\d+/g);
     if (rgb && rgb.length >= 3) {
-      var lum = getLuminance(
+      const lum = getLuminance(
         parseInt(rgb[0]),
         parseInt(rgb[1]),
         parseInt(rgb[2])
       );
-      var mode = lum > 0.5 ? "light" : "dark"; // light background -> dark text
+      const mode = lum > 0.5 ? "light" : "dark"; // light background -> dark text
 
       iframe.contentWindow.postMessage(
         {
           type: "YUUME_BG_LUMINANCE",
           mode: mode,
         },
-        "*"
+        WIDGET_ORIGIN
       );
     }
   }
 
   // Throttle helper
   function throttle(func, limit) {
-    var inThrottle;
-    return function () {
-      var args = arguments;
-      var context = this;
+    let inThrottle;
+    return function (...args) {
       if (!inThrottle) {
-        func.apply(context, args);
+        func.apply(this, args);
         inThrottle = true;
-        setTimeout(function () {
+        setTimeout(() => {
           inThrottle = false;
         }, limit);
       }
@@ -189,7 +192,7 @@
   }
 
   // Listeners per aggiornare il colore
-  var throttledCheck = throttle(checkBackgroundColor, 200);
+  const throttledCheck = throttle(checkBackgroundColor, 200);
   window.addEventListener("scroll", throttledCheck);
   window.addEventListener("resize", throttledCheck);
 
@@ -199,10 +202,10 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // IFRAME SETUP
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  var iframe = document.createElement("iframe");
+  const iframe = document.createElement("iframe");
   // Add timestamp to prevent caching of the widget itself
-  var widgetUrl = config[env].widgetUrl;
-  var separator = widgetUrl.includes("?") ? "&" : "?";
+  const widgetUrl = WIDGET_URL;
+  const separator = widgetUrl.includes("?") ? "&" : "?";
   iframe.src = widgetUrl + separator + "t=" + Date.now();
 
   iframe.id = "yuume-orb-iframe";
@@ -225,17 +228,14 @@
         type: "YUUME_SHOP_DOMAIN",
         shopDomain: SHOP_DOMAIN,
       },
-      "*"
+      WIDGET_ORIGIN
     );
   };
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TRACKING INITIALIZATION
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  console.log("🚀 Yuume tracking initialized:", {
-    sessionId: SESSION_ID,
-    siteId: SITE_ID,
-  });
+  // Tracking initialized
 
   // Heartbeat iniziale
   sendHeartbeat();
@@ -254,6 +254,9 @@
   // MESSAGE LISTENER
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   window.addEventListener("message", function (event) {
+    // Verifica che il messaggio venga dall'origine corretta
+    if (event.origin !== WIDGET_ORIGIN) return;
+
     // Verifica che il messaggio venga dall'iframe
     if (event.source !== iframe.contentWindow) return;
 
@@ -266,7 +269,7 @@
           type: "YUUME_SHOP_DOMAIN",
           shopDomain: SHOP_DOMAIN,
         },
-        "*"
+        WIDGET_ORIGIN
       );
     }
 
@@ -274,7 +277,6 @@
     // CHAT OPENED (utente apre chat)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === "YUUME_CHAT_OPENED") {
-      console.log("💬 Chat opened");
       notifyChatStart();
     }
 
@@ -282,7 +284,6 @@
     // CHAT CLOSED (utente chiude chat)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === "YUUME_CHAT_CLOSED") {
-      console.log("🔇 Chat closed");
       notifyChatEnd();
     }
 
@@ -290,8 +291,6 @@
     // ADD TO CART
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === "YUUME_ADD_TO_CART") {
-      console.log("📥 Ricevuta richiesta add to cart:", event.data);
-
       let addDataCache = null;
       let cartCache = null;
 
@@ -314,14 +313,12 @@
         })
         .then((addData) => {
           addDataCache = addData;
-          console.log("✅ Prodotto aggiunto con successo:", addData);
           return fetch("/cart.js", { credentials: "same-origin" }).then((r) =>
             r.json()
           );
         })
         .then((cart) => {
           cartCache = cart;
-          console.log("📊 Carrello completo:", cart);
 
           // Aggiorna badge numerici
           const itemCount = cart.item_count;
@@ -360,7 +357,6 @@
               badgesUpdated++;
             });
           });
-          console.log(`✅ ${badgesUpdated} badge(s) del carrello aggiornati`);
 
           // Auto-detect sections
           const detectedSections = new Set();
@@ -383,7 +379,6 @@
           });
 
           const ids = Array.from(detectedSections);
-          console.log("🧭 Sections da aggiornare:", ids);
 
           if (ids.length) {
             return fetch(`/?sections=${ids.join(",")}`, {
@@ -395,7 +390,6 @@
                   const el = document.getElementById(`shopify-section-${id}`);
                   if (el && json[id]) el.innerHTML = json[id];
                 });
-                console.log(`🔄 Sections aggiornate: ${ids.join(", ")}`);
 
                 document.dispatchEvent(new Event("cart:refresh"));
                 document.dispatchEvent(new Event("cart:updated"));
@@ -403,9 +397,7 @@
                   new CustomEvent("yuume:cart-updated", { detail: cart })
                 );
               })
-              .catch((err) =>
-                console.warn("Errore aggiornamento sections:", err)
-              );
+              .catch(() => {});
           }
         })
         .then(() => {
@@ -415,18 +407,17 @@
               success: true,
               data: { addData: addDataCache, cart: cartCache },
             },
-            "*"
+            WIDGET_ORIGIN
           );
         })
         .catch((error) => {
-          console.error("❌ Errore aggiunta al carrello:", error);
           iframe.contentWindow.postMessage(
             {
               type: "YUUME_ADD_TO_CART_RESPONSE",
               success: false,
               error: error.message,
             },
-            "*"
+            WIDGET_ORIGIN
           );
         });
     }
@@ -437,12 +428,9 @@
     if (event.data.type === "resize") {
       if (event.data.enlarged) {
         // Robust mobile detection
-        var isMobile = false;
-        if (window.matchMedia) {
-          isMobile = window.matchMedia("(max-width: 768px)").matches;
-        } else {
-          isMobile = window.innerWidth <= 768 || window.screen.width <= 768;
-        }
+        const isMobile = window.matchMedia
+          ? window.matchMedia("(max-width: 768px)").matches
+          : window.innerWidth <= 768;
 
         if (isMobile) {
           iframe.style.width = "100%";
