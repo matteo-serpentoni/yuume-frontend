@@ -431,26 +431,17 @@ const Orb = memo(
           }
           className={`orb-container ${isMinimized ? "minimized" : ""} ${
             isMobileView ? "mobile-device" : ""
-          } ${mode === "preview" ? "preview-mode" : ""}`}
+          } ${mode === "preview" ? "preview-mode" : ""} ${
+            loading ? "loading" : ""
+          }`}
           onClick={handleExpand}
           onKeyDown={handleKeyDown}
           style={{
             "--orb-theme-color": themeColor,
-            opacity: loading ? 0.6 : 1,
           }}
         >
           {/* Loading Placeholder */}
-          {loading && (
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                background: "rgba(255,255,255,0.05)",
-                animation: "pulse 2s infinite",
-              }}
-            />
-          )}
+          {loading && <div className="orb-loading-placeholder" />}
 
           {/* Chat Layer - Rendered once loaded, visibility handled by CSS classes */}
           {!loading && (
@@ -483,7 +474,7 @@ const Orb = memo(
               key={currentMessageIndex} // Force re-render to restart animations
               className="minimized-text"
               style={{
-                color:
+                "--minimized-text-color":
                   textColorMode === "light" ? chatColors.userMessage : "white",
               }}
             >

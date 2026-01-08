@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import "./MessageList.css";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import CategoryCards from "../Message/CategoryCards";
@@ -108,40 +109,14 @@ const MessageList = ({
               transition={{ duration: 0.3 }}
             >
               {msg.results.type === "text" ? (
-                <div
-                  style={{
-                    padding: "16px",
-                    textAlign: "center",
-                    background: "rgba(255,255,255,0.05)",
-                    borderRadius: "16px",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
-                >
-                  <div style={{ fontSize: "24px", marginBottom: "8px" }}>
-                    🔍
-                  </div>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      margin: "0 0 16px 0",
-                      color: "white",
-                      opacity: 0.8,
-                    }}
-                  >
+                <div className="yuume-order-lookup-results-text">
+                  <div className="yuume-order-lookup-icon">🔍</div>
+                  <p className="yuume-order-lookup-message">
                     {msg.results.text}
                   </p>
                   <button
                     onClick={() => sendMessage("Cerca ordine")}
-                    style={{
-                      background: "white",
-                      color: "black",
-                      border: "none",
-                      padding: "8px 16px",
-                      borderRadius: "10px",
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      cursor: "pointer",
-                    }}
+                    className="yuume-order-lookup-retry-btn"
                   >
                     Riprova
                   </button>

@@ -1,5 +1,6 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import MessageBubble from "./MessageBubble";
+import "./TypingIndicator.css";
 
 /**
  * TypingIndicator

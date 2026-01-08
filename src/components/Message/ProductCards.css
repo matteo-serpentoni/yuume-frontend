@@ -330,3 +330,9 @@
   font-size: 11px;
   text-decoration: underline;
 }
+
+.yuume-no-products {
+  color: white;
+  font-size: 14px;
+  padding: 10px;
+}

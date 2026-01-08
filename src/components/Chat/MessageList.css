@@ -1,0 +1,37 @@
+/* MessageList.css */
+
+.yuume-order-lookup-results-text {
+  padding: 16px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.yuume-order-lookup-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.yuume-order-lookup-message {
+  font-size: 14px;
+  margin: 0 0 16px 0;
+  color: white;
+  opacity: 0.8;
+}
+
+.yuume-order-lookup-retry-btn {
+  background: white;
+  color: black;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.yuume-order-lookup-retry-btn:hover {
+  opacity: 0.9;
+}

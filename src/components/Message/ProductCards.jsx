@@ -295,7 +295,7 @@ const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
 
   if (!Array.isArray(products) || products.length === 0) {
     return (
-      <div style={{ color: "white", fontSize: "14px", padding: "10px" }}>
+      <div className="yuume-no-products">
         Non ho trovato prodotti che corrispondono alla tua ricerca.
       </div>
     );

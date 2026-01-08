@@ -28,10 +28,6 @@ const MessageBubble = ({
       chatColors.userMessage && {
         "--user-msg-color-rgb": hexToRgb(chatColors.userMessage),
       }),
-    ...(type === "category_cards" && {
-      width: "100%",
-      maxWidth: "100%",
-    }),
   };
 
   return (

@@ -1,4 +1,5 @@
-import React, { useState, memo } from "react";
+import { useState, memo } from "react";
+import "./StarRating.css";
 
 const StarRating = memo(({ onRate, disabled = false }) => {
   const [rating, setRating] = useState(0);
@@ -14,20 +15,9 @@ const StarRating = memo(({ onRate, disabled = false }) => {
 
   if (submitted) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "16px",
-          background: "rgba(255, 255, 255, 0.05)",
-          borderRadius: "12px",
-          marginTop: "16px",
-          textAlign: "center",
-        }}
-      >
-        <div style={{ fontSize: "24px", marginBottom: "8px" }}>🎉</div>
-        <div style={{ color: "#fff", fontWeight: "500" }}>
+      <div className="star-rating-container">
+        <div className="star-rating-submitted-icon">🎉</div>
+        <div className="star-rating-submitted-text">
           Grazie per il feedback!
         </div>
       </div>
@@ -35,29 +25,10 @@ const StarRating = memo(({ onRate, disabled = false }) => {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "16px",
-        background: "rgba(255, 255, 255, 0.05)",
-        borderRadius: "12px",
-        marginTop: "16px",
-      }}
-    >
+    <div className="star-rating-container">
+      <div className="star-rating-title">Come valuti questa conversazione?</div>
       <div
-        style={{
-          color: "rgba(255, 255, 255, 0.9)",
-          marginBottom: "12px",
-          fontSize: "14px",
-          fontWeight: "500",
-        }}
-      >
-        Come valuti questa conversazione?
-      </div>
-      <div
-        style={{ display: "flex", gap: "8px" }}
+        className="star-group"
         role="group"
         aria-label="Valutazione stelline"
       >
@@ -66,19 +37,9 @@ const StarRating = memo(({ onRate, disabled = false }) => {
             key={star}
             type="button"
             aria-label={`Valuta ${star} stelle su 5`}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: disabled ? "default" : "pointer",
-              fontSize: "24px",
-              padding: "4px",
-              color:
-                star <= (hover || rating)
-                  ? "#FFD700"
-                  : "rgba(255, 255, 255, 0.2)",
-              transition: "color 0.2s, transform 0.1s",
-              transform: star <= hover ? "scale(1.1)" : "scale(1)",
-            }}
+            className={`star-button ${
+              star <= (hover || rating) ? "active" : ""
+            } ${star <= hover ? "hover" : ""} ${disabled ? "disabled" : ""}`}
             onClick={() => handleRate(star)}
             onMouseEnter={() => !disabled && setHover(star)}
             onMouseLeave={() => !disabled && setHover(rating)}
