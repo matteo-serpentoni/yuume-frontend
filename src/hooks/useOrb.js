@@ -29,16 +29,17 @@ export const useOrb = (modeOverride = null) => {
   const [loading, setLoading] = useState(true);
   const [shopDomain, setShopDomain] = useState(() => {
     // 1. Check URL
-    const urlShop = new URLSearchParams(window.location.search).get('shop');
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlShop = urlParams.get('shop') || urlParams.get('shopDomain');
     if (urlShop) return urlShop;
 
     // 2. Check SessionStorage (Manual Override in Dev)
-    const savedDevShop = sessionStorage.getItem('yuume_dev_shop_domain');
-    if (savedDevShop) return savedDevShop;
+    if (import.meta.env.DEV) {
+      const savedDevShop = sessionStorage.getItem('yuume_dev_shop_domain');
+      if (savedDevShop) return savedDevShop;
+    }
 
-    // 3. Check Hostname (last resort)
-    const host = window.location.hostname;
-    return host === 'localhost' ? 'localhost' : host;
+    return null; // Must wait for postMessage if not in URL
   });
   const [isMobile, setIsMobile] = useState(false);
   const [isPreviewMobile, setIsPreviewMobile] = useState(false);

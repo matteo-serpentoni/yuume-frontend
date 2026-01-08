@@ -120,6 +120,14 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     };
 
     const newSessionId = generateSessionId();
+
+    // Surgical clear: only yuume keys
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith('yuume_') && key !== STORAGE_KEYS.SHOP_DOMAIN) {
+        sessionStorage.removeItem(key);
+      }
+    });
+
     sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
     sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
     sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
@@ -414,7 +422,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         console.error('Chat error:', error);
 
         if (error.status === 410 || error.message?.includes('session_expired')) {
-          sessionStorage.clear();
+          clearChat();
 
           addAssistantMessage({
             type: 'text',
