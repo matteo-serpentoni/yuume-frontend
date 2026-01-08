@@ -30,3 +30,12 @@ export const hexToRgb = (hex) => {
   const b = parseInt(cleaned.substring(4, 6), 16);
   return `${r}, ${g}, ${b}`;
 };
+
+/**
+ * Converts a vec3 array [0..1] to an rgb() string.
+ * @param {number[]} vec3 - [r, g, b]
+ * @returns {string} "rgb(r, g, b)"
+ */
+export const vec3ToRgbString = (vec3) => {
+  return `rgb(${vec3[0] * 255}, ${vec3[1] * 255}, ${vec3[2] * 255})`;
+};

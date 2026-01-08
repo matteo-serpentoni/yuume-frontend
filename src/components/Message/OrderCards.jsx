@@ -1,4 +1,8 @@
 import { motion } from "framer-motion";
+import {
+  getOrderStatusClass,
+  normalizeOrderNumber,
+} from "../../utils/shopifyUtils";
 import "./OrderCards.css";
 
 export const OrderItemRow = ({ item, index, theme = "dark" }) => {
@@ -35,21 +39,7 @@ export const OrderDetailCard = ({ order, theme = "dark" }) => {
   } = order;
 
   const getStatusClass = (statusValue) => {
-    const val = String(statusValue).toLowerCase().replace(/\s+/g, "_");
-    const allowed = [
-      "paid",
-      "pending",
-      "authorized",
-      "refunded",
-      "voided",
-      "annullato",
-      "fulfilled",
-      "unfulfilled",
-      "in_preparazione",
-      "in_lavorazione",
-      "partially_fulfilled",
-    ];
-    return allowed.includes(val) ? val : "default";
+    return getOrderStatusClass(statusValue);
   };
 
   const statusLabel = status?.fulfillment || status;
@@ -66,7 +56,7 @@ export const OrderDetailCard = ({ order, theme = "dark" }) => {
         <div className="yuume-order-detail-header-top">
           <div>
             <h4 className="yuume-order-number">
-              {`#${String(orderNumber).replace(/^#+/, "")}`}
+              {`#${normalizeOrderNumber(orderNumber)}`}
             </h4>
             <p className="yuume-order-date">{createdAt}</p>
           </div>
@@ -139,7 +129,7 @@ const OrderListRow = ({ order, index, onClick }) => {
         <div className="yuume-order-row-top">
           <span className="yuume-order-row-number">
             {order.orderNumber
-              ? `#${String(order.orderNumber).replace(/^#+/, "")}`
+              ? `#${normalizeOrderNumber(order.orderNumber)}`
               : order.createdAt}
           </span>
           {order.orderNumber && (

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, memo } from "react";
+import { extractVariantId } from "../../utils/shopifyUtils";
 import "./AddToCartButton.css";
 
 const AddToCartButton = memo(
@@ -62,23 +63,6 @@ const AddToCartButton = memo(
         console.error("Errore aggiunta al carrello:", error);
         if (onError) onError(error);
       }
-    };
-
-    // Funzione per estrarre l'ID numerico dal GID Shopify
-    const extractVariantId = (variantId) => {
-      if (!variantId) return null;
-
-      // Se è già un numero, restituiscilo
-      if (typeof variantId === "number") return variantId;
-
-      // Se è una stringa numerica, convertila
-      if (typeof variantId === "string" && !variantId.includes("/")) {
-        return parseInt(variantId, 10);
-      }
-
-      // Se è un GID (gid://shopify/ProductVariant/123456), estrai l'ID
-      const match = variantId.match(/\/(\d+)$/);
-      return match ? parseInt(match[1], 10) : null;
     };
 
     useEffect(() => {

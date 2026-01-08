@@ -3,36 +3,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import AddToCartButton from "./AddToCartButton";
 import Drawer from "../UI/Drawer";
 import { formatPrice } from "../../utils/messageHelpers";
+import {
+  normalizeStorefrontProduct,
+  isDefaultVariant,
+} from "../../utils/shopifyUtils";
 import "./ProductCards.css";
 
 const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
+  // Normalize product data using unified utility
   const {
+    primaryImage: image,
+    isAvailable,
+    hasVariants,
     name,
     price,
-    currency = "EUR",
-    images: rawImages = [],
-    image: fallbackImage,
-    available: initialAvailable,
-    availability: fallbackAvailable,
-    variants = [],
-  } = product;
-
-  // Normalize image
-  const image = (Array.isArray(rawImages) && rawImages[0]) || fallbackImage;
-
-  // Normalize availability
-  const isAvailable =
-    initialAvailable !== undefined ? initialAvailable : fallbackAvailable;
-
-  // Determine if there are real variants to customize
-  const hasVariants = (product.options || []).some(
-    (opt) =>
-      !(
-        opt.name === "Title" &&
-        opt.values.length === 1 &&
-        opt.values[0] === "Default Title"
-      )
-  );
+    currency,
+    variants,
+  } = normalizeStorefrontProduct(product);
 
   return (
     <motion.div
@@ -54,7 +41,7 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
     >
       <div className="yuume-product-image-container">
         {image ? (
-          <img src={image.url || image} alt={name} />
+          <img src={image.url || image} alt={product.name} />
         ) : (
           <div className="yuume-product-placeholder">🎁</div>
         )}
@@ -97,9 +84,9 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
           ) : (
             <div className="yuume-card-spacer" />
           )}
-          {isAvailable && (variants[0] || product.variantId) && (
+          {isAvailable && (product.variants[0] || product.variantId) && (
             <AddToCartButton
-              variantId={variants[0]?.id || product.variantId}
+              variantId={product.variants[0]?.id || product.variantId}
               shopDomain={shopDomain}
               quantity={1}
               compact={true}
@@ -115,26 +102,18 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   React.useEffect(() => {
     return () => {};
   }, [product.name]);
+  // Normalize product data using unified utility
+  const normalized = normalizeStorefrontProduct(product);
   const {
+    images,
+    isAvailable,
     name,
     description,
     price: initialPrice,
-    currency = "EUR",
-    images: rawImages = [],
-    image: fallbackImage,
-    variants = [],
-    options = [],
-    available: initialAvailable,
-    availability: fallbackAvailable,
-  } = product;
-
-  // Normalize images
-  const images =
-    Array.isArray(rawImages) && rawImages.length > 0
-      ? rawImages
-      : fallbackImage
-      ? [fallbackImage]
-      : [];
+    currency,
+    variants,
+    options,
+  } = normalized;
 
   const [selectedOptions, setSelectedOptions] = React.useState(() => {
     const initial = {};
@@ -147,11 +126,11 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   });
 
   const [currentVariant, setCurrentVariant] = React.useState(
-    variants[0] || null
+    normalized.variants[0] || null
   );
 
   React.useEffect(() => {
-    const found = variants.find(
+    const found = normalized.variants.find(
       (v) =>
         v.selectedOptions &&
         v.selectedOptions.every(
@@ -159,25 +138,23 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
         )
     );
     if (found) setCurrentVariant(found);
-  }, [selectedOptions, variants]);
+  }, [selectedOptions, normalized.variants]);
 
   const handleOptionChange = (name, value) => {
     setSelectedOptions((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isAvailable = currentVariant
+  const isAvailableResult = currentVariant
     ? currentVariant.available
-    : initialAvailable !== undefined
-    ? initialAvailable
-    : fallbackAvailable;
+    : isAvailable;
 
   const currentPrice = currentVariant?.price || initialPrice;
 
   const footer = (
     <>
-      {isAvailable && (currentVariant || variants[0]) ? (
+      {isAvailableResult && (currentVariant || normalized.variants[0]) ? (
         <AddToCartButton
-          variantId={currentVariant?.id || variants[0].id}
+          variantId={currentVariant?.id || normalized.variants[0].id}
           shopDomain={shopDomain}
           quantity={1}
           onAnimationComplete={onClose}
@@ -192,24 +169,10 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
 
   return (
     <Drawer isOpen={!!product} onClose={onClose} footer={footer}>
-      {options.filter(
-        (opt) =>
-          !(
-            opt.name === "Title" &&
-            opt.values.length === 1 &&
-            opt.values[0] === "Default Title"
-          )
-      ).length > 0 && (
+      {product.options.filter((opt) => !isDefaultVariant(opt)).length > 0 && (
         <div className="yuume-drawer-variants">
-          {options
-            .filter(
-              (opt) =>
-                !(
-                  opt.name === "Title" &&
-                  opt.values.length === 1 &&
-                  opt.values[0] === "Default Title"
-                )
-            )
+          {product.options
+            .filter((opt) => !isDefaultVariant(opt))
             .map((opt) => (
               <div key={opt.name} className="yuume-variant-group">
                 <span className="yuume-variant-label">{opt.name}</span>

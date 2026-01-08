@@ -8,6 +8,7 @@ import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import { ProductDrawer } from "../Message/ProductCards";
 import { OrderDetailCard } from "../Message/OrderCards";
+import { normalizeOrderNumber } from "../../utils/shopifyUtils";
 import Drawer from "../UI/Drawer";
 import ProfileView from "./ProfileView";
 import StarRating from "./StarRating";
@@ -267,10 +268,7 @@ const Chat = ({
           <Drawer
             isOpen={!!activeOrder}
             onClose={() => setActiveOrder(null)}
-            title={`Ordine #${String(activeOrder.orderNumber).replace(
-              /^#+/,
-              ""
-            )}`}
+            title={`Ordine #${normalizeOrderNumber(activeOrder.orderNumber)}`}
           >
             <OrderDetailCard order={activeOrder} theme="light" />
           </Drawer>

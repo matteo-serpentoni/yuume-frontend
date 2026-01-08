@@ -4,6 +4,8 @@ import Chat from "../Chat/Chat";
 import ChatPreview from "../Chat/ChatPreview";
 import DevTools from "../Dev/DevTools";
 import { useOrb } from "../../hooks/useOrb";
+import { getCssVariable } from "../../utils/domUtils";
+import { vec3ToRgbString } from "../../utils/colorUtils";
 import "./Orb.css";
 
 const Orb = memo(
@@ -260,10 +262,7 @@ const Orb = memo(
 
       // ✅ Helper per ottenere la dimensione massima dell'orb dalle variabili CSS
       const getMaxOrbSize = () => {
-        if (typeof window === "undefined") return 600;
-        const style = getComputedStyle(document.documentElement);
-        const sizeStr = style.getPropertyValue("--orb-size").trim();
-        return parseInt(sizeStr, 10) || 600;
+        return parseInt(getCssVariable("--orb-size", "600"), 10);
       };
 
       function resize() {
@@ -405,9 +404,7 @@ const Orb = memo(
 
     // ✅ Calcola colore tema da baseColor1 (che è il colore principale dell'orb WebGL)
     // baseColor1 è un array [r, g, b] con valori 0-1
-    const themeColor = `rgb(${baseColor1[0] * 255}, ${baseColor1[1] * 255}, ${
-      baseColor1[2] * 255
-    })`;
+    const themeColor = vec3ToRgbString(baseColor1);
 
     return (
       <>

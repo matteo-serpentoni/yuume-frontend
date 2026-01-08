@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
+import { normalizeOrderNumber } from "../../utils/shopifyUtils";
 import "./OrderLookupForm.css";
 
 /**
@@ -18,7 +19,7 @@ const OrderLookupForm = ({ onSubmit, isLoading }) => {
 
     // Format: "ORDER_LOOKUP:email:#orderNumber" or just "ORDER_LOOKUP:email"
     const lookupString = orderNumber
-      ? `ORDER_LOOKUP:${email}:${orderNumber}`
+      ? `ORDER_LOOKUP:${email}:${normalizeOrderNumber(orderNumber)}`
       : `ORDER_LOOKUP:${email}`;
 
     onSubmit(lookupString);
