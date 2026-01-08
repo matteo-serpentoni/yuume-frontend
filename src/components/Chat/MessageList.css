@@ -35,3 +35,19 @@
 .yuume-order-lookup-retry-btn:hover {
   opacity: 0.9;
 }
+
+.yuume-message-block.standalone {
+  margin-bottom: 0px; /* Pushed to the bottom as per user request */
+}
+
+.yuume-standalone-content {
+  width: 100%;
+  padding: 0 4px;
+}
+
+.yuume-standalone-meta {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+  padding-right: 8px;
+}

@@ -89,21 +89,25 @@
 
 /* --- PREMIUM VERTICAL CARD (BENTO STYLE) --- */
 .yuume-product-card-minimal {
-  flex: 0 0 240px; /* Precise width for vertical layout + peek */
+  flex: 0 0 240px; /* Snimmer width for portrait layout */
   scroll-snap-align: start;
-  padding: 10px; /* Uniform internal spacing */
+  padding: 6px; /* Tightened spacing */
   border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  color: #1f2937;
+  gap: 8px; /* Tightened gap */
+  color: #ffffff;
   box-sizing: border-box;
-  border: 1.5px solid rgba(0, 0, 0, 0.03);
-  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
   overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .yuume-product-card-minimal.clickable {
@@ -119,10 +123,10 @@
 /* Hero Image Section */
 .yuume-product-card-minimal .yuume-product-image-container {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 18px;
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
+  height: 220px; /* Reduced to cut 'gray' empty space and minimize total height */
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
   flex-shrink: 0;
   display: flex;
@@ -150,21 +154,22 @@
 .yuume-product-info {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 0 6px;
+  gap: 4px;
+  padding: 0 4px;
   flex: 1;
 }
 
 .yuume-product-card-minimal .yuume-product-name {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   margin: 0;
-  color: #0f172a;
+  color: #ffffff; /* High contrast white */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   line-height: 1.4;
   /* Multi-line clamp */
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  line-clamp: 2; /* Standard property for cross-browser support */
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -177,19 +182,20 @@
 }
 
 .yuume-product-card-minimal .yuume-current-price {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
-  color: #000;
+  color: #ffffff;
   letter-spacing: -0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 /* Actions Section */
 .yuume-product-card-footer {
   width: 100%;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  padding-top: 4px;
+  padding-top: 2px;
 }
 
 .yuume-card-spacer {
@@ -197,9 +203,11 @@
 }
 
 .yuume-options-btn {
-  flex: 1;
-  height: 38px;
-  border-radius: 12px;
+  flex: 1 1 0% !important; /* Force identical growth/shrink regardless of content */
+  width: 0 !important;
+  min-width: 0 !important;
+  height: 32px !important;
+  border-radius: 10px;
   border: 1.5px solid #f1f5f9;
   background: #ffffff;
   color: #64748b;
@@ -212,6 +220,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  margin: 0;
 }
 
 .yuume-options-btn:hover {
@@ -250,8 +260,12 @@
 }
 
 .yuume-add-to-cart-btn {
-  height: 36px;
-  font-size: 12px;
+  flex: 1;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 32px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
 }
 
 /* --- COMMON UTILS --- */
@@ -261,7 +275,8 @@
   gap: 4px;
   font-size: 10px;
   font-weight: 600;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .yuume-status-dot {

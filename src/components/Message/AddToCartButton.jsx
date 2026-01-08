@@ -3,7 +3,15 @@ import { extractVariantId } from '../../utils/shopifyUtils';
 import './AddToCartButton.css';
 
 const AddToCartButton = memo(
-  ({ variantId, shopDomain, quantity = 1, onSuccess, onError, onAnimationComplete }) => {
+  ({
+    variantId,
+    shopDomain,
+    quantity = 1,
+    onSuccess,
+    onError,
+    onAnimationComplete,
+    compact = false,
+  }) => {
     const buttonRef = useRef(null);
 
     const addToCart = async () => {
@@ -211,7 +219,7 @@ const AddToCartButton = memo(
     }, [variantId, quantity, onSuccess, onError]);
 
     return (
-      <button className="add-to-cart" ref={buttonRef}>
+      <button className={`add-to-cart ${compact ? 'yuume-add-to-cart-btn' : ''}`} ref={buttonRef}>
         <span>Add to cart</span>
         <svg className="morph" viewBox="0 0 64 13">
           <path d="M0 12C6 12 17 12 32 12C47.9024 12 58 12 64 12V13H0V12Z" />

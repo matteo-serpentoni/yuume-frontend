@@ -9,6 +9,7 @@ import OrderCards from '../Message/OrderCards';
 import OrderLookupForm from '../Message/OrderLookupForm';
 import TextMessage from '../Message/TextMessage';
 import Suggestions from '../Message/Suggestions';
+import { formatTime } from '../../utils/messageHelpers';
 
 /**
  * MessageList
@@ -158,19 +159,28 @@ const MessageList = ({
       content = <TextMessage message={msg} />;
     }
 
+    const isStandalone = ['product_cards'].includes(type);
+
     return (
-      <div className="yuume-message-block">
-        <MessageBubble
-          sender={msg.sender}
-          timestamp={msg.timestamp}
-          chatColors={chatColors}
-          type={type}
-          feedback={msg.feedback}
-          onFeedback={(type) => sendFeedback(msg.id, type, msg.text)}
-          showFeedback={msg.sender === 'assistant' && !msg.error && !msg.disableFeedback}
-        >
-          {content}
-        </MessageBubble>
+      <div className={`yuume-message-block ${isStandalone ? 'standalone' : ''}`}>
+        {!isStandalone ? (
+          <MessageBubble
+            sender={msg.sender}
+            timestamp={msg.timestamp}
+            chatColors={chatColors}
+            type={type}
+            feedback={msg.feedback}
+            onFeedback={(type) => sendFeedback(msg.id, type, msg.text)}
+            showFeedback={msg.sender === 'assistant' && !msg.error && !msg.disableFeedback}
+          >
+            {content}
+          </MessageBubble>
+        ) : (
+          <div className="yuume-standalone-content">
+            {content}
+            {/* Timestamp removed to save space for products */}
+          </div>
+        )}
 
         {/* Suggestion Chips - External to Bubble */}
         {msg.suggestions && msg.suggestions.length > 0 && (

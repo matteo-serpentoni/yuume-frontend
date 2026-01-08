@@ -57,7 +57,7 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
 
       {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
         <div className="yuume-product-card-footer" onClick={(e) => e.stopPropagation()}>
-          {hasVariants ? (
+          {hasVariants && (
             <button
               className="yuume-options-btn"
               aria-label={`Seleziona opzioni per ${product.name}`}
@@ -69,8 +69,6 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
             >
               Customize
             </button>
-          ) : (
-            <div className="yuume-card-spacer" />
           )}
           {isAvailable && (product.variants[0] || product.variantId) && (
             <AddToCartButton
@@ -243,7 +241,7 @@ const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
 
   return (
     <div className="yuume-products-container">
-      {displayMessage && <div className="yuume-products-header-message">{displayMessage}</div>}
+      {/* displayMessage removed to save space as per user request */}
 
       <div className="yuume-carousel-wrapper">
         {showLeftArrow && (

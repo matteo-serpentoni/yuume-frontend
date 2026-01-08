@@ -182,3 +182,36 @@
   stroke-dashoffset: var(--cart-tick-offset);
   transition: stroke-dashoffset 0.2s;
 }
+
+/* COMPACT MODE FOR PRODUCT CARDS */
+.add-to-cart.yuume-add-to-cart-btn {
+  --text-x: 6px; /* Even closer as requested */
+  --cart-x: -38px; /* Adjusted for tighter space */
+  padding: 0;
+  width: 100% !important;
+  height: 32px !important;
+  transform: none !important;
+}
+
+.add-to-cart.yuume-add-to-cart-btn span {
+  font-size: 12px !important;
+  line-height: 32px !important;
+}
+
+.add-to-cart.yuume-add-to-cart-btn .cart {
+  top: 3px;
+}
+
+.add-to-cart.yuume-add-to-cart-btn .morph {
+  --svg-top: -12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.add-to-cart.yuume-add-to-cart-btn.active .morph {
+  opacity: 1;
+}
+
+.add-to-cart.yuume-add-to-cart-btn:before {
+  border-radius: 10px;
+}
