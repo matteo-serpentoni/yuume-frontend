@@ -12,6 +12,12 @@
   pointer-events: none;
 }
 
+/* DESKTOP COMPRESSION: Balanced spacing */
+.orb-container:not(.mobile-device) .chat-mobile-header {
+  height: 52px;
+  margin-bottom: 8px;
+}
+
 .header-content {
   display: flex;
   flex-direction: column; /* Vertical stacking by default */
