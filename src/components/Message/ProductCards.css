@@ -128,6 +128,7 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
+  position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -144,6 +145,34 @@
   height: 100%;
   object-fit: contain;
   padding: 12px;
+  transition: transform 0.4s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.yuume-image-zoom-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: white;
+}
+
+.yuume-product-image-container:hover .yuume-image-zoom-overlay {
+  opacity: 1;
+}
+
+.yuume-image-zoom-overlay svg {
+  transform: scale(0.8);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.yuume-product-image-container:hover .yuume-image-zoom-overlay svg {
+  transform: scale(1.2);
 }
 
 .yuume-product-placeholder {

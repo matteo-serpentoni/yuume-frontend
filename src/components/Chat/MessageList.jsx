@@ -26,6 +26,7 @@ const MessageList = ({
   setActiveOrder,
   sendMessage,
   sendFeedback,
+  onImageClick,
 }) => {
   const messagesAreaRef = useRef(null);
   const lastMessageIdRef = useRef(null);
@@ -75,6 +76,7 @@ const MessageList = ({
           message={msg}
           shopDomain={shopDomain}
           onOpen={setActiveProduct}
+          onImageClick={onImageClick}
           activeProduct={activeProduct}
         />
       );

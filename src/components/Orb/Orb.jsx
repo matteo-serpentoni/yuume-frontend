@@ -452,6 +452,9 @@ const Orb = memo(
             </div>
           )}
 
+          {/* Gallery Portal - Top level for perfect circular alignment */}
+          <div id="yuume-gallery-portal" className="drawer-portal-container" />
+
           {/* Minimized Text */}
           {isMinimized && (
             <div

@@ -14,15 +14,17 @@
 
 /* DESKTOP COMPRESSION: Balanced spacing */
 .orb-container:not(.mobile-device) .chat-mobile-header {
-  height: 52px;
-  margin-bottom: 8px;
+  height: 38px; /* Tighter height to push content up */
+  margin-bottom: 4px;
+  align-items: flex-start; /* Move content to the top of the container */
+  padding-top: 2px;
 }
 
 .header-content {
   display: flex;
   flex-direction: column; /* Vertical stacking by default */
   align-items: center;
-  gap: 2px;
+  gap: 1px;
   opacity: 1;
   transition: opacity 0.3s ease;
 }

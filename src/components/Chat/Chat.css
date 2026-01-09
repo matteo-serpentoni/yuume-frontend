@@ -132,6 +132,14 @@
   gap: 16px; /* More breathing room on desktop */
 }
 
+.orb-container:not(.mobile-device) .chat-inner {
+  overflow: visible; /* Allow clipping escape for children like the close button */
+}
+
+.orb-container:not(.mobile-device) .close-button {
+  top: 14px; /* Move down without affecting flow of other elements */
+}
+
 .mobile-device .chat-mobile-header {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Subtle grounding line */
   margin-bottom: 5px;

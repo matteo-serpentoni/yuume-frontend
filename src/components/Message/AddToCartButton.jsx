@@ -177,7 +177,7 @@ const AddToCartButton = memo(
           button.style.setProperty('--cart-opacity', '0');
           button.style.setProperty('--text-o', '0');
           button.style.setProperty('--text-x', '0px');
-          button.style.setProperty('--cart-x', '-104px');
+          button.style.setProperty('--cart-x', compact ? '-90px' : '-104px');
           button.style.setProperty('--cart-rotate', '0deg');
           button.style.setProperty('--cart-scale', '0.75');
           button.style.setProperty('--package-y', '-16px');
@@ -197,10 +197,13 @@ const AddToCartButton = memo(
 
         setTimeout(() => {
           // Mostra e anima da sinistra
+          const resetCartX = compact ? '-38px' : '-48px';
+          const resetTextX = compact ? '6px' : '12px';
+
           button.style.setProperty('--cart-opacity', '1');
-          button.style.setProperty('--cart-x', '-48px');
+          button.style.setProperty('--cart-x', resetCartX);
           button.style.setProperty('--text-o', '1');
-          button.style.setProperty('--text-x', '12px');
+          button.style.setProperty('--text-x', resetTextX);
           button.style.overflow = '';
           button.classList.remove('active');
 

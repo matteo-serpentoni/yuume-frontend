@@ -1,0 +1,185 @@
+.yuume-lightbox-root {
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: inherit; /* Should inherit from the orb chat layer if portaled there */
+  pointer-events: auto; /* Enable interaction even if portal target is pointer-events: none */
+}
+
+.yuume-lightbox-content-group {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  overflow: hidden; /* Ensure nothing leaks out of the primary column */
+}
+
+/* DESKTOP CIRCULAR OVERRIDE */
+.orb-container:not(.mobile-device) .yuume-lightbox-root {
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  width: 60%; /* Match glass-mask-wrapper base size exactly */
+  height: 60%; /* Match glass-mask-wrapper base size exactly */
+  padding: 10%; /* Comfortable padding within the circle */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  overflow: hidden; /* Strict circular mask */
+}
+
+.yuume-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(25px) saturate(160%);
+  -webkit-backdrop-filter: blur(25px) saturate(160%);
+  cursor: zoom-out;
+  pointer-events: auto;
+}
+
+.yuume-lightbox-container {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 0; /* CRITICAL for flex-direction: column to allow shrinking */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.yuume-lightbox-image-wrapper {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.yuume-lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
+  border-radius: 12px;
+}
+
+.yuume-lightbox-close {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0; /* Never squash the button */
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+  margin-top: -5px;
+  margin-bottom: 15px;
+}
+
+/* Position close button further in for desktop circular gallery */
+.orb-container:not(.mobile-device) .yuume-lightbox-close {
+  margin-top: 5px;
+  margin-bottom: 30px;
+}
+
+.yuume-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.yuume-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+}
+
+.yuume-lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.yuume-lightbox-nav.prev {
+  left: 15px;
+}
+.yuume-lightbox-nav.next {
+  right: 15px;
+}
+
+.yuume-lightbox-dots {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.yuume-lightbox-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s;
+}
+
+.yuume-lightbox-dot.active {
+  background: white;
+  transform: scale(1.4);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .yuume-lightbox-container {
+    padding: 20px;
+  }
+  .yuume-lightbox-nav {
+    width: 40px;
+    height: 40px;
+  }
+  .yuume-lightbox-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+  }
+}

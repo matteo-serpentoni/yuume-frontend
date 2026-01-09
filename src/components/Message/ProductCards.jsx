@@ -1,15 +1,16 @@
 import React, { memo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import AddToCartButton from './AddToCartButton';
 import Drawer from '../UI/Drawer';
 import { formatPrice } from '../../utils/messageHelpers';
 import { normalizeStorefrontProduct, isDefaultVariant } from '../../utils/shopifyUtils';
 import './ProductCards.css';
 
-const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
+const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) => {
   // Normalize product data using unified utility
   const {
     primaryImage: image,
+    images: allImages,
     isAvailable,
     hasVariants,
     name,
@@ -17,6 +18,9 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
     currency,
     variants,
   } = normalizeStorefrontProduct(product);
+
+  // Ensure images is always a non-empty array for the gallery
+  const galleryImages = allImages && allImages.length > 0 ? allImages : image ? [image] : [];
 
   return (
     <motion.div
@@ -36,12 +40,42 @@ const ProductCard = memo(({ product, index, onOpen, shopDomain }) => {
         }
       }}
     >
-      <div className="yuume-product-image-container">
+      <div
+        className="yuume-product-image-container"
+        onClick={(e) => {
+          e.stopPropagation();
+          onImageClick &&
+            onImageClick({
+              images: galleryImages,
+              index: 0,
+              product: product,
+            });
+        }}
+      >
         {image ? (
           <img src={image.url || image} alt={product.name} />
         ) : (
           <div className="yuume-product-placeholder">🎁</div>
         )}
+        <div className="yuume-image-zoom-overlay" aria-hidden="true">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            role="img"
+            aria-label="Ingrandisci immagine"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="11" y1="8" x2="11" y2="14"></line>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+          </svg>
+        </div>
       </div>
 
       <div className="yuume-product-info">
@@ -193,7 +227,7 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   );
 });
 
-const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
+const ProductCards = memo(({ message, shopDomain, onOpen, onImageClick, activeProduct }) => {
   const { products = [], message: displayMessage, meta = {} } = message;
   const scrollRef = React.useRef(null);
   const [showLeftArrow, setShowLeftArrow] = React.useState(false);
@@ -270,6 +304,7 @@ const ProductCards = memo(({ message, shopDomain, onOpen, activeProduct }) => {
               product={product}
               index={index}
               onOpen={onOpen}
+              onImageClick={onImageClick}
               shopDomain={shopDomain}
             />
           ))}

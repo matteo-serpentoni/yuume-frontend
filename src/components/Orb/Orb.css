@@ -219,7 +219,7 @@
 
 .orb-container:not(.mobile-device) .messages-area {
   gap: 16px;
-  padding-top: 30px; /* Elegant gap below header */
+  padding-top: 10px; /* Added padding to prevent overlap since the header moved up further */
 }
 
 .minimized-text-line {
@@ -328,6 +328,16 @@
 /* DESKTOP-ONLY LIGHTER GLASS */
 .orb-container:not(.mobile-device) .orb-chat-layer {
   background: rgba(0, 0, 0, 0.35); /* More luminous than mobile card */
+  width: 80%; /* Synced with height for a perfect circle */
+  height: 80%; /* Increased for more vertical space downwards */
+  --orb-v-padding-top: 5.5%; /* Compensated to keep header in the exact same absolute position */
+  overflow: visible; /* Allow bottom button to be seen even if slightly outside glass */
+}
+
+/* SYNC GLASS MASK: Match chat layer dimensions to ensure the blur alignment is perfectly circular */
+.orb-container:not(.mobile-device) .orb-glass-mask-wrapper {
+  width: 80%;
+  height: 80%;
 }
 
 /* MOBILE RESPONSIVENESS */

@@ -12,6 +12,7 @@ import { normalizeOrderNumber } from '../../utils/shopifyUtils';
 import Drawer from '../UI/Drawer';
 import ProfileView from './ProfileView';
 import StarRating from './StarRating';
+import ImageLightbox from '../UI/ImageLightbox';
 
 const Chat = ({
   onTyping,
@@ -36,6 +37,7 @@ const Chat = ({
   const [view, setView] = useState('chat'); // 'chat' | 'profile'
   const [activeProduct, setActiveProduct] = useState(null);
   const [activeOrder, setActiveOrder] = useState(null);
+  const [activeGallery, setActiveGallery] = useState(null); // { images: [], index: 0 }
 
   // Use custom hook for live chat logic, but ONLY if NOT in preview mode
   const liveChat = useChat(null, null, { disabled: isPreview });
@@ -143,6 +145,7 @@ const Chat = ({
               setActiveOrder={setActiveOrder}
               sendMessage={sendMessage}
               sendFeedback={sendFeedback}
+              onImageClick={setActiveGallery}
             />
 
             {/* Conversation Ended Separator & Rating */}
@@ -202,11 +205,11 @@ const Chat = ({
               </a>
               .
             </div>
-
-            <div id="yuume-drawer-portal" className="drawer-portal-container" />
           </div>
         </>
       )}
+
+      <div id="yuume-drawer-portal" className="drawer-portal-container" />
 
       {/* Close button - Hidden in profile view */}
       {view !== 'profile' && (
@@ -257,6 +260,14 @@ const Chat = ({
           </Drawer>
         )}
       </AnimatePresence>
+
+      <ImageLightbox
+        isOpen={!!activeGallery}
+        images={activeGallery?.images}
+        currentIndex={activeGallery?.index || 0}
+        onClose={() => setActiveGallery(null)}
+        onNavigate={(newIndex) => setActiveGallery({ ...activeGallery, index: newIndex })}
+      />
     </div>
   );
 };

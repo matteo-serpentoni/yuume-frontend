@@ -23,12 +23,15 @@ export const normalizeStorefrontProduct = (product) => {
     // Normalize images to an array of objects or strings
     images:
       Array.isArray(rawImages) && rawImages.length > 0
-        ? rawImages
+        ? rawImages.map((img) => img.url || img)
         : fallbackImage
-          ? [fallbackImage]
+          ? [fallbackImage.url || fallbackImage]
           : [],
     // Primary image for display
-    primaryImage: (Array.isArray(rawImages) && rawImages[0]) || fallbackImage,
+    primaryImage:
+      Array.isArray(rawImages) && rawImages.length > 0
+        ? rawImages[0].url || rawImages[0]
+        : fallbackImage?.url || fallbackImage,
     // Unified availability boolean
     isAvailable: initialAvailable !== undefined ? initialAvailable : fallbackAvailable,
     // Ensure variants is an array
