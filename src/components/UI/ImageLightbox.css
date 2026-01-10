@@ -6,119 +6,90 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: inherit; /* Should inherit from the orb chat layer if portaled there */
-  pointer-events: auto; /* Enable interaction even if portal target is pointer-events: none */
+  border-radius: inherit;
+  pointer-events: auto;
 }
 
-.yuume-lightbox-content-group {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  overflow: hidden; /* Ensure nothing leaks out of the primary column */
+.yuume-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  cursor: zoom-out;
+  pointer-events: auto;
 }
 
 /* DESKTOP CIRCULAR OVERRIDE */
 .orb-container:not(.mobile-device) .yuume-lightbox-root {
   border-radius: 50%;
   aspect-ratio: 1 / 1;
-  width: 60%; /* Match glass-mask-wrapper base size exactly */
-  height: 60%; /* Match glass-mask-wrapper base size exactly */
-  padding: 10%; /* Comfortable padding within the circle */
+  width: 76%;
+  height: 76%;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  overflow: hidden; /* Strict circular mask */
+  overflow: hidden;
 }
 
-.yuume-lightbox-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(25px) saturate(160%);
-  -webkit-backdrop-filter: blur(25px) saturate(160%);
-  cursor: zoom-out;
-  pointer-events: auto;
+.yuume-lightbox-content-group {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .yuume-lightbox-container {
   position: relative;
   width: 100%;
-  flex: 1;
-  min-height: 0; /* CRITICAL for flex-direction: column to allow shrinking */
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  box-sizing: border-box;
-  pointer-events: none;
 }
 
 .yuume-lightbox-image-wrapper {
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%) !important;
+  width: 90%;
+  height: 55%;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto;
+  cursor: grab;
+}
+
+.yuume-lightbox-image-wrapper:active {
+  cursor: grabbing;
 }
 
 .yuume-lightbox-img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.6));
   border-radius: 12px;
-}
-
-.yuume-lightbox-close {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0; /* Never squash the button */
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  pointer-events: auto;
-  margin-top: -5px;
-  margin-bottom: 15px;
-}
-
-/* Position close button further in for desktop circular gallery */
-.orb-container:not(.mobile-device) .yuume-lightbox-close {
-  margin-top: 5px;
-  margin-bottom: 30px;
-}
-
-.yuume-lightbox-close:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: rotate(90deg) scale(1.1);
+  user-select: none;
 }
 
 .yuume-lightbox-nav {
   position: absolute;
-  top: 50%;
+  top: 45%;
   transform: translateY(-50%);
   z-index: 100;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   display: flex;
   align-items: center;
@@ -126,60 +97,154 @@
   cursor: pointer;
   transition: all 0.3s;
   pointer-events: auto;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .yuume-lightbox-nav:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   transform: translateY(-50%) scale(1.1);
 }
 
 .yuume-lightbox-nav.prev {
-  left: 15px;
-}
-.yuume-lightbox-nav.next {
-  right: 15px;
+  left: 45px;
 }
 
-.yuume-lightbox-dots {
+.yuume-lightbox-nav.next {
+  right: 45px;
+}
+
+.yuume-lightbox-thumbnails-wrapper {
   position: absolute;
-  bottom: 25px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 85px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 110;
+}
+
+.yuume-lightbox-thumbnails {
   display: flex;
   gap: 8px;
-  pointer-events: auto;
+  padding: 6px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto;
+  max-width: 75%;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
 }
 
-.yuume-lightbox-dot {
-  width: 6px;
-  height: 6px;
+.yuume-lightbox-thumbnails::-webkit-scrollbar {
+  display: none;
+}
+
+.yuume-lightbox-thumbnail {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+
+.yuume-lightbox-thumbnail.active {
+  opacity: 1;
+  border-color: white;
+  transform: scale(1.1);
+}
+
+.yuume-lightbox-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.yuume-lightbox-close {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   transition: all 0.3s;
+  backdrop-filter: blur(15px);
+  pointer-events: auto;
+  z-index: 120;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.yuume-lightbox-dot.active {
-  background: white;
-  transform: scale(1.4);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+.yuume-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(-50%) rotate(90deg) scale(1.1);
 }
 
-/* Mobile adjustments */
-@media (max-width: 600px) {
-  .yuume-lightbox-container {
-    padding: 20px;
-  }
+/* MOBILE VIEW ADAPTATIONS */
+@media (max-width: 768px) {
+  /* Increased breakpoint to cover tablets */
   .yuume-lightbox-nav {
-    width: 40px;
-    height: 40px;
+    display: none !important; /* Strictly hide on mobile/tablet */
   }
-  .yuume-lightbox-close {
+
+  .yuume-lightbox-root {
+    overflow: hidden !important;
+    width: 100% !important;
+    height: 100% !important;
     position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 36px;
-    height: 36px;
-    margin: 0;
+    inset: 0;
+    border-radius: 0;
+  }
+
+  .yuume-lightbox-image-wrapper {
+    height: 60%;
+    top: 40%;
+    width: 100%;
+    padding: 0 35px;
+    box-sizing: border-box;
+    touch-action: pan-y pinch-zoom; /* Allow native zoom and vertical pan, let JS handle or block horizontal */
+  }
+
+  .yuume-lightbox-thumbnails-wrapper {
+    bottom: 30px;
+    left: 20px;
+    right: 20px;
+    width: auto; /* Allow left/right to define width and margins */
+  }
+
+  .yuume-lightbox-thumbnails {
+    max-width: 100%;
+    background: rgba(255, 255, 255, 0.12);
+    box-sizing: border-box;
+  }
+
+  .yuume-lightbox-thumbnail {
+    width: 44px;
+    height: 44px;
+  }
+
+  .yuume-lightbox-close {
+    top: 20px;
+    left: auto;
+    right: 20px;
+    transform: none;
+  }
+
+  .yuume-lightbox-close:hover {
+    transform: rotate(90deg) scale(1.1);
   }
 }

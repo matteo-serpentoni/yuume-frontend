@@ -1,6 +1,6 @@
-import { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import './ImageLightbox.css';
 
 const ImageLightbox = ({
@@ -11,7 +11,32 @@ const ImageLightbox = ({
   onNavigate,
   portalId = 'yuume-gallery-portal',
 }) => {
+  const dragControls = useDragControls();
   const [target, setTarget] = useState(null);
+  const [direction, setDirection] = useState(0);
+  const [isPinching, setIsPinching] = useState(false); // Track pinch gesture on mobile
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length > 1) {
+      setIsPinching(true);
+    } else {
+      setIsPinching(false);
+      if (images.length > 1) {
+        dragControls.start(e);
+      }
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    // If we detect more than one finger during move, ensure pinching mode is active
+    if (e.touches.length > 1 && !isPinching) {
+      setIsPinching(true);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsPinching(false);
+  };
 
   useLayoutEffect(() => {
     const el = document.getElementById(portalId);
@@ -22,11 +47,81 @@ const ImageLightbox = ({
     }
   }, [portalId]);
 
+  const handleNavigate = useCallback(
+    (newIndex, newDirection) => {
+      setDirection(newDirection);
+      onNavigate(newIndex);
+    },
+    [onNavigate],
+  );
+
+  const prevImage = useCallback(() => {
+    handleNavigate((currentIndex - 1 + images.length) % images.length, -1);
+  }, [currentIndex, images.length, handleNavigate]);
+
+  const nextImage = useCallback(() => {
+    handleNavigate((currentIndex + 1) % images.length, 1);
+  }, [currentIndex, images.length, handleNavigate]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') prevImage();
+      if (e.key === 'ArrowRight') nextImage();
+      if (e.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, prevImage, nextImage, onClose]);
+
+  const thumbnailsRef = React.useRef(null);
+
+  // Manual scroll for thumbnails to avoid shifting the whole page/lightbox
+  useEffect(() => {
+    if (thumbnailsRef.current) {
+      const activeThumb = thumbnailsRef.current.children[currentIndex];
+      if (activeThumb) {
+        const container = thumbnailsRef.current;
+        const scrollLeft =
+          activeThumb.offsetLeft - container.offsetWidth / 2 + activeThumb.offsetWidth / 2;
+
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: 'smooth',
+        });
+      }
+    }
+  }, [currentIndex]);
+
   if (!target) return null;
 
   const currentImage = images[currentIndex];
-  // Support both Shopify image objects and raw strings
   const imageUrl = currentImage?.url || currentImage || '';
+
+  const variants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      zIndex: 0,
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+    }),
+  };
+
+  const swipeConfidenceThreshold = 5000;
+  const swipePower = (offset, velocity) => {
+    return Math.abs(offset) * velocity;
+  };
 
   const content = (
     <AnimatePresence>
@@ -37,31 +132,58 @@ const ImageLightbox = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Pure blur backdrop */}
           <div className="yuume-lightbox-backdrop" onClick={onClose} />
 
-          {/* Image and Controls Container */}
           <div className="yuume-lightbox-content-group">
-            {/* Image Container */}
             <div className="yuume-lightbox-container">
-              <motion.div
-                className="yuume-lightbox-image-wrapper"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              >
-                <img src={imageUrl} alt="Product Detail" className="yuume-lightbox-img" />
-              </motion.div>
+              <AnimatePresence initial={false} custom={direction}>
+                <motion.div
+                  key={currentIndex}
+                  custom={direction}
+                  variants={variants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{
+                    x: { type: 'spring', stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 },
+                  }}
+                  drag={images.length > 1 ? 'x' : false}
+                  dragControls={dragControls}
+                  dragListener={false}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={1}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onDragEnd={(e, { offset, velocity }) => {
+                    const swipe = swipePower(offset.x, velocity.x);
+                    const dragOffsetTrigger = 50;
 
-              {/* Navigation (Only if multiple images) */}
+                    if (swipe < -swipeConfidenceThreshold || offset.x < -dragOffsetTrigger) {
+                      nextImage();
+                    } else if (swipe > swipeConfidenceThreshold || offset.x > dragOffsetTrigger) {
+                      prevImage();
+                    }
+                  }}
+                  className="yuume-lightbox-image-wrapper"
+                >
+                  <img
+                    src={imageUrl}
+                    alt="Product Detail"
+                    className="yuume-lightbox-img"
+                    draggable="false"
+                  />
+                </motion.div>
+              </AnimatePresence>
+
               {images.length > 1 && (
                 <>
                   <button
                     className="yuume-lightbox-nav prev"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onNavigate((currentIndex - 1 + images.length) % images.length);
+                      prevImage();
                     }}
                     aria-label="Immagine precedente"
                   >
@@ -82,7 +204,7 @@ const ImageLightbox = ({
                     className="yuume-lightbox-nav next"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onNavigate((currentIndex + 1) % images.length);
+                      nextImage();
                     }}
                     aria-label="Prossima immagine"
                   >
@@ -99,20 +221,31 @@ const ImageLightbox = ({
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </button>
-
-                  <div className="yuume-lightbox-dots">
-                    {images.map((_, i) => (
-                      <div
-                        key={i}
-                        className={`yuume-lightbox-dot ${i === currentIndex ? 'active' : ''}`}
-                      />
-                    ))}
-                  </div>
                 </>
               )}
             </div>
 
-            {/* Close Button - Now logically follows the content, positioned via CSS */}
+            {images.length > 1 && (
+              <div className="yuume-lightbox-thumbnails-wrapper">
+                <div className="yuume-lightbox-thumbnails" ref={thumbnailsRef}>
+                  {images.map((img, i) => (
+                    <div
+                      key={i}
+                      className={`yuume-lightbox-thumbnail ${i === currentIndex ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (i !== currentIndex) {
+                          handleNavigate(i, i > currentIndex ? 1 : -1);
+                        }
+                      }}
+                    >
+                      <img src={img?.url || img} alt={`View ${i + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <button className="yuume-lightbox-close" onClick={onClose} aria-label="Chiudi gallery">
               <svg
                 width="24"
