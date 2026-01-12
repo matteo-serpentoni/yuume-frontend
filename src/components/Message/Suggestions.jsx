@@ -22,6 +22,7 @@ const Suggestions = ({ suggestions, onSuggestionClick }) => {
             ease: 'easeOut',
           }}
           onClick={() => onSuggestionClick(s.value || s.label)}
+          aria-label={`Suggerimento: ${s.label}`}
           whileHover={{
             y: -2,
           }}

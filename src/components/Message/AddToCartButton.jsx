@@ -2,6 +2,8 @@ import React, { useRef, useEffect, memo } from 'react';
 import { extractVariantId } from '../../utils/shopifyUtils';
 import './AddToCartButton.css';
 
+import { BRIDGE_CONFIG } from '../../config/bridge';
+
 const AddToCartButton = memo(
   ({
     variantId,
@@ -30,7 +32,7 @@ const AddToCartButton = memo(
         // Invece di fare la fetch, invia un messaggio al parent
         window.parent.postMessage(
           {
-            type: 'YUUME_ADD_TO_CART',
+            type: 'YUUME:addToCart',
             variantId: numericVariantId,
             quantity: quantity,
           },
@@ -39,7 +41,13 @@ const AddToCartButton = memo(
 
         // Ascolta la risposta dal parent
         const handleResponse = (event) => {
-          if (event.data.type === 'YUUME_ADD_TO_CART_RESPONSE') {
+          // ✅ Security: Validate Origin
+          if (!BRIDGE_CONFIG.isValidOrigin(event.origin)) return;
+
+          if (
+            event.data.type === 'YUUME:addToCartResponse' ||
+            event.data.type === 'YUUME_ADD_TO_CART_RESPONSE'
+          ) {
             window.removeEventListener('message', handleResponse);
 
             if (event.data.success) {

@@ -1,7 +1,10 @@
 import React from 'react';
+import { reportError } from '../../services/errorApi';
 
 /**
- * Basic ErrorBoundary to prevent the white screen of death.
+ * ErrorBoundary
+ * Catches React errors and reports them to the server silently.
+ * Renders null on error to avoid breaking the merchant's site.
  */
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -9,53 +12,27 @@ class ErrorBoundary extends React.Component {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('CRITICAL UI ERROR:', error, errorInfo);
+    // Report to server via service
+    reportError({
+      message: error?.message || 'Unknown error',
+      stack: error?.stack || null,
+      componentStack: errorInfo?.componentStack || null,
+      shopDomain: new URLSearchParams(window.location.search).get('shop') || 'unknown',
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+    });
   }
 
   render() {
     if (this.state.hasError) {
-      return (
-        <div
-          style={{
-            padding: '24px',
-            textAlign: 'center',
-            color: 'white',
-            background: '#232733',
-            height: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            fontFamily: 'system-ui, sans-serif',
-          }}
-        >
-          <div style={{ fontSize: '32px', marginBottom: '16px' }}>⚠️</div>
-          <h2 style={{ fontSize: '18px', marginBottom: '12px' }}>Qualcosa è andato storto</h2>
-          <p style={{ opacity: 0.7, fontSize: '14px', lineHeight: '1.5' }}>
-            Non siamo riusciti a caricare l'assistente. Prova a ricaricare la pagina.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              marginTop: '24px',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: 'none',
-              background: '#9C43FE',
-              color: 'white',
-              cursor: 'pointer',
-              fontWeight: '600',
-            }}
-          >
-            Ricarica
-          </button>
-        </div>
-      );
+      // ✅ Silent Failure: If a fallback prop is provided, render it.
+      // Otherwise render null to protect the merchant's site.
+      return this.props.fallback || null;
     }
 
     return this.props.children;

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getWidgetConfig } from '../services/customizationApi';
 import { hexToVec3 } from '../utils/colorUtils';
+import { BRIDGE_CONFIG } from '../config/bridge';
 
 const DEFAULT_CONFIG = {
   orbTheme: {
@@ -69,7 +70,14 @@ export const useOrb = (modeOverride = null) => {
   // PostMessage Listener for live updates (Preview Mode)
   useEffect(() => {
     const handleMessage = (event) => {
-      if (event.data.type === 'YUUME_UPDATE_CUSTOMIZATION') {
+      // ✅ Security: Validate Origin
+      if (!BRIDGE_CONFIG.isValidOrigin(event.origin)) return;
+
+      // Normalize message types with YUUME: prefix
+      if (
+        event.data.type === 'YUUME:updateCustomization' ||
+        event.data.type === 'YUUME_UPDATE_CUSTOMIZATION'
+      ) {
         const { orbTheme, chatColors, mobileMode } = event.data.data;
 
         if (mobileMode !== undefined) {
@@ -82,12 +90,10 @@ export const useOrb = (modeOverride = null) => {
         }));
       }
 
-      if (event.data.type === 'YUUME_SHOP_DOMAIN') {
+      if (event.data.type === 'YUUME:shopDomain' || event.data.type === 'YUUME_SHOP_DOMAIN') {
         const isDev = mode === 'development';
         const incomingDomain = event.data.shopDomain;
 
-        // In development, ignore incoming "localhost" if we already have something better
-        // or if we have a manual override in storage
         if (isDev) {
           const hasManualOverride = !!sessionStorage.getItem('yuume_dev_shop_domain');
           if (hasManualOverride || (shopDomain && incomingDomain === 'localhost')) {
@@ -98,7 +104,7 @@ export const useOrb = (modeOverride = null) => {
         setShopDomain(incomingDomain);
       }
 
-      if (event.data.type === 'YUUME_BG_LUMINANCE') {
+      if (event.data.type === 'YUUME:bgLuminance' || event.data.type === 'YUUME_BG_LUMINANCE') {
         setTextColorMode(event.data.mode === 'light' ? 'light' : 'dark');
       }
     };
@@ -107,7 +113,7 @@ export const useOrb = (modeOverride = null) => {
 
     // Request shop domain if needed
     if (window.parent && !shopDomain && mode === 'production') {
-      window.parent.postMessage({ type: 'REQUEST_SHOP_DOMAIN' }, '*');
+      window.parent.postMessage({ type: 'YUUME:requestShopDomain' }, '*');
     }
 
     return () => window.removeEventListener('message', handleMessage);

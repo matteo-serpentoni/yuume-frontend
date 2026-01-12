@@ -96,3 +96,24 @@ export const getSessionStatus = async (sessionId) => {
     return null;
   }
 };
+
+/**
+ * submitFeedback
+ * Sends user feedback (message rating) to the backend.
+ */
+export const submitFeedback = async (feedbackData) => {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const response = await fetch(`${API_BASE_URL}/api/feedback`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(feedbackData),
+    });
+
+    if (!response.ok) throw new Error('Failed to submit feedback');
+    return await response.json();
+  } catch (error) {
+    console.error('Error submitting feedback:', error);
+    throw error;
+  }
+};

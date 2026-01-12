@@ -11,7 +11,16 @@ const CategoryCard = ({ category, index, onCategoryClick }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08, duration: 0.3 }}
       onClick={() => onCategoryClick(title)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onCategoryClick(title);
+        }
+      }}
       className="yuume-category-card"
+      role="button"
+      tabIndex={0}
+      aria-label={`Visualizza prodotti della categoria ${title}`}
       whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
       whileTap={{ scale: 0.98 }}
     >

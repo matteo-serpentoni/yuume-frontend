@@ -7,7 +7,6 @@ These rules define the React component patterns for yuume-widget.
 - **Folder Pattern**: Each major component should have its own folder (e.g., 'components/Orb/Orb.jsx' with 'Orb.css').
 - **Memoization**: Use 'memo()' for components that receive stable props to prevent unnecessary re-renders.
 - **Lazy Loading**: Use 'React.lazy()' for heavy or dev-only components.
-- **Error Boundaries**: Critical subtrees should be wrapped with 'ErrorBoundary' (see 'components/UI/ErrorBoundary.jsx') to prevent crashes from affecting the entire widget.
 
 ## 2. Props & State
 
@@ -15,7 +14,12 @@ These rules define the React component patterns for yuume-widget.
 - **Callbacks**: Wrap callbacks with 'useCallback()' when passed as props to memoized children.
 - **Refs for Performance**: Use 'useRef()' for values that shouldn't trigger re-renders (e.g., WebGL contexts, animation state).
 
-## 3. File Naming
+## 3. Resilience & Error Handling
+
+- **Silent Error Boundaries**: Critical subtrees should be wrapped with 'ErrorBoundary'.
+- **Graceful Failure**: The global ErrorBoundary MUST render 'null' on error. It is better for the widget to disappear than to show a broken UI on the merchant's site.
+
+## 4. File Naming
 
 - **Components**: PascalCase (e.g., 'ChatMessage.jsx').
 - **Hooks**: camelCase with 'use' prefix (e.g., 'useChat.js').

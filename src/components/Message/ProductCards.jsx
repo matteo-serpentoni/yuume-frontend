@@ -42,6 +42,9 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
     >
       <div
         className="yuume-product-image-container"
+        role="button"
+        tabIndex={0}
+        aria-label="Ingrandisci immagine"
         onClick={(e) => {
           e.stopPropagation();
           onImageClick &&
@@ -50,6 +53,18 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
               index: 0,
               product: product,
             });
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.stopPropagation();
+            e.preventDefault();
+            onImageClick &&
+              onImageClick({
+                images: galleryImages,
+                index: 0,
+                product: product,
+              });
+          }
         }}
       >
         {image ? (

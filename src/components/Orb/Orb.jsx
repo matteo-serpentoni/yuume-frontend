@@ -360,9 +360,9 @@ const Orb = memo(
       if (mode === 'preview') return; // Skip in preview mode
 
       if (enlarged) {
-        window.parent?.postMessage({ type: 'YUUME_CHAT_OPENED' }, '*');
+        window.parent?.postMessage({ type: 'YUUME:chatOpened' }, '*');
       } else {
-        window.parent?.postMessage({ type: 'YUUME_CHAT_CLOSED' }, '*');
+        window.parent?.postMessage({ type: 'YUUME:chatClosed' }, '*');
       }
     }, [enlarged, mode]);
 
@@ -370,7 +370,7 @@ const Orb = memo(
     const handleExpand = useCallback(() => {
       if (isMinimized && mode !== 'preview') {
         setEnlarged(true);
-        window.parent?.postMessage({ type: 'resize', enlarged: true }, '*');
+        window.parent?.postMessage({ type: 'YUUME:resize', enlarged: true }, '*');
       }
     }, [isMinimized, mode, setEnlarged]);
 
@@ -444,7 +444,7 @@ const Orb = memo(
                     setEnlarged(false);
                     // Wait for animation (600ms) before resizing iframe
                     setTimeout(() => {
-                      window.parent?.postMessage({ type: 'resize', enlarged: false }, '*');
+                      window.parent?.postMessage({ type: 'YUUME:resize', enlarged: false }, '*');
                     }, 600);
                   }}
                 />

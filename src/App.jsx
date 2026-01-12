@@ -12,7 +12,7 @@ function App() {
   });
 
   useEffect(() => {
-    window.parent?.postMessage({ type: 'resize', enlarged }, '*');
+    window.parent?.postMessage({ type: 'YUUME:resize', enlarged }, '*');
   }, [enlarged]);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ function App() {
     if (import.meta.env.MODE === 'development' && devPreview.show) {
       window.postMessage(
         {
-          type: 'YUUME_BG_LUMINANCE',
+          type: 'YUUME:bgLuminance',
           mode: devPreview.theme,
         },
         '*',

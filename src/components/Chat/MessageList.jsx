@@ -2,6 +2,8 @@ import React, { useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import './MessageList.css';
 import MessageBubble from './MessageBubble';
+import MessageFallback from './MessageFallback';
+import ErrorBoundary from '../UI/ErrorBoundary';
 import TypingIndicator from './TypingIndicator';
 import CategoryCards from '../Message/CategoryCards';
 import ProductCards from '../Message/ProductCards';
@@ -9,7 +11,6 @@ import OrderCards from '../Message/OrderCards';
 import OrderLookupForm from '../Message/OrderLookupForm';
 import TextMessage from '../Message/TextMessage';
 import Suggestions from '../Message/Suggestions';
-import { formatTime } from '../../utils/messageHelpers';
 
 /**
  * MessageList
@@ -207,9 +208,13 @@ const MessageList = ({
     <div
       ref={messagesAreaRef}
       className={`messages-area ${activeProduct || activeOrder ? 'yuume-drawer-active' : ''}`}
+      aria-live="polite"
+      aria-atomic="false"
     >
       {chatBlocks.map((msg) => (
-        <div key={msg.id}>{renderMessage(msg)}</div>
+        <ErrorBoundary key={msg.id} fallback={<MessageFallback />}>
+          <div key={msg.id}>{renderMessage(msg)}</div>
+        </ErrorBoundary>
       ))}
 
       {loading && !isOrderLookupLoading && (

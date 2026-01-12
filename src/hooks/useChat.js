@@ -1,5 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { sendMessage, ChatApiError, getSessionStatus } from '../services/chatApi';
+import { sendMessage, ChatApiError, getSessionStatus, submitFeedback } from '../services/chatApi';
 import { io } from 'socket.io-client';
 
 const STORAGE_KEYS = {
@@ -489,20 +488,14 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
       // 3. Send to backend
       try {
-        await fetch(`${API_URL}/api/feedback`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            shopDomain,
-            sessionId,
-            messageId,
-            userQuery,
-            aiResponse: aiMessageText,
-            rating,
-            type, // ✅ Send type
-          }),
+        await submitFeedback({
+          shopDomain,
+          sessionId,
+          messageId,
+          userQuery,
+          aiResponse: aiMessageText,
+          rating,
+          type,
         });
       } catch (error) {
         console.error('Error sending feedback:', error);
