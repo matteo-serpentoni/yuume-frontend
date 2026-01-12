@@ -12,7 +12,8 @@ These rules define the code style and quality standards for yuume-widget.
 - **Order**: Organize imports: React first, then external libs, then internal modules, then styles.
 - **ESM**: Use ES Modules exclusively ('import/export').
 
-## 3. DRY Principle
+## 3. DRY Principle & UI Consistency
 
 - **Utils**: Generic helpers (color conversion, DOM helpers) MUST live in 'utils/'.
-- **No Duplication**: If similar logic appears in multiple components, extract it to a hook or utility.
+- **UI Atoms**: Re-use core building blocks (e.g., 'MessageBubble', 'Drawer') instead of duplicating CSS or structural HTML. This ensures project-wide visual consistency.
+- **No Duplication**: If similar logic or styling appears in multiple components, extract it to a shared component, hook, or utility.
