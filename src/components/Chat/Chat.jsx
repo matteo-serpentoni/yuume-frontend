@@ -62,13 +62,13 @@ const Chat = ({
     for (let i = 0; i < filtered.length; i++) {
       const msg = filtered[i];
 
-      // Try to merge order_form with its subsequent response
-      if (msg.type === 'order_form') {
-        let resultIndex = -1;
+      // Try to merge lookup or return forms with their subsequent response(s)
+      if (['order_form', 'return_form', 'return_items', 'return_reason'].includes(msg.type)) {
+        let lastResultIndex = -1;
+        let finalResults = null;
 
-        // Look ahead for the next response from assistant/ai
-        // We look ahead up to 3 messages to find a result or an error
-        for (let j = i + 1; j < Math.min(i + 4, filtered.length); j++) {
+        // Look ahead for ALL related messages in the flow to keep them in a single card
+        for (let j = i + 1; j < Math.min(i + 8, filtered.length); j++) {
           const next = filtered[j];
           if (next.sender === 'assistant' || next.sender === 'ai') {
             const isOrderResult = [
@@ -79,27 +79,44 @@ const Chat = ({
               'ORDER_DETAIL_RESPONSE',
             ].includes(next.type);
 
-            const isOrderError =
-              (next.type === 'text' || !next.type) &&
-              next.text &&
-              (next.text.toLowerCase().includes('non ho trovato') ||
-                next.text.toLowerCase().includes('spiacenti') ||
-                next.text.toLowerCase().includes('a questa email')); // Added context from user screenshot
+            const isReturnResult = [
+              'return_items',
+              'return_reason',
+              'return_submitted',
+              'RETURN_ITEMS_RESPONSE',
+              'RETURN_REASON_RESPONSE',
+              'RETURN_SUBMITTED_RESPONSE',
+            ].includes(next.type);
 
-            if (isOrderResult || isOrderError) {
-              resultIndex = j;
-              filtered[j].isResultSource = true; // Mark to skip top-level rendering
-              break;
+            const isResultError =
+              (next.type === 'text' ||
+                next.type === 'return_form' ||
+                next.type === 'RETURN_FORM_REQUEST' ||
+                !next.type) &&
+              (next.text || next.message || next.results) &&
+              (next.text?.toLowerCase().includes('non ho trovato') ||
+                next.message?.toLowerCase().includes('non ho trovato') ||
+                next.results?.text?.toLowerCase().includes('non ho trovato') ||
+                next.text?.toLowerCase().includes('spiacenti') ||
+                next.text?.toLowerCase().includes('a questa email'));
+
+            if (isOrderResult || isReturnResult || isResultError) {
+              lastResultIndex = j;
+              finalResults = next;
+              filtered[j].isResultSource = true;
+              // Keep looking for additional steps in the flow
+              continue;
             }
+            break;
           }
         }
 
-        if (resultIndex !== -1) {
-          const results = { ...filtered[resultIndex] };
+        if (lastResultIndex !== -1) {
+          const results = { ...finalResults };
 
           // Inherit email from the user's lookup message (somewhere between form and results)
-          if (!results.email) {
-            for (let k = i + 1; k < resultIndex; k++) {
+          if (!results.email && msg.type === 'order_form') {
+            for (let k = i + 1; k < lastResultIndex; k++) {
               const prevMsg = filtered[k];
               if (prevMsg.text?.startsWith('ORDER_LOOKUP:')) {
                 const parts = prevMsg.text.split(':');
@@ -110,7 +127,7 @@ const Chat = ({
           }
 
           blocks.push({ ...msg, results });
-          i = resultIndex; // Skip everything until the result
+          i = lastResultIndex; // Skip everything consumed by the merge
           continue;
         }
       }

@@ -1,16 +1,18 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import './MessageList.css';
-import MessageBubble from './MessageBubble';
-import MessageFallback from './MessageFallback';
-import ErrorBoundary from '../UI/ErrorBoundary';
-import TypingIndicator from './TypingIndicator';
 import CategoryCards from '../Message/CategoryCards';
 import ProductCards from '../Message/ProductCards';
 import OrderCards from '../Message/OrderCards';
 import OrderLookupForm from '../Message/OrderLookupForm';
+import ReturnForm from '../Message/ReturnForm';
+import LookupResult from '../Message/LookupResult';
 import TextMessage from '../Message/TextMessage';
 import Suggestions from '../Message/Suggestions';
+import ErrorBoundary from '../UI/ErrorBoundary';
+import MessageFallback from './MessageFallback';
+import MessageBubble from './MessageBubble';
+import TypingIndicator from './TypingIndicator';
 
 /**
  * MessageList
@@ -109,16 +111,10 @@ const MessageList = ({
               transition={{ duration: 0.3 }}
             >
               {msg.results.type === 'text' ? (
-                <div className="yuume-order-lookup-results-text">
-                  <div className="yuume-order-lookup-icon">🔍</div>
-                  <p className="yuume-order-lookup-message">{msg.results.text}</p>
-                  <button
-                    onClick={() => sendMessage('Cerca ordine')}
-                    className="yuume-order-lookup-retry-btn"
-                  >
-                    Riprova
-                  </button>
-                </div>
+                <LookupResult
+                  message={msg.results.text}
+                  onRetry={() => sendMessage('Cerca ordine')}
+                />
               ) : (
                 <OrderCards
                   message={msg.results}
@@ -140,8 +136,14 @@ const MessageList = ({
     }
     // 4. Order Details/Lists
     else if (
-      ['order_detail', 'order_list', 'order_cards'].includes(msg.type) ||
-      ['ORDER_DETAIL_RESPONSE', 'ORDER_LIST_RESPONSE', 'ORDER_RESPONSE'].includes(msg.type)
+      [
+        'order_detail',
+        'order_list',
+        'order_cards',
+        'ORDER_DETAIL_RESPONSE',
+        'ORDER_LIST_RESPONSE',
+        'ORDER_RESPONSE',
+      ].includes(msg.type)
     ) {
       type = 'order_cards';
       content = (
@@ -158,11 +160,43 @@ const MessageList = ({
           }}
         />
       );
+    }
+    // 5. Return Form Flow (Steps 1, 2, 3)
+    else if (['return_form', 'return_items', 'return_reason'].includes(msg.type)) {
+      type = 'return_form';
+
+      // Check for merged result that is a next step or success
+      const isStepTransition =
+        msg.results &&
+        ['return_items', 'return_reason', 'return_submitted'].includes(msg.results.type);
+
+      const displayMessage = isStepTransition ? msg.results : msg;
+
+      content = (
+        <ReturnForm
+          message={displayMessage}
+          onSubmit={(signal) => sendMessage(signal, { hidden: true })}
+          loading={loading}
+        />
+      );
+    }
+    // 6. Return Submitted (Final Step)
+    else if (msg.type === 'return_submitted') {
+      type = 'return_submitted';
+      content = (
+        <div className="yuume-return-success-block">
+          <div className="yuume-return-success-icon">✅</div>
+          <div className="yuume-return-success-text">
+            <h4>Richiesta Ricevuta!</h4>
+            <p>{msg.message}</p>
+          </div>
+        </div>
+      );
     } else {
       content = <TextMessage message={msg} />;
     }
 
-    const isStandalone = ['product_cards'].includes(type);
+    const isStandalone = ['product_cards', 'return_form', 'return_submitted'].includes(type);
 
     return (
       <div className={`yuume-message-block ${isStandalone ? 'standalone' : ''}`}>
@@ -198,11 +232,12 @@ const MessageList = ({
 
   // Determine if we should show the global typing indicator.
   // We hide it if an order lookup is active via the form, as the form shows its own loader.
-  const isOrderLookupLoading =
+  const isFormLoading =
     loading &&
     chatBlocks.length > 0 &&
-    chatBlocks[chatBlocks.length - 1].type === 'order_form' &&
-    !chatBlocks[chatBlocks.length - 1].results;
+    ['order_form', 'return_form', 'return_items', 'return_reason'].includes(
+      chatBlocks[chatBlocks.length - 1].type,
+    );
 
   return (
     <div
@@ -217,9 +252,7 @@ const MessageList = ({
         </ErrorBoundary>
       ))}
 
-      {loading && !isOrderLookupLoading && (
-        <TypingIndicator aiMessageColor={chatColors.aiMessage} />
-      )}
+      {loading && !isFormLoading && <TypingIndicator aiMessageColor={chatColors.aiMessage} />}
     </div>
   );
 };

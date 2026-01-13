@@ -1,5 +1,6 @@
 import { sendMessage, ChatApiError, getSessionStatus, submitFeedback } from '../services/chatApi';
 import { io } from 'socket.io-client';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 const STORAGE_KEYS = {
   SESSION_ID: 'yuume_session_id',
