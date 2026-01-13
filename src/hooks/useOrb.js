@@ -27,6 +27,7 @@ const DEFAULT_CONFIG = {
  */
 export const useOrb = (modeOverride = null) => {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [authorizedDomain, setAuthorizedDomain] = useState(null);
   const [loading, setLoading] = useState(true);
   const [shopDomain, setShopDomain] = useState(() => {
     // 1. Check URL
@@ -70,8 +71,8 @@ export const useOrb = (modeOverride = null) => {
   // PostMessage Listener for live updates (Preview Mode)
   useEffect(() => {
     const handleMessage = (event) => {
-      // ✅ Security: Validate Origin
-      if (!BRIDGE_CONFIG.isValidOrigin(event.origin)) return;
+      // ✅ Security: Validate Origin (using authorizedDomain from backend if available)
+      if (!BRIDGE_CONFIG.isValidOrigin(event.origin, authorizedDomain)) return;
 
       // Normalize message types with YUUME: prefix
       if (
@@ -117,7 +118,7 @@ export const useOrb = (modeOverride = null) => {
     }
 
     return () => window.removeEventListener('message', handleMessage);
-  }, [shopDomain, mode]);
+  }, [shopDomain, authorizedDomain, mode]);
 
   // Initial Data Fetching (Production & Development Overrides)
   useEffect(() => {
@@ -126,9 +127,6 @@ export const useOrb = (modeOverride = null) => {
       return;
     }
 
-    // Use the raw domain/id. The backend resolveId now supports direct domain lookup.
-    const siteId = shopDomain;
-
     // Don't fetch if we're on localhost and no override is present
     if (shopDomain === 'localhost') {
       setLoading(false);
@@ -136,9 +134,15 @@ export const useOrb = (modeOverride = null) => {
     }
 
     setLoading(true);
-    getWidgetConfig(siteId)
+    getWidgetConfig(shopDomain)
       .then((data) => {
-        if (data) setConfig(data);
+        if (data) {
+          setConfig(data);
+          // 🛡️ Source of Truth: Store authorized domain from our database config
+          if (data.domain) {
+            setAuthorizedDomain(data.domain);
+          }
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -155,6 +159,7 @@ export const useOrb = (modeOverride = null) => {
     isPreviewMobile,
     textColorMode,
     shopDomain,
+    authorizedDomain,
     setConfig,
     setShopDomain,
   };

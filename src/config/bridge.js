@@ -16,9 +16,21 @@ export const BRIDGE_CONFIG = {
   prefix: 'YUUME:',
 
   // Helper to validate origin
-  isValidOrigin: (origin) => {
+  isValidOrigin: (origin, shopDomain = null) => {
     if (import.meta.env.DEV) return true; // Relaxed for local dev
-    return BRIDGE_CONFIG.whitelist.some((allowed) => origin.startsWith(allowed));
+
+    // 1. Check official whitelist (Dashboard, CDN, etc.)
+    const isWhitelisted = BRIDGE_CONFIG.whitelist.some((allowed) => origin.startsWith(allowed));
+    if (isWhitelisted) return true;
+
+    // 2. Dynamic check for merchant domain
+    if (shopDomain) {
+      // Normalize both for comparison (ensure protocol matches)
+      const normalizedDomain = shopDomain.startsWith('http') ? shopDomain : `https://${shopDomain}`;
+      return origin === normalizedDomain;
+    }
+
+    return false;
   },
 
   // Helper to check if message has correct prefix

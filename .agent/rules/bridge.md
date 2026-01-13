@@ -9,7 +9,10 @@ These rules ensure secure and reliable communication between the widget and the 
 
 ## 2. Security
 
-- **Origin Validation**: When listening for 'message' events from the parent, ALWAYS validate 'event.origin' against a whitelist before processing. Store the whitelist in a central config (e.g., 'config/bridge.js').
+- **Hybrid Origin Validation**: ALWAYS validate 'event.origin' using a hybrid approach:
+    - **Static Whitelist**: Use for official origins (e.g., dashboard, Shopify preview, CDN).
+    - **Dynamic Validation**: Use for the merchant's domain. The authorized domain MUST be fetched from the backend and never trusted from the parent page's self-reporting.
+- **Centralized Logic**: Origin validation logic must reside in 'config/bridge.js'.
 - **No Sensitive Data**: Never send authentication tokens or sensitive user data via 'postMessage'.
 
 ## 3. Standard Actions
