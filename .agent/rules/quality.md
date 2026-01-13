@@ -17,3 +17,9 @@ These rules define the code style and quality standards for yuume-widget.
 - **Utils**: Generic helpers (color conversion, DOM helpers) MUST live in 'utils/'.
 - **UI Atoms**: Re-use core building blocks (e.g., 'MessageBubble', 'Drawer') instead of duplicating CSS or structural HTML. This ensures project-wide visual consistency.
 - **No Duplication**: If similar logic or styling appears in multiple components, extract it to a shared component, hook, or utility.
+
+## 4. Comments & Documentation
+
+- **Value-Driven**: Add comments only if they explain "why" something is done or provide non-obvious context. Avoid redundant comments that restate the code.
+- **Tone**: Keep comments professional and technical. No emojis allowed in the codebase.
+- **No Emojis**: **NEVER use emojis in code comments.** They are reserved for commit messages and UI feedback if necessary, but not the codebase.
