@@ -21,32 +21,65 @@ const LookupResult = ({ message, onRetry, loading }) => (
   </motion.div>
 );
 
-/**
- * DynamicForm Component
- *
- * Universal renderer for interactive forms driven by the backend Form Engine.
- * Supports:
- * - Multi-step flows with progress indicator
- * - Dynamic field types (text, email, list_select)
- * - Native keyboard support (Enter to submit)
- * - Inline error display
- */
+// 🚀 Ultra-stable navigation cache to survive component unmounts
+const navCache = new Map();
+
 const DynamicForm = ({ message, onSubmit, loading, children }) => {
-  if (!message || !message.config) {
+  console.error('🚀 [DynamicForm] Mounting/Rendering', {
+    id: message?.id,
+    formId: message?.config?.formId,
+    hasConfig: !!message?.config,
+  });
+  if (!message || (!message.config && !navCache.has(message.id))) {
+    console.error('🚀 [DynamicForm] Early return - no config/cache');
     return null;
   }
 
-  const { config, results, context } = message;
+  const { config, results, id: msgId } = message;
 
-  // ✅ UX: If results is a form_request, we use its config instead of the original one
-  // This allows the form to "reset" or "change" in place during retries
-  const activeConfig =
-    results?.type?.toLowerCase() === 'form_request' && results?.config ? results.config : config;
+  // 1. Total State Persistence (restored from cache if available)
+  const [navState, setNavState] = useState(() => {
+    const cached = navCache.get(msgId);
+    const initial = cached || {
+      history: [],
+      override: null,
+      lastResultsStr: JSON.stringify(results),
+      lastStoredState: null,
+    };
+    console.error('🚀 [DynamicForm] Initializing State', { msgId, fromCache: !!cached, initial });
+    return initial;
+  });
+
+  const { history, override, lastResultsStr, lastStoredState } = navState;
+
+  // Persist state to cache whenever it changes
+  useEffect(() => {
+    navCache.set(msgId, navState);
+  }, [msgId, navState]);
+
+  // 2. Form Data State (synchronized with active config)
+  const [formData, setFormData] = useState(() => {
+    const initial = {};
+    const initialConfig = results?.config || config;
+    (initialConfig.fields || []).forEach((f) => {
+      initial[f.id] = f.value || '';
+    });
+    return initial;
+  });
+
+  const [notes, setNotes] = useState('');
+  const [errorVisible, setErrorVisible] = useState(null);
+
+  // Ref-less logic: use current stringified results for comparison
+  const currentResultsStr = JSON.stringify(results);
+
+  // 3. Derived "Active" Configuration
+  const activeConfig = (override ? override.config : results?.config || config) || {};
 
   const {
-    formId,
-    title,
-    icon,
+    formId = '',
+    title = '',
+    icon = '',
     steps = 1,
     currentStep = 1,
     fields = [],
@@ -56,27 +89,117 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
     notesPlaceholder = 'Aggiungi dettagli...',
   } = activeConfig;
 
-  // Local State: Map of field basic values
-  const [formData, setFormData] = useState(() => {
-    const initial = {};
-    fields.forEach((f) => {
-      initial[f.id] = f.value || '';
-    });
-    return initial;
-  });
+  const isErrorState = !!(
+    results &&
+    (results.results?.type === 'text' ||
+      results.results?.message ||
+      (results.type === 'text' && !results.config))
+  );
 
-  const [notes, setNotes] = useState('');
-  const [errorVisible, setErrorVisible] = useState(null);
-
-  // Sync state if config changes (e.g. next step) or if results arrive
+  // 4. Synchronize state with incoming props
   useEffect(() => {
+    console.error('🔄 [DynamicForm] sync-effect running', {
+      msgId,
+      activeFormId: activeConfig.formId,
+      step: activeConfig.currentStep,
+      hasOverride: !!override,
+      resultsChanged: currentResultsStr !== lastResultsStr,
+    });
+
+    // Handle Override Expiry: If server sends NEW data, we exit back-mode
+    if (override) {
+      if (currentResultsStr !== lastResultsStr) {
+        console.error('🔄 [DynamicForm] CLEARING OVERRIDE: New server results detected');
+        setNavState((prev) => ({
+          ...prev,
+          override: null,
+          lastResultsStr: currentResultsStr,
+        }));
+      }
+      return;
+    }
+
+    // Normal progression tracking
+    const isProgression =
+      lastStoredState &&
+      (lastStoredState.formId !== activeConfig.formId ||
+        lastStoredState.currentStep < activeConfig.currentStep);
+
+    if (isProgression) {
+      console.error('🔄 [DynamicForm] RECORDING HISTORY: Progression detected', {
+        from: { id: lastStoredState.formId, step: lastStoredState.currentStep },
+        to: { id: activeConfig.formId, step: activeConfig.currentStep },
+      });
+      setNavState((prev) => ({
+        ...prev,
+        history: [...prev.history, lastStoredState],
+        lastResultsStr: currentResultsStr,
+        lastStoredState: {
+          formId: activeConfig.formId,
+          currentStep: activeConfig.currentStep,
+          config: activeConfig,
+          formData,
+          notes,
+          isError: isErrorState,
+        },
+      }));
+    } else {
+      // Just sync current state without pushing history
+      setNavState((prev) => ({
+        ...prev,
+        lastResultsStr: currentResultsStr,
+        lastStoredState: {
+          formId: activeConfig.formId,
+          currentStep: activeConfig.currentStep,
+          config: activeConfig,
+          formData,
+          notes,
+          isError: isErrorState,
+        },
+      }));
+    }
+
+    if (isErrorState && history.length > 0) {
+      console.error('🔄 [DynamicForm] CLEARING HISTORY: Error state detected');
+      setNavState((prev) => ({ ...prev, history: [] }));
+    }
+
+    // Sync form data fields
     const newInitial = {};
     fields.forEach((f) => {
       newInitial[f.id] = f.value || formData[f.id] || '';
     });
     setFormData(newInitial);
     setErrorVisible(null);
-  }, [currentStep, formId, JSON.stringify(results)]);
+  }, [msgId, activeConfig.formId, activeConfig.currentStep, currentResultsStr]);
+
+  const handleBack = () => {
+    console.error('🔙 [DynamicForm] handleBack called. History length:', history.length);
+    if (history.length === 0) return;
+
+    const prev = history[history.length - 1];
+
+    const newState = {
+      ...navState,
+      history: history.slice(0, -1),
+      override: prev,
+      lastResultsStr: currentResultsStr, // Sync results to avoid immediate clear
+      lastStoredState: prev,
+    };
+
+    console.error('🔙 [DynamicForm] Navigating BACK to:', {
+      formId: prev.formId,
+      step: prev.currentStep,
+    });
+
+    // 🛡️ Synchronous cache update
+    navCache.set(msgId, newState);
+    setNavState(newState);
+
+    setFormData(prev.formData);
+    setNotes(prev.notes || '');
+    setErrorVisible(null);
+  };
 
   const handleInputChange = (id, value) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -86,7 +209,7 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
     if (e) e.preventDefault();
     if (loading) return;
 
-    // 1. Validate required fields
+    // Validation
     for (const field of fields) {
       if (field.required && !formData[field.id] && formData[field.id] !== 0) {
         setErrorVisible(`Il campo ${field.label} è obbligatorio.`);
@@ -98,9 +221,20 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
       }
     }
 
+    const isOtherReason = formData.reasonId === 'other';
+    if (isOtherReason && allowNotes && !notes.trim()) {
+      setErrorVisible('Per favore, fornisci maggiori dettagli nella sezione note.');
+      return;
+    }
+
     setErrorVisible(null);
 
-    // 2. Build signal: PREFIX:val1:val2...[:notes]
+    // Clear override on submit
+    if (override) {
+      console.error('🚀 [DynamicForm] SUBMIT: Clearing override');
+      setNavState((prev) => ({ ...prev, override: null }));
+    }
+
     const values = fields.map((f) => {
       const val = formData[f.id];
       return typeof val === 'string' ? val.replace(/^#+/, '').trim() : val;
@@ -123,8 +257,8 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
             {field.options?.map((opt) => (
               <div
                 key={opt.id}
-                className={`yuume-dynamic-list-option ${formData[field.id] === opt.id ? 'active' : ''}`}
-                onClick={() => handleInputChange(field.id, opt.id)}
+                className={`yuume-dynamic-list-option ${formData[field.id] === opt.id ? 'active' : ''} ${opt.disabled ? 'disabled' : ''}`}
+                onClick={() => !opt.disabled && handleInputChange(field.id, opt.id)}
               >
                 <div className="yuume-dynamic-radio">
                   {formData[field.id] === opt.id && <div className="yuume-dynamic-radio-inner" />}
@@ -135,7 +269,18 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
                   </div>
                 )}
                 <div className="yuume-dynamic-option-content">
-                  <div className="yuume-dynamic-option-title">{opt.title || opt.label}</div>
+                  <div className="yuume-dynamic-option-title">
+                    {opt.title || opt.label}
+                    {opt.returnStatus && (
+                      <span className={`yuume-return-status-badge status-${opt.returnStatus}`}>
+                        {opt.returnStatus === 'pending'
+                          ? 'Richiesta pendente'
+                          : opt.returnStatus === 'approved'
+                            ? 'Approvata'
+                            : opt.returnStatus}
+                      </span>
+                    )}
+                  </div>
                   {(opt.quantity || opt.price) && (
                     <div className="yuume-dynamic-option-meta">
                       {opt.quantity && opt.quantity > 1 ? `${opt.quantity} pezzi • ` : ''}
@@ -145,6 +290,33 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (field.type === 'select') {
+      return (
+        <div key={field.id} className="yuume-form-group">
+          <label htmlFor={`field-${field.id}`}>{field.label}</label>
+          <div className="yuume-select-wrapper">
+            <select
+              id={`field-${field.id}`}
+              value={formData[field.id]}
+              onChange={(e) => handleInputChange(field.id, e.target.value)}
+              disabled={loading}
+              className="yuume-dynamic-select"
+            >
+              <option value="" disabled>
+                Seleziona un'opzione...
+              </option>
+              {field.options?.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.title || opt.label}
+                </option>
+              ))}
+            </select>
+            <div className="yuume-select-arrow" aria-hidden="true" />
           </div>
         </div>
       );
@@ -179,7 +351,7 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
         <h3 className="yuume-dynamic-form-title">{title}</h3>
       </div>
 
-      {steps > 1 && !children && (
+      {steps > 1 && !children && !isErrorState && (
         <div className="yuume-dynamic-progress-dots">
           {Array.from({ length: steps }).map((_, i) => {
             const s = i + 1;
@@ -207,10 +379,7 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
             >
               {children}
             </motion.div>
-          ) : results &&
-            (results.results?.type === 'text' ||
-              results.results?.message ||
-              (results.type === 'text' && !results.config)) ? (
+          ) : isErrorState ? (
             <LookupResult
               key="error-state"
               message={
@@ -242,10 +411,16 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
 
                 {allowNotes && (
                   <div className="yuume-form-group-notes">
-                    <label>Dettagli opzionali</label>
+                    <label>
+                      {formData.reasonId === 'other'
+                        ? 'Dettagli obbligatori'
+                        : 'Dettagli opzionali'}
+                    </label>
                     <textarea
                       className="yuume-dynamic-textarea"
-                      placeholder={notesPlaceholder}
+                      placeholder={
+                        formData.reasonId === 'other' ? 'Descrivi il motivo...' : notesPlaceholder
+                      }
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       disabled={loading}
@@ -256,9 +431,21 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
 
               {errorVisible && <div className="yuume-dynamic-error-message">{errorVisible}</div>}
 
-              <button type="submit" className="yuume-dynamic-form-submit" disabled={loading}>
-                {loading ? <span className="yuume-loader-small" /> : submitLabel}
-              </button>
+              <div className="yuume-dynamic-form-actions">
+                {history.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="yuume-dynamic-form-back-btn"
+                    disabled={loading}
+                  >
+                    Indietro
+                  </button>
+                )}
+                <button type="submit" className="yuume-dynamic-form-submit" disabled={loading}>
+                  {loading ? <span className="yuume-loader-small" /> : submitLabel || 'Continua'}
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
