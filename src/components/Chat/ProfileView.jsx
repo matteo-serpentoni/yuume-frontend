@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getProfile, updateProfile } from '../../services/chatApi';
+import { validateEmail } from '../../utils/validators';
 import './ProfileView.css';
 
 const ProfileView = ({
@@ -45,8 +46,7 @@ const ProfileView = ({
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!validateEmail(email)) {
       setMessage({ type: 'error', text: "Inserisci un'email valida." });
       setTimeout(() => setMessage(null), 3000);
       return;

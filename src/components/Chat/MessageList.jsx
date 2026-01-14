@@ -4,9 +4,7 @@ import './MessageList.css';
 import CategoryCards from '../Message/CategoryCards';
 import ProductCards from '../Message/ProductCards';
 import OrderCards from '../Message/OrderCards';
-import OrderLookupForm from '../Message/OrderLookupForm';
-import ReturnForm from '../Message/ReturnForm';
-import LookupResult from '../Message/LookupResult';
+import DynamicForm from '../Message/DynamicForm';
 import TextMessage from '../Message/TextMessage';
 import Suggestions from '../Message/Suggestions';
 import ErrorBoundary from '../UI/ErrorBoundary';
@@ -57,24 +55,20 @@ const MessageList = ({
     }
   }, [chatBlocks, loading]);
 
-  const renderMessage = (msg) => {
-    let content = null;
-    let type = 'default';
-
+  const renderMessageContent = (msg) => {
     // 1. Category Cards
-    if (msg.type === 'category_cards' || msg.type === 'CATEGORY_RESPONSE') {
-      type = 'category_cards';
-      content = (
+    if (msg.type?.toLowerCase() === 'category_cards') {
+      return (
         <CategoryCards
           message={msg}
           onCategoryClick={(title) => sendMessage(`Mostrami i prodotti della categoria ${title}`)}
         />
       );
     }
+
     // 2. Product Cards
-    else if (msg.type === 'product_cards' || msg.type === 'PRODUCT_RESPONSE') {
-      type = 'product_cards';
-      content = (
+    if (msg.type?.toLowerCase() === 'product_cards') {
+      return (
         <ProductCards
           message={msg}
           shopDomain={shopDomain}
@@ -84,69 +78,19 @@ const MessageList = ({
         />
       );
     }
-    // 3. Order Lookup Form (with results)
-    else if (msg.type === 'order_form' || msg.type === 'ORDER_FORM_REQUEST') {
-      type = 'order_form';
-      const hasResults = !!msg.results;
 
-      content = (
-        <AnimatePresence mode="wait">
-          {!hasResults ? (
-            <motion.div
-              key="form"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <OrderLookupForm
-                onSubmit={(lookupString) => sendMessage(lookupString, { hidden: true })}
-                isLoading={loading}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="results"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {msg.results.type === 'text' ? (
-                <LookupResult
-                  message={msg.results.text}
-                  onRetry={() => sendMessage('Cerca ordine')}
-                />
-              ) : (
-                <OrderCards
-                  message={msg.results}
-                  onOrderClick={(order, email) => {
-                    if (typeof order === 'object') {
-                      setActiveOrder(order);
-                    } else {
-                      sendMessage(`ORDER_LOOKUP:${email}:${order}`, {
-                        hidden: true,
-                      });
-                    }
-                  }}
-                />
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      );
-    }
     // 4. Order Details/Lists
-    else if (
+    if (
       [
         'order_detail',
         'order_list',
         'order_cards',
-        'ORDER_DETAIL_RESPONSE',
-        'ORDER_LIST_RESPONSE',
-        'ORDER_RESPONSE',
-      ].includes(msg.type)
+        'order_detail_response',
+        'order_list_response',
+        'order_response',
+      ].includes(msg.type?.toLowerCase())
     ) {
-      type = 'order_cards';
-      content = (
+      return (
         <OrderCards
           message={msg}
           onOrderClick={(order, email) => {
@@ -161,42 +105,89 @@ const MessageList = ({
         />
       );
     }
-    // 5. Return Form Flow (Steps 1, 2, 3)
-    else if (['return_form', 'return_items', 'return_reason'].includes(msg.type)) {
-      type = 'return_form';
 
-      // Check for merged result that is a next step or success
-      const isStepTransition =
-        msg.results &&
-        ['return_items', 'return_reason', 'return_submitted'].includes(msg.results.type);
-
-      const displayMessage = isStepTransition ? msg.results : msg;
-
-      content = (
-        <ReturnForm
-          message={displayMessage}
-          onSubmit={(signal) => sendMessage(signal, { hidden: true })}
-          loading={loading}
-        />
-      );
-    }
     // 6. Return Submitted (Final Step)
-    else if (msg.type === 'return_submitted') {
-      type = 'return_submitted';
-      content = (
+    if (msg.type?.toLowerCase() === 'return_submitted') {
+      return (
         <div className="yuume-return-success-block">
-          <div className="yuume-return-success-icon">✅</div>
+          <div className="yuume-return-success-glow" />
+          <div className="yuume-success-check-wrapper">
+            <div className="yuume-success-check">
+              <svg viewBox="0 0 52 52">
+                <title>Successo</title>
+                <circle cx="26" cy="26" r="25" fill="none" />
+                <path fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+              </svg>
+            </div>
+          </div>
           <div className="yuume-return-success-text">
             <h4>Richiesta Ricevuta!</h4>
             <p>{msg.message}</p>
           </div>
         </div>
       );
-    } else {
-      content = <TextMessage message={msg} />;
     }
 
-    const isStandalone = ['product_cards', 'return_form', 'return_submitted'].includes(type);
+    // 7. Dynamic Form (New Engine)
+    if (msg.type?.toLowerCase() === 'form_request') {
+      const results = msg.results;
+      const resultType = results?.type?.toLowerCase();
+
+      // Check if we have a specialized result to show inside the form
+      const hasSpecializedResult = [
+        'order_detail',
+        'order_list',
+        'order_cards',
+        'product_cards',
+        'category_cards',
+        'return_submitted',
+      ].includes(resultType);
+
+      return (
+        <DynamicForm
+          message={msg}
+          onSubmit={(signal) => sendMessage(signal, { hidden: true })}
+          loading={loading}
+        >
+          {hasSpecializedResult && renderMessageContent(results)}
+        </DynamicForm>
+      );
+    }
+
+    return <TextMessage message={msg} />;
+  };
+
+  const renderMessage = (msg) => {
+    const content = renderMessageContent(msg);
+    let type = 'default';
+
+    if (msg.type?.toLowerCase() === 'category_cards') {
+      type = 'category_cards';
+    } else if (msg.type?.toLowerCase() === 'product_cards') {
+      type = 'product_cards';
+    } else if (
+      [
+        'order_detail',
+        'order_list',
+        'order_cards',
+        'order_detail_response',
+        'order_list_response',
+        'order_response',
+      ].includes(msg.type?.toLowerCase())
+    ) {
+      type = 'order_cards';
+    } else if (msg.type?.toLowerCase() === 'return_submitted') {
+      type = 'return_submitted';
+    } else if (msg.type?.toLowerCase() === 'form_request') {
+      type = 'form_request';
+    }
+
+    const isStandalone = [
+      'product_cards',
+      'return_form',
+      'return_submitted',
+      'form_request',
+    ].includes(type?.toLowerCase());
 
     return (
       <div className={`yuume-message-block ${isStandalone ? 'standalone' : ''}`}>
@@ -235,7 +226,7 @@ const MessageList = ({
   const isFormLoading =
     loading &&
     chatBlocks.length > 0 &&
-    ['order_form', 'return_form', 'return_items', 'return_reason'].includes(
+    ['form_request', 'order_form', 'return_form', 'return_items', 'return_reason'].includes(
       chatBlocks[chatBlocks.length - 1].type,
     );
 

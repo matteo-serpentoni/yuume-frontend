@@ -324,18 +324,31 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     });
 
     socket.on('message:received', (message) => {
-      // ✅ SAFETY FILTER: Never show system messages to the end user
-      if (message.sender === 'system' || message.role === 'system') {
+      // ✅ SAFETY OVERRIDE: Assistant responses should NEVER be hidden in the widget
+      const isAssistant =
+        message.sender === 'assistant' || message.sender === 'ai' || message.role === 'assistant';
+
+      if (
+        !isAssistant &&
+        (message.sender === 'system' || message.role === 'system' || message.hidden)
+      ) {
         return;
       }
 
       setMessages((prev) => {
-        // Avoid duplicates
-        if (prev.some((m) => m.id === message.id)) return prev;
+        // Robust duplicate prevention
+        const msgId = String(message.id || '');
+        const exists = prev.some((m) => {
+          if (!m.id) return false;
+          return String(m.id) === msgId;
+        });
+
+        if (exists) return prev;
         return [...prev, message];
       });
-      // If message is from assistant/human, stop loading
-      if (message.sender === 'assistant') {
+
+      // If message is from assistant, stop loading
+      if (isAssistant) {
         setLoading(false);
       }
     });

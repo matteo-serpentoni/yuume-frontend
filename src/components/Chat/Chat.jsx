@@ -63,50 +63,70 @@ const Chat = ({
       const msg = filtered[i];
 
       // Try to merge lookup or return forms with their subsequent response(s)
-      if (['order_form', 'return_form', 'return_items', 'return_reason'].includes(msg.type)) {
+      const isForm = [
+        'form_request',
+        'order_form',
+        'return_form',
+        'return_items',
+        'return_reason',
+      ].some((t) => t.toLowerCase() === msg.type?.toLowerCase());
+
+      if (isForm) {
         let lastResultIndex = -1;
         let finalResults = null;
 
-        // Look ahead for ALL related messages in the flow to keep them in a single card
-        for (let j = i + 1; j < Math.min(i + 8, filtered.length); j++) {
-          const next = filtered[j];
-          if (next.sender === 'assistant' || next.sender === 'ai') {
+        // Infinite lookahead: search for any sequence of results or updated forms until a USER message
+        for (let j = i + 1; j < filtered.length; j++) {
+          const nextMsg = filtered[j];
+
+          // Stop if the next message is from the user (visible user intervention)
+          if (nextMsg.sender === 'user') {
+            break;
+          }
+
+          if (nextMsg.sender === 'assistant' || nextMsg.sender === 'ai') {
+            const nextTypeLower = nextMsg.type?.toLowerCase() || '';
+
             const isOrderResult = [
               'order_list',
               'order_detail',
               'order_cards',
-              'ORDER_LIST_RESPONSE',
-              'ORDER_DETAIL_RESPONSE',
-            ].includes(next.type);
+              'order_detail_response',
+              'order_list_response',
+              'order_response',
+            ].includes(nextTypeLower);
 
-            const isReturnResult = [
-              'return_items',
-              'return_reason',
-              'return_submitted',
-              'RETURN_ITEMS_RESPONSE',
-              'RETURN_REASON_RESPONSE',
-              'RETURN_SUBMITTED_RESPONSE',
-            ].includes(next.type);
+            const isProductResult = ['product_cards', 'category_cards'].includes(nextTypeLower);
+            const isFormRetry = nextTypeLower === 'form_request';
+            const isReturnSuccess = nextTypeLower === 'return_submitted';
 
             const isResultError =
-              (next.type === 'text' ||
-                next.type === 'return_form' ||
-                next.type === 'RETURN_FORM_REQUEST' ||
-                !next.type) &&
-              (next.text || next.message || next.results) &&
-              (next.text?.toLowerCase().includes('non ho trovato') ||
-                next.message?.toLowerCase().includes('non ho trovato') ||
-                next.results?.text?.toLowerCase().includes('non ho trovato') ||
-                next.text?.toLowerCase().includes('spiacenti') ||
-                next.text?.toLowerCase().includes('a questa email'));
+              (nextTypeLower === 'text' ||
+                nextTypeLower === 'return_form' ||
+                nextTypeLower === 'form_request' ||
+                !nextTypeLower) &&
+              (nextMsg.text || nextMsg.message || nextMsg.results) &&
+              (nextMsg.text?.toLowerCase().includes('non ho trovato') ||
+                nextMsg.message?.toLowerCase().includes('non ho trovato') ||
+                nextMsg.results?.text?.toLowerCase().includes('non ho trovato') ||
+                nextMsg.text?.toLowerCase().includes('spiacenti') ||
+                nextMsg.text?.toLowerCase().includes('a questa email'));
 
-            if (isOrderResult || isReturnResult || isResultError) {
+            if (
+              isOrderResult ||
+              isProductResult ||
+              isFormRetry ||
+              isReturnSuccess ||
+              isResultError
+            ) {
               lastResultIndex = j;
-              finalResults = next;
+              finalResults = nextMsg;
               filtered[j].isResultSource = true;
-              // Keep looking for additional steps in the flow
+              // Continue looking to pick the LATEST result in the chain
               continue;
             }
+
+            // If we found an AI message that ISN'T a result, stop merging
             break;
           }
         }
@@ -115,7 +135,7 @@ const Chat = ({
           const results = { ...finalResults };
 
           // Inherit email from the user's lookup message (somewhere between form and results)
-          if (!results.email && msg.type === 'order_form') {
+          if (!results.email && msg.type?.toLowerCase() === 'order_form') {
             for (let k = i + 1; k < lastResultIndex; k++) {
               const prevMsg = filtered[k];
               if (prevMsg.text?.startsWith('ORDER_LOOKUP:')) {
