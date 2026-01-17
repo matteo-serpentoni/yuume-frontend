@@ -1,0 +1,720 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PromoCard - Liquid Glass Coupon Redesign
+   Physical voucher shape with high-end refraction
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.yuume-promo-card-perspective {
+  perspective: 1000px;
+  width: 100%;
+}
+
+.yuume-promo-card {
+  position: relative;
+  width: 92%;
+  height: 300px;
+  margin: 0 auto;
+  color: #ffffff;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+}
+
+.yuume-promo-card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.yuume-card-side {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+  /* Physical Coupon Mask */
+  --mask-size: 14px;
+  --mask-pos: 240px;
+  -webkit-mask-image:
+    radial-gradient(
+      circle at 0 var(--mask-pos),
+      transparent var(--mask-size),
+      black var(--mask-size)
+    ),
+    radial-gradient(
+      circle at 100% var(--mask-pos),
+      transparent var(--mask-size),
+      black var(--mask-size)
+    );
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(
+      circle at 0 var(--mask-pos),
+      transparent var(--mask-size),
+      black var(--mask-size)
+    ),
+    radial-gradient(
+      circle at 100% var(--mask-pos),
+      transparent var(--mask-size),
+      black var(--mask-size)
+    );
+  mask-composite: intersect;
+}
+
+.yuume-card-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, rgba(15, 15, 15, 0.95), rgba(30, 30, 30, 0.95));
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Internal Sections */
+/* Internal Sections */
+.yuume-coupon-top {
+  padding: 0;
+  height: 240px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Front side is only interactive when NOT flipped */
+.yuume-promo-card:not(.is-flipped) .yuume-card-front {
+  pointer-events: auto;
+  z-index: 2;
+}
+.yuume-promo-card.is-flipped .yuume-card-front {
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Back side is only interactive when flipped */
+.yuume-promo-card.is-flipped .yuume-card-back {
+  pointer-events: auto;
+  z-index: 2;
+}
+.yuume-promo-card:not(.is-flipped) .yuume-card-back {
+  pointer-events: none;
+  z-index: 1;
+}
+
+.yuume-front-content {
+  flex: 1;
+  padding: 0 20px 20px 20px;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scrollbar styling (EXACT CLONE OF BACK SIDE) */
+.yuume-front-content::-webkit-scrollbar,
+.yuume-back-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.yuume-front-content::-webkit-scrollbar-track,
+.yuume-back-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.yuume-front-content::-webkit-scrollbar-thumb,
+.yuume-back-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.yuume-coupon-divider {
+  height: 0px;
+  position: relative;
+  margin: 0 14px;
+  border-top: 2px dashed rgba(255, 255, 255, 0.12);
+  z-index: 10;
+  top: -1px; /* Center with the mask hole */
+}
+
+.yuume-coupon-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  background: rgba(255, 255, 255, 0.02);
+  height: 60px;
+}
+
+/* Icons & Labels */
+.yuume-promo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 8px 20px;
+  flex-shrink: 0;
+}
+
+.yuume-promo-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.yuume-promo-icon {
+  width: 14px;
+  height: 14px;
+  color: #10b981;
+}
+
+.yuume-promo-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.yuume-promo-status-active {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 800;
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.yuume-status-pulse {
+  width: 5px;
+  height: 5px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+}
+
+/* Main Value */
+.yuume-promo-value-stack {
+  display: flex;
+  flex-direction: column;
+  pointer-events: none; /* Let scroll pass through */
+}
+
+.yuume-promo-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 0 2px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.yuume-promo-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  background: linear-gradient(to right, #ffffff, #d1f7e9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.yuume-promo-requirements {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.yuume-req-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.yuume-promo-expiry {
+  color: #fbbf24; /* Un tocco di ambra per l'urgenza */
+  font-weight: 600;
+}
+
+/* Connectors and flow items need pointer events for buttons */
+.yuume-promo-flow-container {
+  pointer-events: auto;
+}
+
+.yuume-promo-flow-item {
+  /* ... exists ... */
+  pointer-events: auto;
+}
+
+/* Flow Layout (Reward -> Requirement) */
+.yuume-promo-flow-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 4px;
+}
+
+.yuume-promo-flow-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.yuume-flow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.yuume-flow-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.reward-item {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.1);
+}
+
+.reward-item .yuume-flow-icon {
+  color: #10b981;
+}
+
+.requirement-item {
+  background: rgba(251, 191, 36, 0.05);
+  border-color: rgba(251, 191, 36, 0.1);
+}
+
+.requirement-item .yuume-flow-icon {
+  color: #fbbf24;
+}
+
+.yuume-flow-connector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+}
+
+.connector-line {
+  flex: 1;
+  height: 1px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.connector-text {
+  font-size: 8px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.yuume-promo-flow-item.interactive {
+  cursor: pointer;
+}
+
+.yuume-promo-flow-item.interactive:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.reward-item.interactive:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.requirement-item.interactive:hover {
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.yuume-targets-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.yuume-targets-label {
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.yuume-targets-value {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.yuume-targets-value.all-catalog {
+  color: #10b981;
+}
+
+.yuume-search-indicator {
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reward-item .yuume-search-indicator {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.requirement-item .yuume-search-indicator {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.yuume-search-indicator svg {
+  width: 12px;
+  height: 12px;
+}
+
+.interactive:hover .yuume-search-indicator {
+  background: rgba(16, 185, 129, 0.2);
+  transform: scale(1.05);
+}
+
+/* Action: Copy Button */
+.yuume-promo-copy-btn {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.yuume-promo-copy-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transform: skewX(-20deg);
+  animation: yuume-shimmer-sweep 4s infinite;
+}
+
+@keyframes yuume-shimmer-sweep {
+  0% {
+    left: -150%;
+  }
+  25% {
+    left: 150%;
+  }
+  100% {
+    left: 150%;
+  }
+}
+
+.yuume-promo-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.yuume-promo-copy-btn.copied {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.yuume-code-container {
+  flex: 1;
+  min-width: 0;
+  margin-right: 12px;
+}
+
+.code-text {
+  font-family: 'SF Mono', 'Fira Code', 'Roboto Mono', monospace;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.copy-action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 65px;
+}
+
+.copy-label,
+.copy-feedback {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+}
+
+.copy-label svg,
+.copy-feedback svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.yuume-promo-copy-btn:hover .copy-action {
+  opacity: 1;
+}
+
+/* Header Actions on Front side */
+.yuume-promo-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.yuume-promo-info-btn,
+.yuume-promo-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.yuume-promo-info-btn:hover,
+.yuume-promo-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.yuume-promo-info-btn svg,
+.yuume-promo-close-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Back Side Content */
+.yuume-back-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.yuume-back-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #10b981;
+  letter-spacing: 0.05em;
+}
+
+.yuume-back-title svg {
+  width: 14px;
+  height: 14px;
+}
+
+.yuume-back-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.yuume-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.yuume-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.yuume-detail-item .label {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.yuume-detail-item .value {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.yuume-detail-item .value.success {
+  color: #10b981;
+}
+.yuume-detail-item .value.warning {
+  color: #fbbf24;
+}
+
+.yuume-detail-item .meta {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
+}
+
+.yuume-notes-list {
+  margin: 6px 0 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.yuume-notes-list li {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  position: relative;
+  padding-left: 14px;
+}
+
+.yuume-notes-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #10b981;
+}
+
+.yuume-back-footer {
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.yuume-back-return-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.yuume-back-return-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Glow & refraction details */
+.yuume-promo-refraction {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.05) 40%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 60%,
+    transparent 80%
+  );
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Carousel Integration */
+.yuume-promos-container.carousel {
+  width: 100%;
+  margin: 4px 0 0 0;
+}
+
+.yuume-promos-list {
+  display: flex;
+  gap: 16px;
+  padding: 10px 24px 12px 24px;
+  margin: 0 -24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.yuume-promos-list::-webkit-scrollbar {
+  display: none;
+}
+
+.yuume-promo-card-wrapper {
+  flex: 0 0 calc(100% - 48px);
+  max-width: 320px;
+  scroll-snap-align: center;
+}

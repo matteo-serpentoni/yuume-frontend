@@ -63,6 +63,27 @@
     return visitorId;
   }
 
+  function getShopifyIdentity() {
+    try {
+      // 1. Standard Shopify Analytics (ID only)
+      const customerId = window.ShopifyAnalytics?.meta?.page?.customerId;
+
+      // 2. Extended Shopify object (some themes include this)
+      const customer = window.Shopify?.customer;
+
+      if (customerId || customer?.id) {
+        return {
+          id: customerId || customer?.id,
+          email: customer?.email || null, // Might be null, but ID proves "Logged In"
+          isVerified: true,
+        };
+      }
+    } catch (e) {
+      // Silent error for identity detection
+    }
+    return null;
+  }
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TRACKING FUNCTIONS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -217,10 +238,12 @@
 
   // Invia shopDomain al widget quando l'iframe è caricato
   iframe.onload = function () {
+    const identity = getShopifyIdentity();
     iframe.contentWindow.postMessage(
       {
         type: 'YUUME_SHOP_DOMAIN',
         shopDomain: SHOP_DOMAIN,
+        shopifyCustomer: identity, // Pass identity on load
       },
       WIDGET_ORIGIN,
     );
@@ -262,6 +285,20 @@
         {
           type: 'YUUME_SHOP_DOMAIN',
           shopDomain: SHOP_DOMAIN,
+        },
+        WIDGET_ORIGIN,
+      );
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // IDENTITY REQUEST (from widget Ready)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (event.data.type === 'YUUME:ready') {
+      const identity = getShopifyIdentity();
+      iframe.contentWindow.postMessage(
+        {
+          type: 'YUUME:identity',
+          customer: identity,
         },
         WIDGET_ORIGIN,
       );

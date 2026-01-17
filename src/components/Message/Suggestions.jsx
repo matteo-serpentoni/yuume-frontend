@@ -1,3 +1,4 @@
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import './Suggestions.css';
 
@@ -5,7 +6,7 @@ import './Suggestions.css';
  * Suggestions
  * Renders a list of interactive chips to guide the user.
  */
-const Suggestions = ({ suggestions, onSuggestionClick }) => {
+const Suggestions = memo(({ suggestions, onSuggestionClick }) => {
   if (!suggestions || suggestions.length === 0) return null;
 
   return (
@@ -33,6 +34,6 @@ const Suggestions = ({ suggestions, onSuggestionClick }) => {
       ))}
     </div>
   );
-};
+});
 
 export default Suggestions;

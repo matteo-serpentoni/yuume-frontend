@@ -54,6 +54,7 @@
 .yuume-standalone-content {
   width: 100%;
   padding: 0 4px;
+  overflow: visible;
 }
 
 .yuume-standalone-meta {
@@ -61,4 +62,12 @@
   justify-content: flex-end;
   margin-top: 4px;
   padding-right: 8px;
+}
+
+.yuume-promos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  width: 100%;
 }

@@ -45,6 +45,16 @@
   padding: 0 16px 24px 16px;
 }
 
+.initial-suggestions-container {
+  padding: 0 var(--orb-h-padding-messages, 20px);
+  margin-bottom: 8px;
+}
+
+.initial-suggestions-container .yuume-suggestions {
+  margin-top: 0;
+  justify-content: flex-start;
+}
+
 .conversation-ended-separator {
   display: flex;
   align-items: center;

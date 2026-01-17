@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useChat } from '../../hooks/useChat';
 import './Chat.css';
 
@@ -13,6 +13,7 @@ import Drawer from '../UI/Drawer';
 import ProfileView from './ProfileView';
 import StarRating from './StarRating';
 import ImageLightbox from '../UI/ImageLightbox';
+import Suggestions from '../Message/Suggestions';
 
 const Chat = ({
   onTyping,
@@ -50,9 +51,17 @@ const Chat = ({
   const sessionStatus = isPreview ? previewSessionStatus || 'active' : liveChat.sessionStatus;
   const connectionStatus = isPreview ? previewConnectionStatus : liveChat.connectionStatus;
   const assignedTo = isPreview ? previewAssignedTo || null : liveChat.assignedTo;
+  const initialSuggestions = isPreview ? [] : liveChat.initialSuggestions;
 
   const sendMessage = isPreview ? () => {} : liveChat.sendMessage;
   const sendFeedback = isPreview ? () => {} : liveChat.sendFeedback;
+
+  const handleSuggestionClick = useCallback(
+    (value) => {
+      sendMessage(value);
+    },
+    [sendMessage],
+  );
 
   // Group messages to handle "transforming" components (like OrderLookupForm)
   const chatBlocks = useMemo(() => {
@@ -195,6 +204,16 @@ const Chat = ({
                 </div>
 
                 <StarRating onRate={(rating) => sendFeedback(null, rating, null, 'conversation')} />
+              </div>
+            )}
+
+            {/* Initial Suggestions (Show only at the very beginning) */}
+            {initialSuggestions.length > 0 && messages.length <= 1 && (
+              <div className="initial-suggestions-container">
+                <Suggestions
+                  suggestions={initialSuggestions}
+                  onSuggestionClick={handleSuggestionClick}
+                />
               </div>
             )}
 

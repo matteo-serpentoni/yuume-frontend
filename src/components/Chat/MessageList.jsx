@@ -7,6 +7,7 @@ import OrderCards from '../Message/OrderCards';
 import DynamicForm from '../Message/DynamicForm';
 import TextMessage from '../Message/TextMessage';
 import Suggestions from '../Message/Suggestions';
+import PromoCards from '../Message/PromoCards';
 import ErrorBoundary from '../UI/ErrorBoundary';
 import MessageFallback from './MessageFallback';
 import MessageBubble from './MessageBubble';
@@ -106,6 +107,11 @@ const MessageList = ({
       );
     }
 
+    // 5.5 Promo Cards (OFFERS intent - no text, only cards)
+    if (msg.type?.toLowerCase() === 'promo_cards') {
+      return <PromoCards message={msg} onSearch={sendMessage} />;
+    }
+
     // 6. Return Submitted (Final Step)
     if (msg.type?.toLowerCase() === 'return_submitted') {
       return (
@@ -154,7 +160,12 @@ const MessageList = ({
       );
     }
 
-    return <TextMessage message={msg} />;
+    return (
+      <>
+        <TextMessage message={msg} />
+        {msg.promos && msg.promos.length > 0 && <PromoCards message={msg} onSearch={sendMessage} />}
+      </>
+    );
   };
 
   const renderMessage = (msg) => {
@@ -180,6 +191,8 @@ const MessageList = ({
       type = 'return_submitted';
     } else if (msg.type?.toLowerCase() === 'form_request') {
       type = 'form_request';
+    } else if (msg.type?.toLowerCase() === 'promo_cards') {
+      type = 'promo_cards';
     }
 
     const isStandalone = [
@@ -187,6 +200,7 @@ const MessageList = ({
       'return_form',
       'return_submitted',
       'form_request',
+      'promo_cards',
     ].includes(type?.toLowerCase());
 
     return (

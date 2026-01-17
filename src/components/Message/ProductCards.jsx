@@ -15,6 +15,9 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
     hasVariants,
     name,
     price,
+    compareAtPrice,
+    discountCode,
+    isAutomatic,
     currency,
     variants,
   } = normalizeStorefrontProduct(product);
@@ -72,6 +75,15 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
         ) : (
           <div className="yuume-product-placeholder">🎁</div>
         )}
+        {(discountCode || isAutomatic || compareAtPrice > price) && (
+          <div className="yuume-product-discount-badge">
+            {discountCode
+              ? `SCONTO: ${discountCode}`
+              : compareAtPrice > price
+                ? `-${Math.round((1 - price / compareAtPrice) * 100)}%`
+                : 'OFFERTA'}
+          </div>
+        )}
         <div className="yuume-image-zoom-overlay" aria-hidden="true">
           <svg
             width="20"
@@ -96,7 +108,12 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
       <div className="yuume-product-info">
         <h3 className="yuume-product-name">{name}</h3>
         <div className="yuume-product-price-row">
-          <span className="yuume-current-price">{formatPrice(price, currency)}</span>
+          <div className="yuume-price-stack">
+            {compareAtPrice > price && (
+              <span className="yuume-original-price">{formatPrice(compareAtPrice, currency)}</span>
+            )}
+            <span className="yuume-current-price">{formatPrice(price, currency)}</span>
+          </div>
           <div className={`yuume-availability-status ${isAvailable ? 'available' : 'unavailable'}`}>
             <span className="yuume-status-dot"></span>
             {isAvailable ? 'In stock' : 'Out of stock'}
@@ -145,6 +162,7 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
     name,
     description,
     price: initialPrice,
+    compareAtPrice: initialCompareAtPrice,
     currency,
     variants,
     options,
@@ -178,6 +196,7 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   const isAvailableResult = currentVariant ? currentVariant.available : isAvailable;
 
   const currentPrice = currentVariant?.price || initialPrice;
+  const currentCompareAtPrice = currentVariant?.compareAtPrice || initialCompareAtPrice;
 
   const footer = (
     <>
@@ -197,7 +216,17 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   );
 
   return (
-    <Drawer isOpen={!!product} onClose={onClose} footer={footer}>
+    <Drawer isOpen={!!product} onClose={onClose} footer={footer} title={name}>
+      <div className="yuume-drawer-price-section">
+        <div className="yuume-price-stack">
+          {currentCompareAtPrice > currentPrice && (
+            <span className="yuume-original-price">
+              {formatPrice(currentCompareAtPrice, currency)}
+            </span>
+          )}
+          <span className="yuume-current-price">{formatPrice(currentPrice, currency)}</span>
+        </div>
+      </div>
       {product.options.filter((opt) => !isDefaultVariant(opt)).length > 0 && (
         <div className="yuume-drawer-variants">
           {product.options

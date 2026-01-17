@@ -96,6 +96,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   }, [disabled]);
 
   const [assignedTo, setAssignedTo] = useState(null);
+  const [shopifyCustomer, setShopifyCustomer] = useState(null); // Certified identity
+  const [initialSuggestions, setInitialSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const socketRef = useRef(null);
 
@@ -137,6 +139,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     setMessages([welcomeMsg]);
     setSessionStatus('active');
     setAssignedTo(null);
+    setInitialSuggestions([]);
   }, []);
 
   const addUserMessage = useCallback((text, id = Date.now(), hidden = false) => {
@@ -217,16 +220,38 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     return () => clearInterval(interval);
   }, [clearChat, disabled]);
 
+  // ✅ Listen for Identity from Parent (Shopify Storefront)
+  useEffect(() => {
+    if (disabled) return;
+
+    const handleMessage = (event) => {
+      if (event.data?.type === 'YUUME:identity') {
+        const { customer } = event.data;
+        if (customer) {
+          console.log('✅ Shopify Identity Detected:', customer.email);
+          setShopifyCustomer(customer);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    // Request identity from parent in case it was already sent
+    window.parent?.postMessage({ type: 'YUUME:ready' }, '*');
+
+    return () => window.removeEventListener('message', handleMessage);
+  }, [disabled]);
+
   // ✅ WebSocket Connection
   useEffect(() => {
     if (disabled || !sessionId) return;
 
     // Initial status fetch (sync status, assignment and history)
-    getSessionStatus(sessionId)
+    getSessionStatus(sessionId, shopDomain)
       .then((statusData) => {
         if (statusData) {
           if (statusData.status) setSessionStatus(statusData.status);
           if (statusData.assignedTo) setAssignedTo(statusData.assignedTo);
+          if (statusData.initialSuggestions) setInitialSuggestions(statusData.initialSuggestions);
 
           // Sync message history if available
           if (statusData.messages && statusData.messages.length > 0) {
@@ -236,9 +261,11 @@ export const useChat = (devShopDomain, customer, options = {}) => {
               // 1. Create a map of server messages for fast lookup
               const serverMsgMap = new Map();
               serverMessages.forEach((msg) => {
-                serverMsgMap.set(msg.id, msg);
+                if (msg.id) {
+                  serverMsgMap.set(msg.id.toString(), msg);
+                }
                 if (msg.clientMessageId) {
-                  serverMsgMap.set(msg.clientMessageId, msg);
+                  serverMsgMap.set(msg.clientMessageId.toString(), msg);
                 }
               });
 
@@ -247,10 +274,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
               // - Initial welcome message (disableFeedback: true)
               // - Any message not yet present on server (by ID and clientMessageId)
               const localToKeep = prev.filter((localMsg) => {
+                const localIdStr = localMsg.id?.toString();
+
                 // If it's already on the server, don't keep the local copy (server is source of truth)
-                const existsOnServer =
-                  serverMsgMap.has(localMsg.id) ||
-                  (localMsg.id && serverMsgMap.has(localMsg.id.toString()));
+                const existsOnServer = localIdStr && serverMsgMap.has(localIdStr);
 
                 if (existsOnServer) return false;
 
@@ -385,7 +412,11 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         setSessionStatus('active');
         setMessages([]); // Clear previous messages
         setAssignedTo(null);
+        setInitialSuggestions([]);
       }
+
+      // Clear initial suggestions on any explicit message
+      setInitialSuggestions([]);
 
       sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
 
@@ -400,6 +431,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           devShopDomain || shopDomain,
           {
             customer,
+            shopifyCustomer, // Pass certified identity
             ...options,
           },
           userMsgId,
@@ -526,6 +558,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     sessionId,
     sessionStatus,
     assignedTo, // ✅ Return assignedTo
+    shopifyCustomer, // ✅ Return certified identity
+    initialSuggestions, // ✅ Return initial suggestions
     sendMessage: sendChatMessage,
     clearChat,
     sendFeedback,

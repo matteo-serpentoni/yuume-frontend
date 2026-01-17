@@ -82,11 +82,12 @@ export const updateProfile = async (sessionId, shopDomain, data) => {
   }
 };
 
-export const getSessionStatus = async (sessionId) => {
+export const getSessionStatus = async (sessionId, shopDomain) => {
   try {
     const headers = { 'Content-Type': 'application/json' };
+    const domainQuery = shopDomain ? `?shopDomain=${shopDomain}` : '';
 
-    const response = await fetch(`${API_BASE_URL}/api/chat/session/${sessionId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat/session/${sessionId}${domainQuery}`, {
       headers,
     });
 
