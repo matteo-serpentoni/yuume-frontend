@@ -30,6 +30,10 @@ export const BRIDGE_CONFIG = {
       return origin === normalizedDomain;
     }
 
+    // 3. Bootstrap: Allow Shopify stores to initiate handshake even if shopDomain is not yet set
+    const isShopify = origin.endsWith('.myshopify.com') || origin.endsWith('.shopify.com');
+    if (isShopify) return true;
+
     return false;
   },
 

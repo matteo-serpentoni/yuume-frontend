@@ -103,9 +103,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   const [shopDomain, setShopDomain] = useState(() => {
     if (disabled) return 'preview-shop.myshopify.com';
-    return (
-      devShopDomain || sessionStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) || window.location.hostname
-    );
+    return devShopDomain || sessionStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) || null;
   });
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
