@@ -9,6 +9,10 @@ export const BRIDGE_CONFIG = {
   whitelist: [
     'http://localhost:5173', // Local Dev
     'http://localhost:5001', // Local API
+    'https://yuumechat.com',
+    'https://widget.yuumechat.com',
+    'https://yuume-widget.vercel.app',
+    'https://yuume-dashboard.vercel.app',
     'https://cdn.shopify.com', // Shopify Previews
   ],
 
@@ -16,23 +20,27 @@ export const BRIDGE_CONFIG = {
   prefix: 'YUUME:',
 
   // Helper to validate origin
-  isValidOrigin: (origin, shopDomain = null) => {
+  isValidOrigin: (origin, authorizedDomain = null, messageType = null) => {
     if (import.meta.env.DEV) return true; // Relaxed for local dev
 
     // 1. Check official whitelist (Dashboard, CDN, etc.)
     const isWhitelisted = BRIDGE_CONFIG.whitelist.some((allowed) => origin.startsWith(allowed));
     if (isWhitelisted) return true;
 
-    // 2. Dynamic check for merchant domain
-    if (shopDomain) {
-      // Normalize both for comparison (ensure protocol matches)
-      const normalizedDomain = shopDomain.startsWith('http') ? shopDomain : `https://${shopDomain}`;
+    // 2. Secure Check: If we have a verified domain from the backend, we lock to it
+    if (authorizedDomain) {
+      const normalizedDomain = authorizedDomain.startsWith('http')
+        ? authorizedDomain
+        : `https://${authorizedDomain}`;
       return origin === normalizedDomain;
     }
 
-    // 3. Bootstrap: Allow Shopify stores to initiate handshake even if shopDomain is not yet set
-    const isShopify = origin.endsWith('.myshopify.com') || origin.endsWith('.shopify.com');
-    if (isShopify) return true;
+    // 3. Bootstrap Handshake: If we don't have an authorized domain yet,
+    // we allow messages that follow our protocol (YUUME: prefix).
+    // This allows custom domains to initiate the handshake.
+    if (!authorizedDomain && messageType && BRIDGE_CONFIG.hasPrefix(messageType)) {
+      return true;
+    }
 
     return false;
   },

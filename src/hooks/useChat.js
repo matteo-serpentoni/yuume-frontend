@@ -1,4 +1,5 @@
 import { sendMessage, ChatApiError, getSessionStatus, submitFeedback } from '../services/chatApi';
+import { reportError } from '../services/errorApi';
 import { io } from 'socket.io-client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
@@ -391,6 +392,17 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   const sendChatMessage = useCallback(
     async (text, options = {}) => {
       if (!text.trim() || loading) return;
+
+      const currentShop = devShopDomain || shopDomain;
+      if (!currentShop) {
+        reportError({
+          message: `Missing shopDomain in sendChatMessage. Prop: ${devShopDomain || 'null'}, State: ${shopDomain || 'null'}`,
+          shopDomain: 'missing',
+          userAgent: navigator.userAgent,
+          url: window.location.href,
+        });
+        throw new Error('Configurazione non trovata. Per favore ricarica la pagina. (Codice: 001)');
+      }
 
       let currentSessionId = sessionId;
 

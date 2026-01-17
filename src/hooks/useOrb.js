@@ -72,7 +72,7 @@ export const useOrb = (modeOverride = null) => {
   useEffect(() => {
     const handleMessage = (event) => {
       // ✅ Security: Validate Origin (using authorizedDomain from backend if available)
-      if (!BRIDGE_CONFIG.isValidOrigin(event.origin, authorizedDomain)) return;
+      if (!BRIDGE_CONFIG.isValidOrigin(event.origin, authorizedDomain, event.data?.type)) return;
 
       // Normalize message types with YUUME: prefix
       if (event.data.type === 'YUUME:updateCustomization') {
@@ -100,6 +100,7 @@ export const useOrb = (modeOverride = null) => {
         }
 
         setShopDomain(incomingDomain);
+        sessionStorage.setItem('yuume_dev_shop_domain', incomingDomain);
       }
 
       if (event.data.type === 'YUUME:bgLuminance') {
@@ -120,7 +121,11 @@ export const useOrb = (modeOverride = null) => {
   // Initial Data Fetching (Production & Development Overrides)
   useEffect(() => {
     if (!shopDomain) {
-      setLoading(false);
+      if (mode === 'production') {
+        setLoading(true);
+      } else {
+        setLoading(false);
+      }
       return;
     }
 

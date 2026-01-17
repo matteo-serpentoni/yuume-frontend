@@ -41,7 +41,7 @@ const Chat = ({
   const [activeGallery, setActiveGallery] = useState(null); // { images: [], index: 0 }
 
   // Use custom hook for live chat logic, but ONLY if NOT in preview mode
-  const liveChat = useChat(null, null, { disabled: isPreview });
+  const liveChat = useChat(devShopDomain, null, { disabled: isPreview });
 
   // ✅ Source of truth: use host props if preview, otherwise use live hook results
   const messages = isPreview ? previewMessages || [] : liveChat.messages;

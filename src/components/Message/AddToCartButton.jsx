@@ -41,8 +41,7 @@ const AddToCartButton = memo(
 
         // Ascolta la risposta dal parent
         const handleResponse = (event) => {
-          // ✅ Security: Validate Origin
-          if (!BRIDGE_CONFIG.isValidOrigin(event.origin)) return;
+          if (!BRIDGE_CONFIG.isValidOrigin(event.origin, null, event.data?.type)) return;
 
           if (event.data.type === 'YUUME:addToCartResponse') {
             window.removeEventListener('message', handleResponse);
