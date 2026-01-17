@@ -184,7 +184,7 @@
 
       iframe.contentWindow.postMessage(
         {
-          type: 'YUUME_BG_LUMINANCE',
+          type: 'YUUME:bgLuminance',
           mode: mode,
         },
         WIDGET_ORIGIN,
@@ -241,7 +241,7 @@
     const identity = getShopifyIdentity();
     iframe.contentWindow.postMessage(
       {
-        type: 'YUUME_SHOP_DOMAIN',
+        type: 'YUUME:shopDomain',
         shopDomain: SHOP_DOMAIN,
         shopifyCustomer: identity, // Pass identity on load
       },
@@ -280,10 +280,10 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // SHOP DOMAIN REQUEST
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'REQUEST_SHOP_DOMAIN') {
+    if (event.data.type === 'YUUME:requestShopDomain') {
       iframe.contentWindow.postMessage(
         {
-          type: 'YUUME_SHOP_DOMAIN',
+          type: 'YUUME:shopDomain',
           shopDomain: SHOP_DOMAIN,
         },
         WIDGET_ORIGIN,
@@ -307,21 +307,21 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // CHAT OPENED (utente apre chat)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME_CHAT_OPENED') {
+    if (event.data.type === 'YUUME:chatOpened') {
       notifyChatStart();
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // CHAT CLOSED (utente chiude chat)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME_CHAT_CLOSED') {
+    if (event.data.type === 'YUUME:chatClosed') {
       notifyChatEnd();
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // ADD TO CART
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME_ADD_TO_CART') {
+    if (event.data.type === 'YUUME:addToCart') {
       let addDataCache = null;
       let cartCache = null;
 
@@ -420,7 +420,7 @@
         .then(() => {
           iframe.contentWindow.postMessage(
             {
-              type: 'YUUME_ADD_TO_CART_RESPONSE',
+              type: 'YUUME:addToCartResponse',
               success: true,
               data: { addData: addDataCache, cart: cartCache },
             },
@@ -430,7 +430,7 @@
         .catch((error) => {
           iframe.contentWindow.postMessage(
             {
-              type: 'YUUME_ADD_TO_CART_RESPONSE',
+              type: 'YUUME:addToCartResponse',
               success: false,
               error: error.message,
             },
@@ -442,7 +442,7 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // RESIZE
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'resize') {
+    if (event.data.type === 'YUUME:resize') {
       if (event.data.enlarged) {
         // Robust mobile detection
         const isMobile = window.matchMedia

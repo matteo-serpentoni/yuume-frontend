@@ -75,10 +75,7 @@ export const useOrb = (modeOverride = null) => {
       if (!BRIDGE_CONFIG.isValidOrigin(event.origin, authorizedDomain)) return;
 
       // Normalize message types with YUUME: prefix
-      if (
-        event.data.type === 'YUUME:updateCustomization' ||
-        event.data.type === 'YUUME_UPDATE_CUSTOMIZATION'
-      ) {
+      if (event.data.type === 'YUUME:updateCustomization') {
         const { orbTheme, chatColors, mobileMode } = event.data.data;
 
         if (mobileMode !== undefined) {
@@ -91,7 +88,7 @@ export const useOrb = (modeOverride = null) => {
         }));
       }
 
-      if (event.data.type === 'YUUME:shopDomain' || event.data.type === 'YUUME_SHOP_DOMAIN') {
+      if (event.data.type === 'YUUME:shopDomain') {
         const isDev = mode === 'development';
         const incomingDomain = event.data.shopDomain;
 
@@ -105,7 +102,7 @@ export const useOrb = (modeOverride = null) => {
         setShopDomain(incomingDomain);
       }
 
-      if (event.data.type === 'YUUME:bgLuminance' || event.data.type === 'YUUME_BG_LUMINANCE') {
+      if (event.data.type === 'YUUME:bgLuminance') {
         setTextColorMode(event.data.mode === 'light' ? 'light' : 'dark');
       }
     };
