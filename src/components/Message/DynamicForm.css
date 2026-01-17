@@ -96,7 +96,7 @@
 .yuume-form-group-notes label {
   font-size: 9px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.65); /* Increased from 0.4 for better visibility */
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-left: 2px;
@@ -113,6 +113,11 @@
   outline: none;
   transition: all 0.2s ease;
   font-family: inherit;
+}
+
+.yuume-form-group input::placeholder,
+.yuume-dynamic-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.45); /* Increased visibility for placeholders */
 }
 
 .yuume-dynamic-textarea {

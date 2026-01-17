@@ -10,6 +10,23 @@
   pointer-events: auto;
 }
 
+.yuume-drawer-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1001;
+  overflow: visible; /* Default: slide from screen edge */
+}
+
+/* DESKTOP CLIPPING: Drawer emerges from the input line (bottom 54px) */
+.orb-container:not(.mobile-device) .yuume-drawer-container {
+  bottom: 54px; /* Matches the "bottom" of the card we want */
+  top: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden; /* This clips the entering/exiting drawer */
+}
+
 .yuume-drawer {
   position: absolute;
   bottom: 0;
@@ -29,6 +46,20 @@
   border-bottom: none;
   overflow: hidden;
   pointer-events: auto;
+}
+
+/* DESKTOP REFINEMENT: Floating Rectangular Card */
+.orb-container:not(.mobile-device) .yuume-drawer {
+  width: calc(100% - (2 * var(--orb-h-padding-messages, 20px)));
+  max-width: 610px; /* Safety cap */
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  bottom: 0; /* Now anchored to the bottom of the CLIPPING CONTAINER (which is at 54px) */
+  border-radius: 24px 24px 0 0; /* Squared bottom corners as requested */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-height: 80%; /* Ensure it doesn't cover top part */
 }
 
 .yuume-drawer-header {

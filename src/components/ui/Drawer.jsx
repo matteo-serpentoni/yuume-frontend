@@ -47,26 +47,29 @@ const Drawer = ({
             onClick={onClose}
           />
 
-          {/* Drawer Shell */}
-          <motion.div
-            className="yuume-drawer"
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          >
-            <div className={`yuume-drawer-header ${title ? 'has-title' : ''}`}>
-              <div className="yuume-drawer-handle" onClick={onClose} />
-              {title && <h3 className="yuume-drawer-title">{title}</h3>}
-              <button className="yuume-drawer-close" onClick={onClose}>
-                ✕
-              </button>
-            </div>
+          {/* Drawer Clipping Container */}
+          <div className="yuume-drawer-container">
+            {/* Drawer Shell */}
+            <motion.div
+              className="yuume-drawer"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            >
+              <div className={`yuume-drawer-header ${title ? 'has-title' : ''}`}>
+                <div className="yuume-drawer-handle" onClick={onClose} />
+                {title && <h3 className="yuume-drawer-title">{title}</h3>}
+                <button className="yuume-drawer-close" onClick={onClose}>
+                  ✕
+                </button>
+              </div>
 
-            <div className="yuume-drawer-content">{children}</div>
+              <div className="yuume-drawer-content">{children}</div>
 
-            {footer && <div className="yuume-drawer-footer">{footer}</div>}
-          </motion.div>
+              {footer && <div className="yuume-drawer-footer">{footer}</div>}
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

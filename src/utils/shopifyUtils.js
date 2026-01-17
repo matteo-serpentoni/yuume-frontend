@@ -36,6 +36,10 @@ export const normalizeStorefrontProduct = (product) => {
     isAvailable: initialAvailable !== undefined ? initialAvailable : fallbackAvailable,
     // Compare at price for discounts
     compareAtPrice: product.compareAtPrice || null,
+    discountPercentage:
+      product.compareAtPrice && parseFloat(product.compareAtPrice) > parseFloat(product.price)
+        ? Math.round((1 - parseFloat(product.price) / parseFloat(product.compareAtPrice)) * 100)
+        : 0,
     // Proactive Discount Info
     discountCode: product.discountCode || null,
     isAutomatic: product.isAutomatic || false,
