@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './MessageInput.css';
 
 const MessageInput = ({
@@ -19,6 +19,41 @@ const MessageInput = ({
 
   const isDisconnected = connectionStatus !== 'online';
   const disabled = propDisabled || loading || isDisconnected;
+
+  // ✅ Auto-focus when loading/disabled state changes (e.g. AI finishes)
+  useEffect(() => {
+    if (!disabled && !previewMode) {
+      inputRef.current?.focus();
+    }
+  }, [disabled, previewMode]);
+
+  // ✅ Global Key Capture: focus input if user types while widget is active
+  useEffect(() => {
+    if (previewMode || isDisconnected) return;
+
+    const handleGlobalKeyDown = (e) => {
+      // Ignore if user is already in an input/textarea
+      if (
+        document.activeElement.tagName === 'INPUT' ||
+        document.activeElement.tagName === 'TEXTAREA' ||
+        document.activeElement.isContentEditable
+      ) {
+        return;
+      }
+
+      // Ignore meta keys (Cmd, Ctrl, Alt)
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      // Ignore functional keys (F1, Escape, etc.)
+      if (e.key.length > 1 && e.key !== 'Backspace' && e.key !== 'Delete') return;
+
+      // Focus and the browser will naturally pipe the character if focus happens immediately
+      inputRef.current?.focus();
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [previewMode, isDisconnected]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -60,6 +95,7 @@ const MessageInput = ({
           onFocus={() => !previewMode && setIsFocused(true)}
           onBlur={() => !previewMode && setIsFocused(false)}
           disabled={disabled}
+          autoFocus={!previewMode}
           maxLength={2000}
         />
         {shouldShowButton && (
