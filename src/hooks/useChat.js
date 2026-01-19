@@ -97,7 +97,15 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   }, [disabled]);
 
   const [assignedTo, setAssignedTo] = useState(null);
-  const [shopifyCustomer, setShopifyCustomer] = useState(null); // Certified identity
+  const [shopifyCustomer, setShopifyCustomer] = useState(() => {
+    if (disabled) return null;
+    try {
+      const saved = sessionStorage.getItem('yuume_shopify_customer');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  }); // Certified identity
   const [initialSuggestions, setInitialSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const socketRef = useRef(null);
@@ -224,11 +232,16 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     if (disabled) return;
 
     const handleMessage = (event) => {
-      if (event.data?.type === 'YUUME:identity') {
-        const { customer } = event.data;
+      if (event.data?.type === 'YUUME:identity' || event.data?.type === 'YUUME:shopDomain') {
+        const customer = event.data.customer || event.data.shopifyCustomer;
         if (customer) {
-          console.log('✅ Shopify Identity Detected:', customer.email);
+          console.log('✅ Shopify Identity Detected:', customer.email || customer.id);
           setShopifyCustomer(customer);
+          try {
+            sessionStorage.setItem('yuume_shopify_customer', JSON.stringify(customer));
+          } catch (e) {
+            // Storage full or restricted
+          }
         }
       }
     };
@@ -513,6 +526,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       addUserMessage,
       addAssistantMessage,
       customer,
+      shopifyCustomer, // ✅ Fix stale closure: add dependency
       sessionStatus,
       setSessionId,
       setSessionStatus,

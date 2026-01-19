@@ -71,9 +71,17 @@
       // 2. Extended Shopify object (some themes include this)
       const customer = window.Shopify?.customer;
 
-      if (customerId || customer?.id) {
+      // 3. Fallback: Shopify __st object
+      const stCustomerId = window.__st?.cid;
+
+      // 4. Fallback: Trekkie library (often present in Shopify stores)
+      const trekkieId = window.ShopifyAnalytics?.lib?.trekkie?.customer?.id;
+
+      const finalId = customerId || customer?.id || stCustomerId || trekkieId;
+
+      if (finalId) {
         return {
-          id: customerId || customer?.id,
+          id: finalId,
           email: customer?.email || null, // Might be null, but ID proves "Logged In"
           isVerified: true,
         };
