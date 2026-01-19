@@ -45,7 +45,6 @@ export const useOrb = (modeOverride = null) => {
   });
   const [isMobile, setIsMobile] = useState(false);
   const [isPreviewMobile, setIsPreviewMobile] = useState(false);
-  const [textColorMode, setTextColorMode] = useState('dark'); // default dark bg -> white text
 
   // Detect mode based on URL or environment
   const mode =
@@ -102,10 +101,6 @@ export const useOrb = (modeOverride = null) => {
         setShopDomain(incomingDomain);
         sessionStorage.setItem('yuume_dev_shop_domain', incomingDomain);
       }
-
-      if (event.data.type === 'YUUME:bgLuminance') {
-        setTextColorMode(event.data.mode === 'light' ? 'light' : 'dark');
-      }
     };
 
     window.addEventListener('message', handleMessage);
@@ -159,7 +154,6 @@ export const useOrb = (modeOverride = null) => {
     mode,
     isMobile,
     isPreviewMobile,
-    textColorMode,
     shopDomain,
     authorizedDomain,
     setConfig,

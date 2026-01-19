@@ -63,19 +63,6 @@ function App() {
     return () => window.removeEventListener('yuume_dev_update', handleDevUpdate);
   }, []);
 
-  // Sync dev theme with Orb luminance detection
-  useEffect(() => {
-    if (import.meta.env.MODE === 'development' && devPreview.show) {
-      window.postMessage(
-        {
-          type: 'YUUME:bgLuminance',
-          mode: devPreview.theme,
-        },
-        '*',
-      );
-    }
-  }, [devPreview.theme, devPreview.show]);
-
   // Conditionally load MockStorefront only in dev
   const MockStorefront = React.lazy(() =>
     import.meta.env.MODE === 'development'

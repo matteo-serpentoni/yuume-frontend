@@ -26,7 +26,6 @@ const Orb = memo(
       mode,
       isMobile,
       isPreviewMobile,
-      textColorMode,
       shopDomain,
       setConfig,
       setShopDomain,
@@ -454,8 +453,7 @@ const Orb = memo(
               key={currentMessageIndex} // Force re-render to restart animations
               className="minimized-text"
               style={{
-                '--minimized-text-color':
-                  textColorMode === 'light' ? chatColors.userMessage : 'white',
+                '--minimized-text-color': 'white',
               }}
             >
               {messages[currentMessageIndex].split('\n').map((line, lineIndex) => (
