@@ -11,7 +11,7 @@ import PromoCards from '../Message/PromoCards';
 import ErrorBoundary from '../UI/ErrorBoundary';
 import MessageFallback from './MessageFallback';
 import MessageBubble from './MessageBubble';
-import TypingIndicator from './TypingIndicator';
+import HumanThinking from './HumanThinking';
 
 /**
  * MessageList
@@ -257,7 +257,9 @@ const MessageList = ({
         </ErrorBoundary>
       ))}
 
-      {loading && !isFormLoading && <TypingIndicator aiMessageColor={chatColors.aiMessage} />}
+      <AnimatePresence>
+        {loading && !isFormLoading && <HumanThinking chatColors={chatColors} />}
+      </AnimatePresence>
     </div>
   );
 };

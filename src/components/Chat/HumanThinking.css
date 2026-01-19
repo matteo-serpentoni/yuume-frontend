@@ -1,0 +1,59 @@
+/* HumanThinking.css */
+
+.human-thinking-wrapper {
+  margin: 8px 0;
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: none;
+  /* Ensure it doesn't block interactions while animating */
+}
+
+.thinking-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px;
+}
+
+.thinking-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.thinking-dots-mini {
+  display: flex;
+  gap: 3px;
+  opacity: 0.8;
+}
+
+.thinking-dots-mini .dot {
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  animation: thinking-dot-pulse 1.4s infinite ease-in-out both;
+}
+
+.thinking-dots-mini .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinking-dots-mini .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes thinking-dot-pulse {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.3;
+  }
+  40% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
