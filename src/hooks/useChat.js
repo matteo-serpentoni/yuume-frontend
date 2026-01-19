@@ -51,12 +51,26 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         return JSON.parse(saved);
       }
 
-      // Default welcome message
+      // 🔍 Personalized Welcome: Check if we have a saved name from Yuume Profile
+      let welcomeText = 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?';
+      try {
+        const savedProfile = sessionStorage.getItem('yuume_profile');
+        if (savedProfile) {
+          const profile = JSON.parse(savedProfile);
+          if (profile.name) {
+            const firstName = profile.name.trim().split(' ')[0];
+            welcomeText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
+          }
+        }
+      } catch (e) {
+        // Fallback to default if storage fails
+      }
+
       return [
         {
           id: Date.now(),
           sender: 'assistant',
-          text: 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?',
+          text: welcomeText,
           timestamp: new Date().toISOString(),
           disableFeedback: true, // Disable feedback for welcome message
         },
@@ -272,6 +286,23 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           if (statusData.status) setSessionStatus(statusData.status);
           if (statusData.assignedTo) setAssignedTo(statusData.assignedTo);
           if (statusData.initialSuggestions) setInitialSuggestions(statusData.initialSuggestions);
+
+          // ✅ Handle personalized welcome if customer info is found
+          if (statusData.customer) {
+            sessionStorage.setItem('yuume_profile', JSON.stringify(statusData.customer));
+
+            setMessages((prev) => {
+              // Only personalize if we just have the default welcome message
+              if (prev.length === 1 && prev[0].disableFeedback && statusData.customer.name) {
+                const firstName = statusData.customer.name.trim().split(' ')[0];
+                const personalizedText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
+                if (prev[0].text !== personalizedText) {
+                  return [{ ...prev[0], text: personalizedText }];
+                }
+              }
+              return prev;
+            });
+          }
 
           // Sync message history if available
           if (statusData.messages && statusData.messages.length > 0) {

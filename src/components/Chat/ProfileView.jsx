@@ -60,6 +60,11 @@ const ProfileView = ({
         name,
         email,
       });
+
+      // ✅ Sync to sessionStorage for personalized welcome in next sessions
+      sessionStorage.setItem('yuume_profile', JSON.stringify({ name, email, isIdentified: true }));
+
+      setSaving(true); // Re-setting to trigger loading state if needed elsewhere
       setSaving(false);
       setIsIdentified(true);
       setMessage({ type: 'success', text: 'Profilo salvato!' });
@@ -80,6 +85,7 @@ const ProfileView = ({
     setSaving(true);
     try {
       await updateProfile(sessionId, shopDomain, { reset: true });
+      sessionStorage.removeItem('yuume_profile');
       setName('');
       setEmail('');
       setIsIdentified(false);
