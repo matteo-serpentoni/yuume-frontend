@@ -12,24 +12,32 @@ function App() {
   });
 
   useEffect(() => {
-    // Determine required dimensions based on enlarged state or proactive contents
-    // Fallback logic for when specialized dimensions are needed
     const isEnlarged = typeof enlarged === 'object' ? enlarged.isEnlarged : enlarged;
 
-    const resizeData = {
-      type: 'YUUME:resize',
-      enlarged: isEnlarged,
-      width: isEnlarged ? 800 : enlarged?.proactive ? 380 : 350,
-      height: isEnlarged ? 800 : enlarged?.proactive ? 450 : 350,
+    const performResize = () => {
+      const resizeData = {
+        type: 'YUUME:resize',
+        enlarged: isEnlarged,
+        width: isEnlarged ? 800 : enlarged?.proactive ? 380 : 350,
+        height: isEnlarged ? 800 : enlarged?.proactive ? 450 : 350,
+      };
+
+      if (typeof enlarged === 'object') {
+        if (enlarged.width) resizeData.width = enlarged.width;
+        if (enlarged.height) resizeData.height = enlarged.height;
+      }
+
+      window.parent?.postMessage(resizeData, '*');
     };
 
-    // If 'enlarged' is an object (passed from Orb), it can override defaults
-    if (typeof enlarged === 'object') {
-      if (enlarged.width) resizeData.width = enlarged.width;
-      if (enlarged.height) resizeData.height = enlarged.height;
+    if (isEnlarged) {
+      // Open immediately to avoid clipping during expansion
+      performResize();
+    } else {
+      // Delay closing to match CSS transition (600ms)
+      const timer = setTimeout(performResize, 600);
+      return () => clearTimeout(timer);
     }
-
-    window.parent?.postMessage(resizeData, '*');
   }, [enlarged]);
 
   useEffect(() => {
