@@ -18,8 +18,8 @@ function App() {
       const resizeData = {
         type: 'YUUME:resize',
         enlarged: isEnlarged,
-        width: isEnlarged ? 800 : enlarged?.proactive ? 380 : 350,
-        height: isEnlarged ? 800 : enlarged?.proactive ? 450 : 350,
+        width: isEnlarged ? 1000 : enlarged?.proactive ? 380 : 350,
+        height: isEnlarged ? 1000 : enlarged?.proactive ? 450 : 350,
       };
 
       if (typeof enlarged === 'object') {
