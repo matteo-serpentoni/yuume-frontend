@@ -232,16 +232,24 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     if (disabled) return;
 
     const handleMessage = (event) => {
+      // Listen for both YUUME:identity and YUUME:shopDomain
       if (event.data?.type === 'YUUME:identity' || event.data?.type === 'YUUME:shopDomain') {
         const customer = event.data.customer || event.data.shopifyCustomer;
+
         if (customer) {
           console.log('✅ Shopify Identity Detected:', customer.email || customer.id);
           setShopifyCustomer(customer);
+          // Persist identity to sessionStorage
           try {
             sessionStorage.setItem('yuume_shopify_customer', JSON.stringify(customer));
           } catch (e) {
             // Storage full or restricted
           }
+        } else {
+          // LOGOUT SYNC: Clear identity if parent sends null/undefined
+          console.log('🔄 Shopify Logout Detected: Clearing identity');
+          setShopifyCustomer(null);
+          sessionStorage.removeItem('yuume_shopify_customer');
         }
       }
     };
