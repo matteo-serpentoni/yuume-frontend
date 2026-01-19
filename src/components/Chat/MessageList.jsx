@@ -251,14 +251,40 @@ const MessageList = ({
       aria-live="polite"
       aria-atomic="false"
     >
-      {chatBlocks.map((msg) => (
-        <ErrorBoundary key={msg.id} fallback={<MessageFallback />}>
-          <div key={msg.id}>{renderMessage(msg)}</div>
-        </ErrorBoundary>
-      ))}
+      <AnimatePresence mode="popLayout" initial={false}>
+        {chatBlocks.map((msg) => (
+          <motion.div
+            key={msg.id}
+            layout="position"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{
+              layout: { type: 'spring', damping: 25, stiffness: 200 },
+              opacity: { duration: 0.2 },
+              y: { type: 'spring', damping: 20, stiffness: 150 },
+            }}
+          >
+            <ErrorBoundary fallback={<MessageFallback />}>{renderMessage(msg)}</ErrorBoundary>
+          </motion.div>
+        ))}
 
-      <AnimatePresence>
-        {loading && !isFormLoading && <HumanThinking chatColors={chatColors} />}
+        {loading && !isFormLoading && (
+          <motion.div
+            key="thinking-indicator"
+            layout="position"
+            initial={{ opacity: 0, x: -60, scale: 0.85 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -60, scale: 0.95 }}
+            transition={{
+              layout: { type: 'spring', damping: 25, stiffness: 200 },
+              x: { type: 'spring', damping: 22, stiffness: 120 },
+              opacity: { duration: 0.25 },
+            }}
+          >
+            <HumanThinking chatColors={chatColors} />
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );

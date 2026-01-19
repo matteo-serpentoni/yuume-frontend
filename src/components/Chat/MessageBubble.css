@@ -3,8 +3,6 @@
   width: 100%;
   margin-bottom: 12px;
   position: relative;
-  /* Smoother organic growth curve */
-  animation: bubble-pop-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .message-bubble-wrapper.user {

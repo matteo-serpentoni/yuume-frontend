@@ -21,18 +21,7 @@ const HumanThinking = ({ chatColors }) => {
   const phrase = useMemo(() => PHRASES[Math.floor(Math.random() * PHRASES.length)], []);
 
   return (
-    <motion.div
-      className="human-thinking-wrapper"
-      initial={{ x: -60, opacity: 0, scale: 0.85 }}
-      animate={{ x: 0, opacity: 1, scale: 1 }}
-      exit={{ x: -60, opacity: 0, scale: 0.95 }}
-      transition={{
-        type: 'spring',
-        damping: 22,
-        stiffness: 120,
-        opacity: { duration: 0.25 },
-      }}
-    >
+    <div className="human-thinking-container">
       <MessageBubble sender="assistant" type="thinking" chatColors={chatColors}>
         <div className="thinking-content">
           <span className="thinking-text">{phrase}</span>
@@ -43,7 +32,7 @@ const HumanThinking = ({ chatColors }) => {
           </div>
         </div>
       </MessageBubble>
-    </motion.div>
+    </div>
   );
 };
 
