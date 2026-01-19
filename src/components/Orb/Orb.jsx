@@ -192,8 +192,8 @@ const Orb = memo(
       float c = cos(angle);
       uv = vec2(c * uv.x - s * uv.y, s * uv.x + c * uv.y);
       
-      uv.x += hover * hoverIntensity * 0.1 * sin(uv.y * 10.0 + iTime);
-      uv.y += hover * hoverIntensity * 0.1 * sin(uv.x * 10.0 + iTime);
+      // uv.x += hover * hoverIntensity * 0.1 * sin(uv.y * 10.0 + iTime);
+      // uv.y += hover * hoverIntensity * 0.1 * sin(uv.x * 10.0 + iTime);
       
       return draw(uv);
     }
