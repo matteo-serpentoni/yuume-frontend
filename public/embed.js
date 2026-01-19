@@ -78,11 +78,13 @@
       const trekkieId = window.ShopifyAnalytics?.lib?.trekkie?.customer?.id;
 
       const finalId = customerId || customer?.id || stCustomerId || trekkieId;
+      const finalEmail =
+        customer?.email || window.ShopifyAnalytics?.lib?.trekkie?.customer?.email || null;
 
       if (finalId) {
         return {
           id: finalId,
-          email: customer?.email || null, // Might be null, but ID proves "Logged In"
+          email: finalEmail ? finalEmail.toLowerCase() : null, // Normalize email
           isVerified: true,
         };
       }
