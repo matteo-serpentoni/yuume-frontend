@@ -12,7 +12,24 @@ function App() {
   });
 
   useEffect(() => {
-    window.parent?.postMessage({ type: 'YUUME:resize', enlarged }, '*');
+    // Determine required dimensions based on enlarged state or proactive contents
+    // Fallback logic for when specialized dimensions are needed
+    const isEnlarged = typeof enlarged === 'object' ? enlarged.isEnlarged : enlarged;
+
+    const resizeData = {
+      type: 'YUUME:resize',
+      enlarged: isEnlarged,
+      width: isEnlarged ? 800 : enlarged?.proactive ? 380 : 350,
+      height: isEnlarged ? 800 : enlarged?.proactive ? 450 : 350,
+    };
+
+    // If 'enlarged' is an object (passed from Orb), it can override defaults
+    if (typeof enlarged === 'object') {
+      if (enlarged.width) resizeData.width = enlarged.width;
+      if (enlarged.height) resizeData.height = enlarged.height;
+    }
+
+    window.parent?.postMessage(resizeData, '*');
   }, [enlarged]);
 
   useEffect(() => {

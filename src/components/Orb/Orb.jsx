@@ -355,7 +355,6 @@ const Orb = memo(
       // ✅ Aggiunte dipendenze per colori dinamici
     }, [hue, hoverIntensity, rotateOnHover, forceHoverState]);
 
-    // ✅ FUNZIONALITÀ: Analytics events
     useEffect(() => {
       if (mode === 'preview') return; // Skip in preview mode
 
@@ -366,11 +365,9 @@ const Orb = memo(
       }
     }, [enlarged, mode]);
 
-    // ✅ FUNZIONALITÀ: Gestione click per espandere
     const handleExpand = useCallback(() => {
       if (isMinimized && mode !== 'preview') {
         setEnlarged(true);
-        window.parent?.postMessage({ type: 'YUUME:resize', enlarged: true }, '*');
       }
     }, [isMinimized, mode, setEnlarged]);
 
@@ -442,10 +439,6 @@ const Orb = memo(
                   onTyping={setIsTyping}
                   onMinimize={() => {
                     setEnlarged(false);
-                    // Wait for animation (600ms) before resizing iframe
-                    setTimeout(() => {
-                      window.parent?.postMessage({ type: 'YUUME:resize', enlarged: false }, '*');
-                    }, 600);
                   }}
                 />
               )}

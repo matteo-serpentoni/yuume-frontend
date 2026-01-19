@@ -443,7 +443,9 @@
     // RESIZE
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === 'YUUME:resize') {
-      if (event.data.enlarged) {
+      const { enlarged, width, height } = event.data;
+
+      if (enlarged) {
         // Robust mobile detection
         const isMobile = window.matchMedia
           ? window.matchMedia('(max-width: 768px)').matches
@@ -457,16 +459,19 @@
           iframe.style.top = '0px';
           iframe.style.left = '0px';
         } else {
-          iframe.style.width = '680px';
-          iframe.style.height = '680px';
+          // Use provided dimensions or fallback to default enlarged size
+          iframe.style.width = (width || 680) + 'px';
+          iframe.style.height = (height || 680) + 'px';
           iframe.style.bottom = '0px';
           iframe.style.right = '0px';
           iframe.style.top = 'auto';
           iframe.style.left = 'auto';
         }
       } else {
-        iframe.style.width = '250px';
-        iframe.style.height = '250px';
+        // Minimized state - increased area for glow and proactive cards
+        // Increased from 250px to 350px to allow room for 'CIAO' cards and glow
+        iframe.style.width = (width || 350) + 'px';
+        iframe.style.height = (height || 350) + 'px';
         iframe.style.bottom = '0px';
         iframe.style.right = '0px';
         iframe.style.top = 'auto';

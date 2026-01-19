@@ -7,6 +7,15 @@ export default defineConfig(({ mode }) => ({
   base: '/widget/',
   build: {
     minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-framer': ['framer-motion'],
+          'vendor-ogl': ['ogl'],
+          'vendor-react-core': ['react', 'react-dom', 'react-router-dom'],
+        },
+      },
+    },
   },
   esbuild: {
     // Only drop console in production builds
