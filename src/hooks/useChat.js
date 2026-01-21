@@ -1,5 +1,6 @@
 import { sendMessage, ChatApiError, getSessionStatus, submitFeedback } from '../services/chatApi';
 import { reportError } from '../services/errorApi';
+import { predictIntent } from '../utils/messageHelpers';
 import { io } from 'socket.io-client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
@@ -122,6 +123,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   }); // Certified identity
   const [initialSuggestions, setInitialSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
+  const [thinkingIntent, setThinkingIntent] = useState(null);
   const socketRef = useRef(null);
 
   const [shopDomain, setShopDomain] = useState(() => {
@@ -428,7 +431,14 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       // If message is from assistant, stop loading
       if (isAssistant) {
         setLoading(false);
+        setIsThinking(false);
+        setThinkingIntent(null);
       }
+    });
+
+    socket.on('thinking:start', (data) => {
+      setIsThinking(true);
+      setThinkingIntent(data.intent);
     });
 
     socket.on('session:updated', (data) => {
@@ -483,6 +493,14 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
 
       setLoading(true);
+
+      // 🧠 Local Prediction: Show thinking indicator immediately if it matches a pattern
+      const predicted = predictIntent(text);
+      if (predicted) {
+        setIsThinking(true);
+        setThinkingIntent(predicted);
+      }
+
       const userMsgId = Date.now(); // Generate ID here
       const userMsg = addUserMessage(text, userMsgId, options.hidden);
 
@@ -626,5 +644,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     sendMessage: sendChatMessage,
     clearChat,
     sendFeedback,
+    isThinking,
+    thinkingIntent,
   };
 };

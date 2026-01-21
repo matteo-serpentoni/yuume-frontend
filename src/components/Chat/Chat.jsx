@@ -53,6 +53,9 @@ const Chat = ({
   const assignedTo = isPreview ? previewAssignedTo || null : liveChat.assignedTo;
   const initialSuggestions = isPreview ? [] : liveChat.initialSuggestions;
 
+  const isThinking = isPreview ? false : liveChat.isThinking;
+  const thinkingIntent = isPreview ? null : liveChat.thinkingIntent;
+
   const sendMessage = isPreview ? () => {} : liveChat.sendMessage;
   const sendFeedback = isPreview ? () => {} : liveChat.sendFeedback;
 
@@ -184,6 +187,8 @@ const Chat = ({
               chatBlocks={chatBlocks}
               chatColors={chatColors}
               loading={loading}
+              isThinking={isThinking}
+              thinkingIntent={thinkingIntent}
               shopDomain={shopDomain}
               activeProduct={activeProduct}
               setActiveProduct={setActiveProduct}

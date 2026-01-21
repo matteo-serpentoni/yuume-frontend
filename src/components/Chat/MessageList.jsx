@@ -21,6 +21,8 @@ const MessageList = ({
   chatBlocks,
   chatColors,
   loading,
+  isThinking,
+  thinkingIntent,
   shopDomain,
   activeProduct,
   setActiveProduct,
@@ -49,12 +51,12 @@ const MessageList = ({
     const lastBlock = chatBlocks[chatBlocks.length - 1];
     const lastId = lastBlock?.id;
 
-    if (loading || lastId !== lastMessageIdRef.current) {
+    if (loading || isThinking || lastId !== lastMessageIdRef.current) {
       // Use "smooth" only if it's a new message, "auto" for first load to avoid flicker
       scrollToBottom(lastMessageIdRef.current ? 'smooth' : 'auto');
       lastMessageIdRef.current = lastId;
     }
-  }, [chatBlocks, loading]);
+  }, [chatBlocks, loading, isThinking]);
 
   const renderMessageContent = (msg) => {
     // 1. Category Cards
@@ -269,7 +271,7 @@ const MessageList = ({
           </motion.div>
         ))}
 
-        {loading && !isFormLoading && (
+        {isThinking && !isFormLoading && (
           <motion.div
             key="thinking-indicator"
             layout="position"
@@ -282,7 +284,7 @@ const MessageList = ({
               opacity: { duration: 0.25 },
             }}
           >
-            <HumanThinking chatColors={chatColors} />
+            <HumanThinking chatColors={chatColors} intent={thinkingIntent} />
           </motion.div>
         )}
       </AnimatePresence>
