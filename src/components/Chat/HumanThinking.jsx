@@ -4,6 +4,13 @@ import MessageBubble from './MessageBubble';
 import './HumanThinking.css';
 
 const INTENT_PHRASES = {
+  PRODUCT_ADVICE: [
+    'Fammi capire cosa cerchi...',
+    'Ti aiuto a scegliere...',
+    'Vediamo qual è il prodotto perfetto per te...',
+    'Un attimo che ti faccio qualche domanda...',
+    'Cerco di capire le tue esigenze...',
+  ],
   PRODUCT_DETAIL: [
     'Recupero le info sul prodotto...',
     'Cerco i dettagli per te...',

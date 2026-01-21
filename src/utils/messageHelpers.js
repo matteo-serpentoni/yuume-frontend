@@ -101,6 +101,8 @@ export const predictIntent = (text) => {
   const input = text.toLowerCase().trim();
 
   const PATTERNS = {
+    PRODUCT_ADVICE:
+      /\b(consigli|sugg|miglior|quale|raccomand|cosa mi consig|cosa compro|devo comprar|meglio)\b/i,
     PRODUCT_DETAIL:
       /\b(parlami|dettagli|caratteristiche|specifiche|dimmi di più|info su|descriv|racconta|spieg)\b/i,
     PRODUCT_SEARCH:
