@@ -4,6 +4,13 @@ import MessageBubble from './MessageBubble';
 import './HumanThinking.css';
 
 const INTENT_PHRASES = {
+  PRODUCT_DETAIL: [
+    'Recupero le info sul prodotto...',
+    'Cerco i dettagli per te...',
+    'Controllo le caratteristiche...',
+    'Fammi vedere cosa so su questo...',
+    'Un attimo che trovo le specifiche...',
+  ],
   PRODUCT_SEARCH: [
     'Cerco nel catalogo...',
     'Sbircio in magazzino...',
