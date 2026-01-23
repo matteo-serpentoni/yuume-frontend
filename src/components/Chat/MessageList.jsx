@@ -55,7 +55,8 @@ const MessageList = ({
       // These should behave like standard messages and stay at the bottom
       const isInteraction =
         lastBlock?.type?.toLowerCase() === 'form_request' ||
-        lastBlock?.detectedIntent === 'REFUND_ACTION';
+        lastBlock?.detectedIntent === 'REFUND_ACTION' ||
+        lastBlock?.detectedIntent === 'ORDER_TRACK_ACTION';
 
       // Threshold: if message is taller than 70% of the viewport AND not an interaction
       if (!isInteraction && messageHeight > containerHeight * 0.7) {
