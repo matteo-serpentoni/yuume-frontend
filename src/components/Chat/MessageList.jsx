@@ -33,16 +33,41 @@ const MessageList = ({
   onImageClick,
 }) => {
   const messagesAreaRef = useRef(null);
+  const lastMessageRef = useRef(null);
   const lastMessageIdRef = useRef(null);
 
   const scrollToBottom = (behavior = 'auto') => {
     if (messagesAreaRef.current) {
-      // Use scrollTo with scrollTop for maximum control
-      // This avoids triggering browser-level "scroll-into-view" jumps
       messagesAreaRef.current.scrollTo({
         top: messagesAreaRef.current.scrollHeight,
         behavior: behavior,
       });
+    }
+  };
+
+  const scrollToNewMessage = (behavior = 'smooth') => {
+    if (lastMessageRef.current && messagesAreaRef.current) {
+      const containerHeight = messagesAreaRef.current.clientHeight;
+      const messageHeight = lastMessageRef.current.offsetHeight;
+      const lastBlock = chatBlocks[chatBlocks.length - 1];
+
+      // Never scroll to top for forms or specific action-oriented intents
+      // These should behave like standard messages and stay at the bottom
+      const isInteraction =
+        lastBlock?.type?.toLowerCase() === 'form_request' ||
+        lastBlock?.detectedIntent === 'REFUND_ACTION';
+
+      // Threshold: if message is taller than 70% of the viewport AND not an interaction
+      if (!isInteraction && messageHeight > containerHeight * 0.7) {
+        lastMessageRef.current.scrollIntoView({
+          behavior,
+          block: 'start',
+        });
+      } else {
+        scrollToBottom(behavior);
+      }
+    } else {
+      scrollToBottom(behavior);
     }
   };
 
@@ -51,10 +76,21 @@ const MessageList = ({
     const lastBlock = chatBlocks[chatBlocks.length - 1];
     const lastId = lastBlock?.id;
 
-    if (loading || isThinking || lastId !== lastMessageIdRef.current) {
-      // Use "smooth" only if it's a new message, "auto" for first load to avoid flicker
-      scrollToBottom(lastMessageIdRef.current ? 'smooth' : 'auto');
+    // Detect if we just stopped thinking (response arrived)
+    if (lastId !== lastMessageIdRef.current) {
+      if (!lastMessageIdRef.current) {
+        scrollToBottom('auto');
+      } else {
+        // Wait for DOM and animations to stabilize
+        const timer = setTimeout(() => {
+          scrollToNewMessage('smooth');
+        }, 150);
+        return () => clearTimeout(timer);
+      }
       lastMessageIdRef.current = lastId;
+    } else if (isThinking || loading) {
+      // While thinking/loading, keep it pinned to bottom
+      scrollToBottom('smooth');
     }
   }, [chatBlocks, loading, isThinking]);
 
@@ -254,9 +290,10 @@ const MessageList = ({
       aria-atomic="false"
     >
       <AnimatePresence mode="popLayout" initial={false}>
-        {chatBlocks.map((msg) => (
+        {chatBlocks.map((msg, index) => (
           <motion.div
             key={msg.id}
+            ref={index === chatBlocks.length - 1 ? lastMessageRef : null}
             layout="position"
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

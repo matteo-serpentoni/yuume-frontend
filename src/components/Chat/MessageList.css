@@ -47,8 +47,13 @@
   cursor: not-allowed;
 }
 
+.yuume-message-block {
+  scroll-margin-top: 15px; /* Prevent clipping header when scrolling to top */
+  margin-bottom: 12px;
+}
+
 .yuume-message-block.standalone {
-  margin-bottom: 0px; /* Pushed to the bottom as per user request */
+  margin-bottom: 0px;
 }
 
 .yuume-standalone-content {
