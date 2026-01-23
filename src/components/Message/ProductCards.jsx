@@ -61,6 +61,20 @@ const Icons = {
       <line x1="12" y1="22.08" x2="12" y2="12" />
     </svg>
   ),
+  ExternalLink: () => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  ),
 };
 
 const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) => {
@@ -83,6 +97,7 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
     isAutomatic,
     currency,
     variants,
+    url,
   } = normalizeStorefrontProduct(product);
 
   const toggleFlip = (e) => {
@@ -192,7 +207,18 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
           </div>
 
           <div className="yuume-product-info">
-            <h3 className="yuume-product-name">{name}</h3>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="yuume-product-link-wrapper"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="yuume-product-name">
+                {name}
+                <Icons.ExternalLink />
+              </h3>
+            </a>
             <div className="yuume-product-price-row">
               <div className="yuume-price-stack">
                 {compareAtPrice > price && (
@@ -286,6 +312,16 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
                 </div>
               )}
             </div>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="yuume-view-in-store-btn"
+              onClick={(e) => e.stopPropagation()}
+            >
+              View in Store
+              <Icons.ExternalLink />
+            </a>
           </div>
 
           <button className="yuume-back-return-overlay-btn" onClick={toggleFlip}>

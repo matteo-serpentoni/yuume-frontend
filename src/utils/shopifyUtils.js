@@ -50,6 +50,9 @@ export const normalizeStorefrontProduct = (product) => {
       (opt) =>
         !(opt.name === 'Title' && opt.values.length === 1 && opt.values[0] === 'Default Title'),
     ),
+    // Link to product page
+    url: product.url || product.productUrl || '',
+    productUrl: product.productUrl || product.url || '',
   };
 };
 
