@@ -53,6 +53,12 @@ export const normalizeStorefrontProduct = (product) => {
     // Link to product page
     url: product.url || product.productUrl || '',
     productUrl: product.productUrl || product.url || '',
+    // Calculate total inventory from variants if not present on parent
+    totalInventory:
+      product.totalInventory ??
+      (Array.isArray(variants)
+        ? variants.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0)
+        : 0),
   };
 };
 

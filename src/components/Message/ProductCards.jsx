@@ -1,5 +1,5 @@
 import React, { memo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import AddToCartButton from './AddToCartButton';
 import Drawer from '../UI/Drawer';
 import { formatPrice } from '../../utils/messageHelpers';
@@ -81,6 +81,7 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
   const [isFlipped, setIsFlipped] = useState(false);
 
   // Normalize product data using unified utility
+  const normalizedProduct = normalizeStorefrontProduct(product);
   const {
     primaryImage: image,
     images: allImages,
@@ -98,7 +99,8 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
     currency,
     variants,
     url,
-  } = normalizeStorefrontProduct(product);
+    totalInventory,
+  } = normalizedProduct;
 
   const toggleFlip = (e) => {
     e.stopPropagation();
@@ -180,10 +182,16 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
               </div>
             )}
             {isAvailable && (
-              <span className="yuume-stock-status-badge">
-                <span className="yuume-stock-dot" />
-                In stock
-              </span>
+              <div className="yuume-stock-status-badge-container">
+                {totalInventory > 0 && totalInventory <= 10 ? (
+                  <span className="yuume-stock-urgency-badge">Solo {totalInventory} rimasti</span>
+                ) : (
+                  <span className="yuume-stock-status-badge">
+                    <span className="yuume-stock-dot" />
+                    In stock
+                  </span>
+                )}
+              </div>
             )}
             <div className="yuume-image-zoom-overlay" aria-hidden="true">
               <svg

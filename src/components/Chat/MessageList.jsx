@@ -290,7 +290,7 @@ const MessageList = ({
       aria-live="polite"
       aria-atomic="false"
     >
-      <AnimatePresence mode="popLayout" initial={false}>
+      <AnimatePresence initial={false}>
         {chatBlocks.map((msg, index) => (
           <motion.div
             key={msg.id}
