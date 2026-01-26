@@ -178,7 +178,34 @@
 .message-content {
   flex: 1;
   min-width: 0;
-  padding-right: 4px;
+}
+
+/* WhatsApp style logic for User Bubbles */
+.message-bubble.user {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 4px 10px; /* Vertical / Horizontal gap */
+}
+
+.message-bubble.user .message-content {
+  flex: 0 1 auto; /* Don't force full width, allow metadata to sit beside if room */
+  padding-right: 0;
+}
+
+.message-bubble.user .bubble-meta {
+  margin-top: 0;
+  margin-bottom: -2px; /* Pull down slightly to align with text baseline */
+  flex-shrink: 0;
+}
+
+/* Keep AI bubbles as columns since they have feedback and more text usually */
+.message-bubble.ai,
+.message-bubble.assistant {
+  display: flex;
+  flex-direction: column;
 }
 
 .message-content p {
