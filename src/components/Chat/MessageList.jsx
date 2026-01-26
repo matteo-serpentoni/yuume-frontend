@@ -82,16 +82,16 @@ const MessageList = ({
       if (!lastMessageIdRef.current) {
         scrollToBottom('auto');
       } else {
-        // Wait for DOM and animations to stabilize
+        // Wait for DOM to stabilize before scrolling
         const timer = setTimeout(() => {
           scrollToNewMessage('smooth');
-        }, 150);
+        }, 100);
         return () => clearTimeout(timer);
       }
       lastMessageIdRef.current = lastId;
     } else if (isThinking || loading) {
-      // While thinking/loading, keep it pinned to bottom
-      scrollToBottom('smooth');
+      // While thinking/loading, keep it pinned strongly
+      scrollToBottom('auto');
     }
   }, [chatBlocks, loading, isThinking]);
 
@@ -295,14 +295,11 @@ const MessageList = ({
           <motion.div
             key={msg.id}
             ref={index === chatBlocks.length - 1 ? lastMessageRef : null}
-            layout="position"
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{
-              layout: { type: 'spring', damping: 25, stiffness: 200 },
-              opacity: { duration: 0.2 },
-              y: { type: 'spring', damping: 20, stiffness: 150 },
+              opacity: { duration: 0.25 },
+              y: { duration: 0.3, ease: 'easeOut' },
             }}
           >
             <ErrorBoundary fallback={<MessageFallback />}>{renderMessage(msg)}</ErrorBoundary>
@@ -312,15 +309,10 @@ const MessageList = ({
         {isThinking && !isFormLoading && (
           <motion.div
             key="thinking-indicator"
-            layout="position"
-            initial={{ opacity: 0, x: -60, scale: 0.85 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -60, scale: 0.95 }}
-            transition={{
-              layout: { type: 'spring', damping: 25, stiffness: 200 },
-              x: { type: 'spring', damping: 22, stiffness: 120 },
-              opacity: { duration: 0.25 },
-            }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2 }}
           >
             <HumanThinking chatColors={chatColors} intent={thinkingIntent} />
           </motion.div>
