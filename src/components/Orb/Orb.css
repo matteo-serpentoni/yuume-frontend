@@ -29,6 +29,10 @@
   cursor: pointer;
 }
 
+.orb-container.mobile-device.minimized {
+  --orb-minimized-size: 119px; /* Reduced by 10% from 132px */
+}
+
 /* CANVAS LAYER */
 .orb-canvas-layer {
   position: absolute;
