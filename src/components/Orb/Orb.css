@@ -447,9 +447,10 @@
   /* Boost brightness/saturation for mobile to make it pop */
   filter: brightness(1.2) saturate(1.4);
 
-  /* RESTORE BACKDROP BLUR for Premium Feel */
-  backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
-  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
+  /* RESTORE BACKDROP BLUR for Premium Feel - Optimized for Mobile Performance */
+  /* Reduced from 20px to 10px to minimize GPU workload on average devices */
+  backdrop-filter: blur(10px) saturate(180%) brightness(1.05);
+  -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.05);
 
   /* Glass Edge - Subtle luminous border */
   border: 1px solid rgba(255, 255, 255, 0.15);

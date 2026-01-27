@@ -1,8 +1,9 @@
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { getOrderStatusClass, normalizeOrderNumber } from '../../utils/shopifyUtils';
 import './OrderCards.css';
 
-export const OrderItemRow = ({ item, index, theme = 'dark' }) => {
+export const OrderItemRow = memo(({ item, index, theme = 'dark' }) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: -5 }}
@@ -22,10 +23,10 @@ export const OrderItemRow = ({ item, index, theme = 'dark' }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 // Detail view for a single order
-export const OrderDetailCard = ({ order, theme = 'dark' }) => {
+export const OrderDetailCard = memo(({ order, theme = 'dark' }) => {
   const { orderNumber, status, createdAt, total, items = [], tracking = [] } = order;
 
   const getStatusClass = (statusValue) => {
@@ -84,10 +85,10 @@ export const OrderDetailCard = ({ order, theme = 'dark' }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 // Summary row for list view
-const OrderListRow = ({ order, index, onClick }) => {
+const OrderListRow = memo(({ order, index, onClick }) => {
   const isClickable = !!onClick;
 
   return (
@@ -130,9 +131,9 @@ const OrderListRow = ({ order, index, onClick }) => {
       </div>
     </motion.div>
   );
-};
+});
 
-const OrderCards = ({ message, onOrderClick }) => {
+const OrderCards = memo(({ message, onOrderClick }) => {
   const {
     type: directType,
     orders: directOrders = [],
@@ -199,6 +200,6 @@ const OrderCards = ({ message, onOrderClick }) => {
       </div>
     </div>
   );
-};
+});
 
 export default OrderCards;

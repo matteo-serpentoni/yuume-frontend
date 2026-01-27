@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPromoExpiry } from '../../utils/shopifyUtils';
 import './PromoCard.css';
@@ -159,7 +159,7 @@ const Icons = {
   ),
 };
 
-const PromoCard = ({ promo, onSearch, index = 0 }) => {
+const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
   const [copied, setCopied] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
 
@@ -481,6 +481,6 @@ const PromoCard = ({ promo, onSearch, index = 0 }) => {
       </motion.div>
     </div>
   );
-};
+});
 
 export default PromoCard;

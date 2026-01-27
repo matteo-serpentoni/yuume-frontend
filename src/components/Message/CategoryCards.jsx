@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import './CategoryCards.css';
 
-const CategoryCard = ({ category, index, onCategoryClick }) => {
+const CategoryCard = memo(({ category, index, onCategoryClick }) => {
   const { title, count, image } = category;
 
   return (
@@ -58,9 +58,9 @@ const CategoryCard = ({ category, index, onCategoryClick }) => {
       </div>
     </motion.div>
   );
-};
+});
 
-const CategoryCards = ({ message, onCategoryClick }) => {
+const CategoryCards = memo(({ message, onCategoryClick }) => {
   const { categories = [], message: displayMessage } = message;
 
   if (!Array.isArray(categories) || categories.length === 0) {
@@ -88,6 +88,6 @@ const CategoryCards = ({ message, onCategoryClick }) => {
       <div className="yuume-category-help-text">Clicca su una categoria per vedere i prodotti</div>
     </div>
   );
-};
+});
 
 export default CategoryCards;

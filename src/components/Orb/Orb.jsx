@@ -320,6 +320,11 @@ const Orb = memo(
       let rafId;
       const update = (t) => {
         rafId = requestAnimationFrame(update);
+
+        // Optimization: Pause rendering if we are in mobile card mode (canvas is hidden by CSS)
+        // to save CPU/GPU for the message list and animations.
+        if (isMobileView && enlarged) return;
+
         const dt = (t - lastTime) * 0.001;
         lastTime = t;
         program.uniforms.iTime.value = t * 0.001;
