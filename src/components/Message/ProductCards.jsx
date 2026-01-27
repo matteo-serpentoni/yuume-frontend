@@ -217,8 +217,6 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
           <div className="yuume-product-info">
             <a
               href={url}
-              target="_blank"
-              rel="noopener noreferrer"
               className="yuume-product-link-wrapper"
               onClick={(e) => e.stopPropagation()}
             >
@@ -320,13 +318,7 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
                 </div>
               )}
             </div>
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="yuume-view-in-store-btn"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <a href={url} className="yuume-view-in-store-btn" onClick={(e) => e.stopPropagation()}>
               View in Store
               <Icons.ExternalLink />
             </a>
@@ -567,11 +559,7 @@ const ProductCards = memo(({ message, shopDomain, onOpen, onImageClick, activePr
 
       {meta.totalCount > meta.displayCount && (
         <div className="yuume-products-footer-link">
-          <a
-            href={`https://${shopDomain}/search?q=${encodeURIComponent(displayMessage || '')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={`https://${shopDomain}/search?q=${encodeURIComponent(displayMessage || '')}`}>
             Vedi tutti i {meta.totalCount} risultati su {shopDomain}
           </a>
         </div>
