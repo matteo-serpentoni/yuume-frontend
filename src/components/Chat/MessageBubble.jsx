@@ -48,7 +48,11 @@ const MessageBubble = ({
               <motion.button
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => onFeedback?.('positive')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFeedback?.('positive');
+                }}
+                type="button"
                 className={`feedback-btn ${feedback === 'positive' ? 'active' : ''}`}
                 title="Utile"
               >
@@ -68,7 +72,11 @@ const MessageBubble = ({
               <motion.button
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => onFeedback?.('negative')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFeedback?.('negative');
+                }}
+                type="button"
                 className={`feedback-btn ${feedback === 'negative' ? 'active' : ''}`}
                 title="Non utile"
               >

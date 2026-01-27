@@ -35,6 +35,8 @@ const MessageList = ({
   const messagesAreaRef = useRef(null);
   const lastMessageRef = useRef(null);
   const lastMessageIdRef = useRef(null);
+  const prevThinkingRef = useRef(isThinking);
+  const prevLoadingRef = useRef(loading);
 
   const scrollToBottom = (behavior = 'auto') => {
     if (messagesAreaRef.current) {
@@ -76,6 +78,8 @@ const MessageList = ({
   useEffect(() => {
     const lastBlock = chatBlocks[chatBlocks.length - 1];
     const lastId = lastBlock?.id;
+    const justStartedThinking = isThinking && !prevThinkingRef.current;
+    const justStartedLoading = loading && !prevLoadingRef.current;
 
     // Detect if we just stopped thinking (response arrived)
     if (lastId !== lastMessageIdRef.current) {
@@ -89,10 +93,14 @@ const MessageList = ({
         return () => clearTimeout(timer);
       }
       lastMessageIdRef.current = lastId;
-    } else if (isThinking || loading) {
-      // While thinking/loading, keep it pinned strongly
+    } else if (justStartedThinking || justStartedLoading) {
+      // While thinking/loading, keep it pinned strongly ONLY when we transition to these states
       scrollToBottom('auto');
     }
+
+    // Sync refs for next render
+    prevThinkingRef.current = isThinking;
+    prevLoadingRef.current = loading;
   }, [chatBlocks, loading, isThinking]);
 
   const renderMessageContent = (msg) => {
