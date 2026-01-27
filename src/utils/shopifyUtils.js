@@ -9,13 +9,17 @@
  */
 export const normalizeStorefrontProduct = (product) => {
   if (!product) return null;
+  let variants = product.variants || [];
+  if (variants && !Array.isArray(variants)) {
+    if (variants.nodes) variants = variants.nodes;
+    else if (variants.edges) variants = variants.edges.map((e) => e.node);
+  }
 
   const {
     images: rawImages = [],
     image: fallbackImage,
     available: initialAvailable,
     availability: fallbackAvailable,
-    variants = [],
   } = product;
 
   return {
@@ -33,7 +37,18 @@ export const normalizeStorefrontProduct = (product) => {
         ? rawImages[0].url || rawImages[0]
         : fallbackImage?.url || fallbackImage,
     // Unified availability boolean
-    isAvailable: initialAvailable !== undefined ? initialAvailable : fallbackAvailable,
+    isAvailable:
+      initialAvailable !== undefined
+        ? initialAvailable
+        : fallbackAvailable !== undefined
+          ? fallbackAvailable
+          : product.availableForSale !== undefined
+            ? product.availableForSale
+            : product.available_for_sale !== undefined
+              ? product.available_for_sale
+              : product.isAvailable !== undefined
+                ? product.isAvailable
+                : true,
     // Compare at price for discounts
     compareAtPrice: product.compareAtPrice || null,
     discountPercentage:
@@ -53,12 +68,35 @@ export const normalizeStorefrontProduct = (product) => {
     // Link to product page
     url: product.url || product.productUrl || '',
     productUrl: product.productUrl || product.url || '',
-    // Calculate total inventory from variants if not present on parent
-    totalInventory:
-      product.totalInventory ??
-      (Array.isArray(variants)
-        ? variants.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0)
-        : 0),
+    // Calculate total inventory - prioritize non-zero values and sum variants if available
+    totalInventory: (() => {
+      // 1. If variants are present, they are the most reliable source for tracked inventory
+      if (Array.isArray(variants) && variants.length > 0) {
+        const sum = variants.reduce(
+          (acc, v) =>
+            acc +
+            (v.inventoryQuantity ??
+              v.inventory_quantity ??
+              v.quantityAvailable ??
+              v.quantity ??
+              v.inventory ??
+              0),
+          0,
+        );
+        if (sum > 0) return sum;
+      }
+
+      // 2. Fallback to root properties
+      const rootQty =
+        product.totalInventory ??
+        product.total_inventory ??
+        product.inventory_quantity ??
+        product.inventoryQuantity ??
+        product.quantity ??
+        product.stock;
+
+      return Number(rootQty || 0);
+    })(),
   };
 };
 

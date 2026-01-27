@@ -80,8 +80,8 @@ const Icons = {
 const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Normalize product data using unified utility
   const normalizedProduct = normalizeStorefrontProduct(product);
+
   const {
     primaryImage: image,
     images: allImages,
