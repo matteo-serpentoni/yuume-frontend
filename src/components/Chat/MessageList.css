@@ -47,8 +47,11 @@
   cursor: not-allowed;
 }
 
+.yuume-message-wrapper {
+  scroll-margin-top: 110px; /* Strong clearance for long messages */
+}
+
 .yuume-message-block {
-  scroll-margin-top: 15px; /* Prevent clipping header when scrolling to top */
   margin-bottom: 12px;
 }
 

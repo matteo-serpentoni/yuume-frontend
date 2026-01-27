@@ -60,8 +60,9 @@ const MessageList = ({
         lastBlock?.detectedIntent === 'REFUND_ACTION' ||
         lastBlock?.detectedIntent === 'ORDER_TRACK_ACTION';
 
-      // Threshold: if message is taller than 70% of the viewport AND not an interaction
-      if (!isInteraction && messageHeight > containerHeight * 0.7) {
+      // Threshold: if message is taller than 40% of the viewport AND not an interaction (like a form)
+      // We prioritize showing the START of informational responses so the user doesn't miss the beginning.
+      if (!isInteraction && messageHeight > containerHeight * 0.4) {
         lastMessageRef.current.scrollIntoView({
           behavior,
           block: 'start',
@@ -303,6 +304,7 @@ const MessageList = ({
           <motion.div
             key={msg.id}
             ref={index === chatBlocks.length - 1 ? lastMessageRef : null}
+            className="yuume-message-wrapper"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
