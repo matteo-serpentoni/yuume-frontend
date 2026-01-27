@@ -2,6 +2,8 @@
 
 .yuume-category-card {
   width: 100%;
+  min-width: 260px;
+  max-width: 340px;
   padding: 12px;
   border-radius: 14px;
   background: #ffffff;
@@ -67,7 +69,7 @@
 }
 
 .yuume-category-cards-container {
-  width: 100%;
+  width: auto;
   pointer-events: auto;
   box-sizing: border-box;
 }

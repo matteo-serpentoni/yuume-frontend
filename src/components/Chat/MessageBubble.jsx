@@ -36,9 +36,7 @@ const MessageBubble = memo(
       <div className={`message-bubble-wrapper ${sender} ${className}`}>
         <div
           className={`message-bubble ${sender} ${
-            ['category_cards', 'product_cards', 'order_cards'].includes(type)
-              ? 'full-width'
-              : 'auto-width'
+            ['product_cards', 'order_cards'].includes(type) ? 'full-width' : 'auto-width'
           }`}
           style={bubbleStyles}
         >
