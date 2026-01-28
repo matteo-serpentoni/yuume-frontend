@@ -61,8 +61,8 @@ const ProfileView = ({
         email,
       });
 
-      // ✅ Sync to sessionStorage for personalized welcome in next sessions
-      sessionStorage.setItem('yuume_profile', JSON.stringify({ name, email, isIdentified: true }));
+      // ✅ Sync to localStorage for personalized welcome in next sessions
+      localStorage.setItem('yuume_profile', JSON.stringify({ name, email, isIdentified: true }));
 
       setSaving(true); // Re-setting to trigger loading state if needed elsewhere
       setSaving(false);
@@ -85,7 +85,7 @@ const ProfileView = ({
     setSaving(true);
     try {
       await updateProfile(sessionId, shopDomain, { reset: true });
-      sessionStorage.removeItem('yuume_profile');
+      localStorage.removeItem('yuume_profile');
       setName('');
       setEmail('');
       setIsIdentified(false);

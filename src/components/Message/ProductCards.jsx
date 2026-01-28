@@ -218,6 +218,8 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
             <a
               href={url}
               className="yuume-product-link-wrapper"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="yuume-product-name">

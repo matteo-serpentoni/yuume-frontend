@@ -7,7 +7,7 @@ const ORB_STATE_KEY = 'yuume_orb_enlarged';
 
 function App() {
   const [enlarged, setEnlarged] = useState(() => {
-    const saved = sessionStorage.getItem(ORB_STATE_KEY);
+    const saved = localStorage.getItem(ORB_STATE_KEY);
     return saved === 'true';
   });
 
@@ -41,7 +41,7 @@ function App() {
   }, [enlarged]);
 
   useEffect(() => {
-    sessionStorage.setItem(ORB_STATE_KEY, enlarged.toString());
+    localStorage.setItem(ORB_STATE_KEY, enlarged.toString());
   }, [enlarged]);
 
   useEffect(() => {
@@ -53,8 +53,8 @@ function App() {
 
   // --- DEV-ONLY PREVIEW LOGIC ---
   const [devPreview, setDevPreview] = useState({
-    show: sessionStorage.getItem('yuume_dev_show_storefront') === 'true',
-    theme: sessionStorage.getItem('yuume_dev_storefront_theme') || 'light',
+    show: localStorage.getItem('yuume_dev_show_storefront') === 'true',
+    theme: localStorage.getItem('yuume_dev_storefront_theme') || 'light',
   });
 
   useEffect(() => {
@@ -62,8 +62,8 @@ function App() {
 
     const handleDevUpdate = () => {
       setDevPreview({
-        show: sessionStorage.getItem('yuume_dev_show_storefront') === 'true',
-        theme: sessionStorage.getItem('yuume_dev_storefront_theme') || 'light',
+        show: localStorage.getItem('yuume_dev_show_storefront') === 'true',
+        theme: localStorage.getItem('yuume_dev_storefront_theme') || 'light',
       });
     };
 

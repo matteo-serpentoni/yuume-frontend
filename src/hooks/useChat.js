@@ -24,22 +24,25 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   const [sessionId, setSessionId] = useState(() => {
     if (disabled) return 'preview-session';
-    let id = sessionStorage.getItem(STORAGE_KEYS.SESSION_ID);
-    const savedTime = sessionStorage.getItem(STORAGE_KEYS.SESSION_TIME);
+    let id = localStorage.getItem(STORAGE_KEYS.SESSION_ID);
+    const savedTime = localStorage.getItem(STORAGE_KEYS.SESSION_TIME);
 
     if (id && savedTime) {
       const elapsed = Date.now() - parseInt(savedTime);
 
       if (elapsed >= SESSION_TIMEOUT) {
-        sessionStorage.clear();
+        // Clear only Yuume keys from localStorage
+        Object.values(STORAGE_KEYS).forEach((k) => localStorage.removeItem(k));
+        localStorage.removeItem('yuume_shopify_customer');
+        localStorage.removeItem('yuume_profile');
         id = null;
       }
     }
 
     if (!id) {
       id = generateSessionId();
-      sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, id);
-      sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
+      localStorage.setItem(STORAGE_KEYS.SESSION_ID, id);
+      localStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
     }
 
     return id;
@@ -47,7 +50,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   const [messages, setMessages] = useState(() => {
     try {
-      const saved = !disabled ? sessionStorage.getItem(STORAGE_KEYS.MESSAGES) : null;
+      const saved = !disabled ? localStorage.getItem(STORAGE_KEYS.MESSAGES) : null;
       if (saved) {
         return JSON.parse(saved);
       }
@@ -55,7 +58,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       // 🔍 Personalized Welcome: Check if we have a saved name from Yuume Profile
       let welcomeText = 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?';
       try {
-        const savedProfile = sessionStorage.getItem('yuume_profile');
+        const savedProfile = localStorage.getItem('yuume_profile');
         if (savedProfile) {
           const profile = JSON.parse(savedProfile);
           if (profile.name) {
@@ -85,7 +88,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   // ✅ Session Status State
   const [sessionStatus, setSessionStatus] = useState(() => {
     if (disabled) return 'active';
-    return sessionStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || 'active';
+    return localStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || 'active';
   });
 
   // ✅ Connection Status logic
@@ -115,7 +118,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   const [shopifyCustomer, setShopifyCustomer] = useState(() => {
     if (disabled) return null;
     try {
-      const saved = sessionStorage.getItem('yuume_shopify_customer');
+      const saved = localStorage.getItem('yuume_shopify_customer');
       return saved ? JSON.parse(saved) : null;
     } catch (e) {
       return null;
@@ -129,7 +132,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   const [shopDomain, setShopDomain] = useState(() => {
     if (disabled) return 'preview-shop.myshopify.com';
-    return devShopDomain || sessionStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) || null;
+    return devShopDomain || localStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) || null;
   });
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -148,16 +151,16 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     const newSessionId = generateSessionId();
 
     // Surgical clear: only yuume keys
-    Object.keys(sessionStorage).forEach((key) => {
+    Object.keys(localStorage).forEach((key) => {
       if (key.startsWith('yuume_') && key !== STORAGE_KEYS.SHOP_DOMAIN) {
-        sessionStorage.removeItem(key);
+        localStorage.removeItem(key);
       }
     });
 
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
-    sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, 'active');
+    localStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
+    localStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
+    localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
+    localStorage.setItem(STORAGE_KEYS.SESSION_STATUS, 'active');
 
     setSessionId(newSessionId);
     setMessages([welcomeMsg]);
@@ -216,7 +219,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   useEffect(() => {
     if (disabled) return;
     try {
-      sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
+      localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
     } catch (error) {
       console.error('Errore salvataggio messaggi:', error);
     }
@@ -225,13 +228,13 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   // ✅ Persist session status
   useEffect(() => {
     if (disabled) return;
-    sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, sessionStatus);
+    localStorage.setItem(STORAGE_KEYS.SESSION_STATUS, sessionStatus);
   }, [sessionStatus, disabled]);
 
   useEffect(() => {
     if (disabled) return;
     const interval = setInterval(() => {
-      const savedTime = sessionStorage.getItem(STORAGE_KEYS.SESSION_TIME);
+      const savedTime = localStorage.getItem(STORAGE_KEYS.SESSION_TIME);
       if (savedTime) {
         const elapsed = Date.now() - parseInt(savedTime);
 
@@ -256,9 +259,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         if (customer) {
           console.log('✅ Shopify Identity Detected:', customer.email || customer.id);
           setShopifyCustomer(customer);
-          // Persist identity to sessionStorage
+          // Persist identity to localStorage
           try {
-            sessionStorage.setItem('yuume_shopify_customer', JSON.stringify(customer));
+            localStorage.setItem('yuume_shopify_customer', JSON.stringify(customer));
           } catch (e) {
             // Storage full or restricted
           }
@@ -266,7 +269,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           // LOGOUT SYNC: Clear identity if parent sends null/undefined
           console.log('🔄 Shopify Logout Detected: Clearing identity');
           setShopifyCustomer(null);
-          sessionStorage.removeItem('yuume_shopify_customer');
+          localStorage.removeItem('yuume_shopify_customer');
         }
       }
     };

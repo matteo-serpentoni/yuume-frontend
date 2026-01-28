@@ -12,7 +12,7 @@ const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle 
   const [sites, setSites] = useState([]);
   const [selectedThemeId, setSelectedThemeId] = useState('purple-dream');
   const [selectedSiteDomain, setSelectedSiteDomain] = useState(() => {
-    return sessionStorage.getItem('yuume_dev_shop_domain') || '';
+    return localStorage.getItem('yuume_dev_shop_domain') || '';
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,10 +22,10 @@ const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle 
 
   // Storefront Preview State
   const [showStorefront, setShowStorefront] = useState(() => {
-    return sessionStorage.getItem('yuume_dev_show_storefront') === 'true';
+    return localStorage.getItem('yuume_dev_show_storefront') === 'true';
   });
   const [storefrontTheme, setStorefrontTheme] = useState(() => {
-    return sessionStorage.getItem('yuume_dev_storefront_theme') || 'light';
+    return localStorage.getItem('yuume_dev_storefront_theme') || 'light';
   });
 
   const dispatchDevUpdate = () => {
@@ -62,11 +62,11 @@ const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle 
             setSites(filteredSites);
 
             // If no site is selected yet, pick the first one
-            const savedDevShop = sessionStorage.getItem('yuume_dev_shop_domain');
+            const savedDevShop = localStorage.getItem('yuume_dev_shop_domain');
             if (!savedDevShop && filteredSites.length > 0) {
               const firstDomain = filteredSites[0].domain;
               setSelectedSiteDomain(firstDomain);
-              sessionStorage.setItem('yuume_dev_shop_domain', firstDomain);
+              localStorage.setItem('yuume_dev_shop_domain', firstDomain);
               onSiteChange && onSiteChange(firstDomain);
             }
           }
@@ -270,9 +270,9 @@ const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle 
                 const domain = e.target.value;
                 setSelectedSiteDomain(domain);
                 if (domain) {
-                  sessionStorage.setItem('yuume_dev_shop_domain', domain);
+                  localStorage.setItem('yuume_dev_shop_domain', domain);
                 } else {
-                  sessionStorage.removeItem('yuume_dev_shop_domain');
+                  localStorage.removeItem('yuume_dev_shop_domain');
                 }
                 onSiteChange && onSiteChange(domain);
               }}
@@ -369,7 +369,7 @@ const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle 
               onClick={() => {
                 const newVal = !showStorefront;
                 setShowStorefront(newVal);
-                sessionStorage.setItem('yuume_dev_show_storefront', newVal);
+                localStorage.setItem('yuume_dev_show_storefront', newVal);
                 dispatchDevUpdate();
               }}
               style={{
@@ -394,7 +394,7 @@ const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle 
                 <button
                   onClick={() => {
                     setStorefrontTheme('light');
-                    sessionStorage.setItem('yuume_dev_storefront_theme', 'light');
+                    localStorage.setItem('yuume_dev_storefront_theme', 'light');
                     dispatchDevUpdate();
                   }}
                   style={{
@@ -413,7 +413,7 @@ const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle 
                 <button
                   onClick={() => {
                     setStorefrontTheme('dark');
-                    sessionStorage.setItem('yuume_dev_storefront_theme', 'dark');
+                    localStorage.setItem('yuume_dev_storefront_theme', 'dark');
                     dispatchDevUpdate();
                   }}
                   style={{

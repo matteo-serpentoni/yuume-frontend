@@ -35,9 +35,9 @@ export const useOrb = (modeOverride = null) => {
     const urlShop = urlParams.get('shop') || urlParams.get('shopDomain');
     if (urlShop) return urlShop;
 
-    // 2. Check SessionStorage (Manual Override in Dev)
+    // 2. Check localStorage (Manual Override in Dev)
     if (import.meta.env.DEV) {
-      const savedDevShop = sessionStorage.getItem('yuume_dev_shop_domain');
+      const savedDevShop = localStorage.getItem('yuume_dev_shop_domain');
       if (savedDevShop) return savedDevShop;
     }
 
@@ -92,14 +92,14 @@ export const useOrb = (modeOverride = null) => {
         const incomingDomain = event.data.shopDomain;
 
         if (isDev) {
-          const hasManualOverride = !!sessionStorage.getItem('yuume_dev_shop_domain');
+          const hasManualOverride = !!localStorage.getItem('yuume_dev_shop_domain');
           if (hasManualOverride || (shopDomain && incomingDomain === 'localhost')) {
             return;
           }
         }
 
         setShopDomain(incomingDomain);
-        sessionStorage.setItem('yuume_dev_shop_domain', incomingDomain);
+        localStorage.setItem('yuume_dev_shop_domain', incomingDomain);
       }
     };
 
