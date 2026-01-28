@@ -295,7 +295,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
           // ✅ Handle personalized welcome if customer info is found
           if (statusData.customer) {
-            sessionStorage.setItem('yuume_profile', JSON.stringify(statusData.customer));
+            localStorage.setItem('yuume_profile', JSON.stringify(statusData.customer));
 
             setMessages((prev) => {
               // Only personalize if we just have the default welcome message
@@ -478,9 +478,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         currentSessionId = newId; // Use new ID for this request
 
         // 2. Update Storage
-        sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, newId);
-        sessionStorage.setItem(STORAGE_KEYS.SESSION_STATUS, 'active');
-        sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([]));
+        localStorage.setItem(STORAGE_KEYS.SESSION_ID, newId);
+        localStorage.setItem(STORAGE_KEYS.SESSION_STATUS, 'active');
+        localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([]));
 
         // 3. Update State (Soft Reset)
         setSessionId(newId);
@@ -493,7 +493,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       // Clear initial suggestions on any explicit message
       setInitialSuggestions([]);
 
-      sessionStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
+      localStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
 
       setLoading(true);
 
