@@ -15,15 +15,6 @@
   z-index: 1000;
 }
 
-/* NO TRANSITIONS ON MOBILE - Handled by Framer Motion cross-fade */
-.orb-container.mobile-device {
-  transition: none !important;
-}
-
-.orb-container.mobile-device * {
-  transition: opacity 0.3s ease; /* Allow inner elements to fade but NOT layout */
-}
-
 /* PREVIEW MODE: Disable only transitions for instant layout switching in dashboard */
 .orb-container.preview-mode,
 .orb-container.preview-mode *,
@@ -362,27 +353,6 @@
 /* REFACTOR: Styles now applied via .mobile-device class (controlled by JS) instead of media query */
 /* This allows forcing mobile view in iframe preview regardless of width */
 /* @media (max-width: 600px) { - REMOVED, relying on class */
-/* PURE CROSS-FADE FIX (CHAOS ELIMINATION) */
-.mobile-pure-crossfade-wrapper .orb-glass-mask-wrapper,
-.mobile-pure-crossfade-wrapper .orb-glass-layer,
-.mobile-pure-crossfade-wrapper .orb-canvas-layer {
-  transition: none !important;
-  animation-duration: 0s !important;
-}
-
-/* Force specific positioning for mobile pure layers to prevent CSS inheritance jumps */
-.mobile-pure-crossfade-wrapper .orb-glass-mask-wrapper {
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-}
-
-/* Ensure the chat layer doesn't bring its own transitions */
-.mobile-pure-crossfade-wrapper .orb-chat-layer {
-  transition: none !important;
-  transform: none !important;
-}
-
 .orb-container.mobile-device:not(.minimized) {
   /* Restore "perfetto" centering method */
   top: 50%;

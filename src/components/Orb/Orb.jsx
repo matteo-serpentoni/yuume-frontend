@@ -1,4 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
+import { Renderer, Program, Mesh, Triangle, Vec3 } from 'ogl';
 import Chat from '../Chat/Chat';
 import ChatPreview from '../Chat/ChatPreview';
 import DevTools from '../Dev/DevTools';
@@ -356,7 +357,6 @@ const Orb = memo(
         gl.getExtension('WEBGL_lose_context')?.loseContext();
       };
       // ✅ Aggiunte dipendenze per colori dinamici
-      // enlarged rimosso per evitare re-init costosi durante la transizione
     }, [hue, hoverIntensity, rotateOnHover, forceHoverState]);
 
     useEffect(() => {
@@ -404,6 +404,7 @@ const Orb = memo(
     return (
       <>
         {/* ✅ FUNZIONALITÀ: Dev Tools (Solo in sviluppo locale e non preview) */}
+        {/* Rendered outside the orb-container to avoid mobile clipping/centering issues */}
         {mode === 'development' && (
           <DevTools
             currentConfig={config}
@@ -430,199 +431,71 @@ const Orb = memo(
           {/* Loading Placeholder */}
           {loading && <div className="orb-loading-placeholder" />}
 
-          {/* 
-            PURE CROSS-FADE STRUCTURE (MOBILE-ONLY): 
-            - No morphing, no stretching. 
-            - Circle fades out in corner. 
-            - Chat fades in centered.
-          */}
-
-          {isMobileView ? (
-            <div
-              className="mobile-pure-crossfade-wrapper"
-              style={{ width: '100%', height: '100%', position: 'relative' }}
-            >
-              <AnimatePresence mode="wait">
-                {isMinimized ? (
-                  /* 1. CIRCLE (MINIMIZED) - Fixed position & size */
-                  <motion.div
-                    key="mobile-minimized-orb"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    style={{
-                      position: 'fixed',
-                      bottom: '20px',
-                      right: '25px',
-                      width: '60px',
-                      height: '60px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 10,
-                    }}
-                  >
-                    {/* Minimized Text */}
-                    <div
-                      key={currentMessageIndex}
-                      className="minimized-text"
-                      style={{ '--minimized-text-color': 'white' }}
-                    >
-                      {messages[currentMessageIndex].split('\n').map((line, lineIndex) => (
-                        <div key={lineIndex} className="minimized-text-line">
-                          {Array.from(line).map((char, charIndex) => {
-                            const previousCharsCount = messages[currentMessageIndex]
-                              .split('\n')
-                              .slice(0, lineIndex)
-                              .join('').length;
-                            const globalIndex = previousCharsCount + charIndex;
-                            return (
-                              <span
-                                key={charIndex}
-                                style={{ animationDelay: `${globalIndex * 0.03}s` }}
-                              >
-                                {char === ' ' ? '\u00A0' : char}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Glass Circle Background */}
-                    <div
-                      className="orb-glass-mask-wrapper"
-                      style={{ width: '60px', height: '60px', borderRadius: '50%' }}
-                    >
-                      <div className="orb-glass-layer">
-                        <div className="glass-blobs" />
-                        <div className="glass-noise" />
-                        <div className="glass-shine" />
-                      </div>
-                    </div>
-
-                    {/* WebGL Sphere (Minimized) */}
-                    <div ref={canvasContainerRef} className="orb-canvas-layer" />
-                  </motion.div>
-                ) : (
-                  /* 2. CHAT (ENLARGED) - Fixed centered position */
-                  <motion.div
-                    key="mobile-enlarged-chat"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    style={{
-                      position: 'fixed',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      width: '90vw',
-                      height: '85svh',
-                      maxWidth: '400px',
-                      maxHeight: '700px',
-                      zIndex: 100,
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    {!loading && (
-                      <div
-                        className="orb-chat-layer"
-                        style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-                      >
-                        {mode === 'preview' ? (
-                          <ChatPreview chatColors={chatColors} />
-                        ) : (
-                          <Chat
-                            chatColors={chatColors}
-                            devShopDomain={shopDomain}
-                            onTyping={setIsTyping}
-                            onMinimize={() => setEnlarged(false)}
-                          />
-                        )}
-                      </div>
-                    )}
-
-                    {/* Glass Card Background */}
-                    <div
-                      className="orb-glass-mask-wrapper"
-                      style={{ width: '100%', height: '100%', borderRadius: '24px' }}
-                    >
-                      <div className="orb-glass-layer">
-                        <div className="glass-blobs" />
-                        <div className="glass-noise" />
-                        <div className="glass-shine" />
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          {/* Chat Layer - Rendered once loaded, visibility handled by CSS classes */}
+          {!loading && (
+            <div className="orb-chat-layer">
+              {mode === 'preview' ? (
+                <ChatPreview chatColors={chatColors} />
+              ) : (
+                <Chat
+                  chatColors={chatColors}
+                  devShopDomain={shopDomain}
+                  onTyping={setIsTyping}
+                  onMinimize={() => {
+                    setEnlarged(false);
+                  }}
+                />
+              )}
             </div>
-          ) : (
-            /* 3. ORIGINAL DESKTOP STRUCTURE - Pure CSS Transitions */
-            <>
-              {!loading && (
-                <div className="orb-chat-layer">
-                  {mode === 'preview' ? (
-                    <ChatPreview chatColors={chatColors} />
-                  ) : (
-                    <Chat
-                      chatColors={chatColors}
-                      devShopDomain={shopDomain}
-                      onTyping={setIsTyping}
-                      onMinimize={() => setEnlarged(false)}
-                    />
-                  )}
-                </div>
-              )}
-
-              {isMinimized && (
-                <div
-                  key={currentMessageIndex}
-                  className="minimized-text"
-                  style={{ '--minimized-text-color': 'white' }}
-                >
-                  {messages[currentMessageIndex].split('\n').map((line, lineIndex) => (
-                    <div key={lineIndex} className="minimized-text-line">
-                      {Array.from(line).map((char, charIndex) => {
-                        const previousCharsCount = messages[currentMessageIndex]
-                          .split('\n')
-                          .slice(0, lineIndex)
-                          .join('').length;
-                        const globalIndex = previousCharsCount + charIndex;
-                        return (
-                          <span
-                            key={charIndex}
-                            style={{ animationDelay: `${globalIndex * 0.03}s` }}
-                          >
-                            {char === ' ' ? '\u00A0' : char}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="orb-glass-mask-wrapper">
-                <div className="orb-glass-layer">
-                  <div className="glass-blobs" />
-                  <div className="glass-noise" />
-                  <div className="glass-shine" />
-                </div>
-              </div>
-
-              <div ref={canvasContainerRef} className="orb-canvas-layer" />
-            </>
           )}
 
-          {/* Gallery Portal */}
+          {/* Gallery Portal - Top level for perfect circular alignment */}
           <div id="yuume-gallery-portal" className="drawer-portal-container" />
 
-          {/* Children support */}
+          {/* Minimized Text */}
+          {isMinimized && (
+            <div
+              key={currentMessageIndex} // Force re-render to restart animations
+              className="minimized-text"
+              style={{
+                '--minimized-text-color': 'white',
+              }}
+            >
+              {messages[currentMessageIndex].split('\n').map((line, lineIndex) => (
+                <div key={lineIndex} className="minimized-text-line">
+                  {Array.from(line).map((char, charIndex) => {
+                    // Calculate global index for continuous delay
+                    const previousCharsCount = messages[currentMessageIndex]
+                      .split('\n')
+                      .slice(0, lineIndex)
+                      .join('').length;
+                    const globalIndex = previousCharsCount + charIndex;
+
+                    return (
+                      <span key={charIndex} style={{ animationDelay: `${globalIndex * 0.03}s` }}>
+                        {char === ' ' ? '\u00A0' : char}
+                      </span>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ✅ FUNZIONALITÀ: Children support */}
           {children}
+
+          {/* Liquid Glass Background - Between chat and canvas */}
+          <div className="orb-glass-mask-wrapper">
+            <div className="orb-glass-layer">
+              <div className="glass-blobs" />
+              <div className="glass-noise" />
+              <div className="glass-shine" />
+            </div>
+          </div>
+
+          {/* WebGL Canvas Layer - On top visually, but pointer-events: none to allow clicks through */}
+          <div ref={canvasContainerRef} className="orb-canvas-layer" />
         </div>
       </>
     );
