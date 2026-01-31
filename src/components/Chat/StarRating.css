@@ -7,6 +7,15 @@
   border-radius: 12px;
   margin-top: 16px;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure rating box stays elegant on larger desktop screens */
+.orb-container:not(.mobile-device) .star-rating-container {
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .star-rating-title {
