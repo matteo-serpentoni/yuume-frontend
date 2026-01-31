@@ -171,7 +171,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   const addUserMessage = useCallback((text, id = Date.now(), hidden = false) => {
     const userMessage = {
-      id,
+      id: String(id),
       sender: 'user',
       text,
       timestamp: new Date().toISOString(),
@@ -190,7 +190,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       ...data,
     };
     setMessages((prev) => {
-      if (prev.some((m) => m.id === assistantMessage.id)) return prev;
+      const exists = prev.some((m) => String(m.id || '') === String(assistantMessage.id || ''));
+      if (exists) return prev;
       return [...prev, assistantMessage];
     });
     return assistantMessage;
@@ -357,9 +358,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
               const final = [];
               const seenIds = new Set();
               merged.forEach((m) => {
-                if (!seenIds.has(m.id)) {
+                const idStr = String(m.id || '');
+                if (idStr && !seenIds.has(idStr)) {
                   final.push(m);
-                  seenIds.add(m.id);
+                  seenIds.add(idStr);
                 }
               });
 
