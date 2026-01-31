@@ -370,7 +370,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           }
         }
       })
-      .catch((err) => {
+      .catch(() => {
         // Silently fail if session doesn't exist yet
       });
 
@@ -390,7 +390,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       socket.emit('join_session', sessionId);
     });
 
-    socket.on('disconnect', (reason) => {
+    socket.on('disconnect', () => {
       // If client is still online, means it's a server/socket issue
       if (window.navigator.onLine) {
         setConnectionStatus('reconnecting');
@@ -454,7 +454,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     return () => {
       socket.disconnect();
     };
-  }, [sessionId]);
+  }, [sessionId, disabled, shopDomain]);
 
   const sendChatMessage = useCallback(
     async (text, options = {}) => {
@@ -507,7 +507,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       }
 
       const userMsgId = Date.now(); // Generate ID here
-      const userMsg = addUserMessage(text, userMsgId, options.hidden);
+      addUserMessage(text, userMsgId, options.hidden);
 
       try {
         const response = await sendMessage(
@@ -590,10 +590,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       customer,
       shopifyCustomer, // Fix stale closure: add dependency
       sessionStatus,
-      setSessionId,
       setSessionStatus,
       setMessages,
       setAssignedTo,
+      clearChat,
     ],
   );
 
