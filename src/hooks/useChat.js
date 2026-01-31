@@ -1,8 +1,8 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { io } from 'socket.io-client';
 import { sendMessage, ChatApiError, getSessionStatus, submitFeedback } from '../services/chatApi';
 import { reportError } from '../services/errorApi';
 import { predictIntent } from '../utils/messageHelpers';
-import { io } from 'socket.io-client';
-import { useState, useEffect, useRef, useCallback } from 'react';
 
 const STORAGE_KEYS = {
   SESSION_ID: 'yuume_session_id',
@@ -55,7 +55,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         return JSON.parse(saved);
       }
 
-      // 🔍 Personalized Welcome: Check if we have a saved name from Yuume Profile
+      // Personalized Welcome: Check if we have a saved name from Yuume Profile
       let welcomeText = 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?';
       try {
         const savedProfile = localStorage.getItem('yuume_profile');
@@ -85,13 +85,13 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     }
   });
 
-  // ✅ Session Status State
+  // Session Status State
   const [sessionStatus, setSessionStatus] = useState(() => {
     if (disabled) return 'active';
     return localStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || 'active';
   });
 
-  // ✅ Connection Status logic
+  // Connection Status logic
   const [connectionStatus, setConnectionStatus] = useState('online');
 
   useEffect(() => {
@@ -135,9 +135,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     return devShopDomain || localStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) || null;
   });
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // -------------------------------------
   // HELPER FUNCTIONS (Defined before usage in Effects)
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // -------------------------------------
 
   const clearChat = useCallback(() => {
     const welcomeMsg = {
@@ -201,7 +201,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   // EFFECTS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  // ✅ Reset session when shopDomain changes (Site Switching)
+  // Reset session when shopDomain changes (Site Switching)
   const prevShopDomain = useRef(shopDomain);
   useEffect(() => {
     if (shopDomain && prevShopDomain.current && shopDomain !== prevShopDomain.current) {
@@ -210,7 +210,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     prevShopDomain.current = shopDomain;
   }, [shopDomain, clearChat]);
 
-  // ✅ Sync internal shopDomain when prop changes
+  // Sync internal shopDomain when prop changes
   useEffect(() => {
     if (devShopDomain && devShopDomain !== shopDomain) {
       setShopDomain(devShopDomain);
@@ -226,7 +226,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     }
   }, [messages, disabled]);
 
-  // ✅ Persist session status
+  // Persist session status
   useEffect(() => {
     if (disabled) return;
     localStorage.setItem(STORAGE_KEYS.SESSION_STATUS, sessionStatus);
@@ -248,7 +248,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     return () => clearInterval(interval);
   }, [clearChat, disabled]);
 
-  // ✅ Listen for Identity from Parent (Shopify Storefront)
+  // Listen for Identity from Parent (Shopify Storefront)
   useEffect(() => {
     if (disabled) return;
 
@@ -258,7 +258,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         const customer = event.data.customer || event.data.shopifyCustomer;
 
         if (customer) {
-          console.log('✅ Shopify Identity Detected:', customer.email || customer.id);
+          console.log('Shopify Identity Detected:', customer.email || customer.id);
           setShopifyCustomer(customer);
           // Persist identity to localStorage
           try {
@@ -268,7 +268,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           }
         } else {
           // LOGOUT SYNC: Clear identity if parent sends null/undefined
-          console.log('🔄 Shopify Logout Detected: Clearing identity');
+          console.log('Shopify Logout Detected: Clearing identity');
           setShopifyCustomer(null);
           localStorage.removeItem('yuume_shopify_customer');
         }
@@ -282,7 +282,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     return () => window.removeEventListener('message', handleMessage);
   }, [disabled]);
 
-  // ✅ WebSocket Connection
+  // WebSocket Connection
   useEffect(() => {
     if (disabled || !sessionId) return;
 
@@ -294,7 +294,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           if (statusData.assignedTo) setAssignedTo(statusData.assignedTo);
           if (statusData.initialSuggestions) setInitialSuggestions(statusData.initialSuggestions);
 
-          // ✅ Handle personalized welcome if customer info is found
+          // Handle personalized welcome if customer info is found
           if (statusData.customer) {
             localStorage.setItem('yuume_profile', JSON.stringify(statusData.customer));
 
@@ -410,7 +410,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     });
 
     socket.on('message:received', (message) => {
-      // ✅ SAFETY OVERRIDE: Assistant responses should NEVER be hidden in the widget
+      // SAFETY OVERRIDE: Assistant responses should NEVER be hidden in the widget
       const isAssistant =
         message.sender === 'assistant' || message.sender === 'ai' || message.role === 'assistant';
 
@@ -473,7 +473,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
       let currentSessionId = sessionId;
 
-      // 🔥 AUTO-START NEW SESSION IF COMPLETED
+      // AUTO-START NEW SESSION IF COMPLETED
       if (sessionStatus === 'completed' || sessionStatus === 'abandoned') {
         // 1. Generate new ID
         const newId = generateSessionId();
@@ -499,7 +499,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
       setLoading(true);
 
-      // 🧠 Local Prediction: Show thinking indicator immediately if it matches a pattern
+      // Local Prediction: Show thinking indicator immediately if it matches a pattern
       const predicted = predictIntent(text);
       if (predicted) {
         setIsThinking(true);
@@ -540,7 +540,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
           addAssistantMessage(response.message);
 
-          // ✅ Update status from response
+          // Update status from response
           if (response.status) {
             setSessionStatus(response.status);
           }
@@ -588,7 +588,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       addUserMessage,
       addAssistantMessage,
       customer,
-      shopifyCustomer, // ✅ Fix stale closure: add dependency
+      shopifyCustomer, // Fix stale closure: add dependency
       sessionStatus,
       setSessionId,
       setSessionStatus,
@@ -640,12 +640,12 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     messages,
     loading,
     shopDomain,
-    connectionStatus, // ✅ Return connection status
+    connectionStatus, // Return connection status
     sessionId,
     sessionStatus,
-    assignedTo, // ✅ Return assignedTo
-    shopifyCustomer, // ✅ Return certified identity
-    initialSuggestions, // ✅ Return initial suggestions
+    assignedTo, // Return assignedTo
+    shopifyCustomer, // Return certified identity
+    initialSuggestions, // Return initial suggestions
     sendMessage: sendChatMessage,
     clearChat,
     sendFeedback,
