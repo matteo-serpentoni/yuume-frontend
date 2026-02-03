@@ -29,6 +29,7 @@ const MessageList = ({
   activeOrder,
   setActiveOrder,
   sendMessage,
+  handleSuggestionClick,
   sendFeedback,
   onImageClick,
 }) => {
@@ -278,10 +279,7 @@ const MessageList = ({
 
         {/* Suggestion Chips - External to Bubble */}
         {msg.suggestions && msg.suggestions.length > 0 && (
-          <Suggestions
-            suggestions={msg.suggestions}
-            onSuggestionClick={(value) => sendMessage(value)}
-          />
+          <Suggestions suggestions={msg.suggestions} onSuggestionClick={handleSuggestionClick} />
         )}
       </div>
     );

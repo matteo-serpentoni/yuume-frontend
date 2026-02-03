@@ -22,7 +22,7 @@ const Suggestions = memo(({ suggestions, onSuggestionClick }) => {
             delay: 0.2 + idx * 0.05,
             ease: 'easeOut',
           }}
-          onClick={() => onSuggestionClick(s.value || s.label)}
+          onClick={() => onSuggestionClick(s)}
           aria-label={`Suggerimento: ${s.label}`}
           whileHover={{
             y: -2,

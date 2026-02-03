@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { useChat } from '../../hooks/useChat';
 import './Chat.css';
 
@@ -58,13 +58,7 @@ const Chat = ({
 
   const sendMessage = isPreview ? () => {} : liveChat.sendMessage;
   const sendFeedback = isPreview ? () => {} : liveChat.sendFeedback;
-
-  const handleSuggestionClick = useCallback(
-    (value) => {
-      sendMessage(value);
-    },
-    [sendMessage],
-  );
+  const handleSuggestionClick = isPreview ? () => {} : liveChat.handleSuggestionClick;
 
   // Group messages to handle "transforming" components (like OrderLookupForm)
   const chatBlocks = useMemo(() => {
@@ -195,6 +189,7 @@ const Chat = ({
               activeOrder={activeOrder}
               setActiveOrder={setActiveOrder}
               sendMessage={sendMessage}
+              handleSuggestionClick={handleSuggestionClick}
               sendFeedback={sendFeedback}
               onImageClick={setActiveGallery}
             />

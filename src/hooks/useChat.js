@@ -565,14 +565,25 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           return;
         }
 
-        const errorMessage =
-          error instanceof ChatApiError
-            ? 'Errore di connessione. Riprova tra poco.'
-            : 'Si è verificato un errore inaspettato.';
+        // Determine appropriate error message based on error type
+        let errorMessage;
+        if (error instanceof ChatApiError) {
+          if (error.status === 0) {
+            // Network error (offline, timeout, DNS failure)
+            errorMessage = 'Errore di connessione. Verifica la tua connessione e riprova.';
+          } else if (error.status >= 500) {
+            // Server error (internal bug, overload)
+            errorMessage = 'Qualcosa è andato storto. Riprova tra qualche secondo.';
+          } else {
+            // Other API errors
+            errorMessage = 'Si è verificato un problema. Riprova.';
+          }
+        } else {
+          errorMessage = 'Si è verificato un errore inaspettato.';
+        }
 
         addAssistantMessage({
           type: 'text',
-          title: 'Errore',
           message: errorMessage,
           format: 'plain',
         });
@@ -595,6 +606,17 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       setAssignedTo,
       clearChat,
     ],
+  );
+
+  // Centralized suggestion click handler
+  // Extracts label/value and action from suggestion object for consistent handling
+  const handleSuggestionClick = useCallback(
+    (suggestion) => {
+      const text = suggestion.value || suggestion.label;
+      const options = suggestion.action ? { suggestionAction: suggestion.action } : {};
+      sendChatMessage(text, options);
+    },
+    [sendChatMessage],
   );
 
   const sendFeedback = useCallback(
@@ -647,6 +669,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     shopifyCustomer, // Return certified identity
     initialSuggestions, // Return initial suggestions
     sendMessage: sendChatMessage,
+    handleSuggestionClick, // Centralized suggestion handler
     clearChat,
     sendFeedback,
     isThinking,
