@@ -110,7 +110,11 @@ const MessageList = ({
       return (
         <CategoryCards
           message={msg}
-          onCategoryClick={(title) => sendMessage(`Mostrami i prodotti della categoria ${title}`)}
+          onCategoryClick={(category) =>
+            sendMessage(`Mostrami i prodotti della categoria ${category.title}`, {
+              collectionHandle: category.handle,
+            })
+          }
         />
       );
     }
