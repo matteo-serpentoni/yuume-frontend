@@ -8,7 +8,6 @@ const INTENT_PHRASES = {
     'Fammi capire cosa cerchi...',
     'Ti aiuto a scegliere...',
     'Vediamo qual è il prodotto perfetto per te...',
-    'Un attimo che ti faccio qualche domanda...',
     'Cerco di capire le tue esigenze...',
   ],
   PRODUCT_DETAIL: [
