@@ -457,7 +457,7 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
 });
 
 const ProductCards = memo(({ message, shopDomain, onOpen, onImageClick, activeProduct }) => {
-  const { products = [], message: displayMessage, meta = {} } = message;
+  const { products = [], message: displayMessage } = message;
   const scrollRef = React.useRef(null);
   const [showLeftArrow, setShowLeftArrow] = React.useState(false);
   const [showRightArrow, setShowRightArrow] = React.useState(true);
@@ -558,14 +558,6 @@ const ProductCards = memo(({ message, shopDomain, onOpen, onImageClick, activePr
           </button>
         )}
       </div>
-
-      {meta.totalCount > meta.displayCount && (
-        <div className="yuume-products-footer-link">
-          <a href={`https://${shopDomain}/search?q=${encodeURIComponent(displayMessage || '')}`}>
-            Vedi tutti i {meta.totalCount} risultati su {shopDomain}
-          </a>
-        </div>
-      )}
     </div>
   );
 });
