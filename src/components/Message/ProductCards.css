@@ -183,7 +183,46 @@
   transition: transform 0.4s ease;
 }
 
-.yuume-product-card-minimal:hover .yuume-product-image-container {
+.yuume-product-image-container:not(.no-image) {
+  cursor: pointer;
+}
+
+.yuume-product-image-container.no-image {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Solid faint border */
+  position: relative;
+  overflow: hidden;
+}
+
+.yuume-product-image-container.no-image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    transparent 100%
+  );
+  animation: yuume-shimmer 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes yuume-shimmer {
+  0% {
+    left: -100%;
+  }
+  30% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.yuume-product-card-minimal:hover .yuume-product-image-container:not(.no-image) {
   transform: scale(1.02);
 }
 
@@ -223,7 +262,19 @@
 }
 
 .yuume-product-placeholder {
-  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.1);
+  width: 100%;
+  height: 100%;
+}
+
+.yuume-product-placeholder svg {
+  width: 60px;
+  height: 60px;
+  stroke-width: 0.8;
+  opacity: 0.5;
 }
 
 .yuume-product-discount-badge {

@@ -75,6 +75,21 @@ const Icons = {
       <line x1="10" y1="14" x2="21" y2="3" />
     </svg>
   ),
+  Image: () => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2.5" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <path d="M21 15l-5-5-11 11" />
+      <path d="M17 21l-5-5-5 5" />
+    </svg>
+  ),
 };
 
 const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) => {
@@ -141,12 +156,13 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
         {/* --- FRONT SIDE --- */}
         <div className="yuume-product-side yuume-card-front">
           <div
-            className="yuume-product-image-container"
-            role="button"
-            tabIndex={0}
-            aria-label="Ingrandisci immagine"
+            className={`yuume-product-image-container ${!image ? 'no-image' : ''}`}
+            role={image ? 'button' : 'img'}
+            tabIndex={image ? 0 : -1}
+            aria-label={image ? 'Ingrandisci immagine' : 'Immagine non disponibile'}
             onClick={(e) => {
               e.stopPropagation();
+              if (!image) return;
               onImageClick &&
                 onImageClick({
                   images: galleryImages,
@@ -158,6 +174,7 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
               if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation();
                 e.preventDefault();
+                if (!image) return;
                 onImageClick &&
                   onImageClick({
                     images: galleryImages,
@@ -170,7 +187,9 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
             {image ? (
               <img src={image.url || image} alt={product.name} />
             ) : (
-              <div className="yuume-product-placeholder">🎁</div>
+              <div className="yuume-product-placeholder">
+                <Icons.Image />
+              </div>
             )}
             {(discountCode || isAutomatic || discountPercentage > 0) && (
               <div className="yuume-product-discount-badge">
@@ -193,25 +212,27 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
                 )}
               </div>
             )}
-            <div className="yuume-image-zoom-overlay" aria-hidden="true">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                role="img"
-                aria-label="Ingrandisci immagine"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                <line x1="11" y1="8" x2="11" y2="14"></line>
-                <line x1="8" y1="11" x2="14" y2="11"></line>
-              </svg>
-            </div>
+            {image && (
+              <div className="yuume-image-zoom-overlay" aria-hidden="true">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  role="img"
+                  aria-label="Ingrandisci immagine"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  <line x1="11" y1="8" x2="11" y2="14"></line>
+                  <line x1="8" y1="11" x2="14" y2="11"></line>
+                </svg>
+              </div>
+            )}
           </div>
 
           <div className="yuume-product-info">
