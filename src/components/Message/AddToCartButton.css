@@ -215,3 +215,13 @@
 .add-to-cart.yuume-add-to-cart-btn:before {
   border-radius: 10px;
 }
+
+/* CONTAINER */
+.yuume-add-to-cart-container {
+  width: 140px;
+  display: flex;
+}
+
+.yuume-add-to-cart-container.compact {
+  width: 100%;
+}

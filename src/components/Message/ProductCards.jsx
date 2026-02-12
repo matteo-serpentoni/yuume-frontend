@@ -1,6 +1,7 @@
 import React, { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import AddToCartButton from './AddToCartButton';
+import CheckoutButton from './CheckoutButton';
 import Drawer from '../UI/Drawer';
 import { formatPrice } from '../../utils/messageHelpers';
 import { normalizeStorefrontProduct, isDefaultVariant } from '../../utils/shopifyUtils';
@@ -94,6 +95,7 @@ const Icons = {
 
 const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const normalizedProduct = normalizeStorefrontProduct(product);
 
@@ -286,12 +288,17 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
               )}
               {isAvailable && (product.variants[0] || product.variantId) && (
                 <div className="yuume-add-to-cart-wrapper">
-                  <AddToCartButton
-                    variantId={product.variants[0]?.id || product.variantId}
-                    shopDomain={shopDomain}
-                    quantity={1}
-                    compact={true}
-                  />
+                  {showCheckout ? (
+                    <CheckoutButton compact={true} />
+                  ) : (
+                    <AddToCartButton
+                      variantId={product.variants[0]?.id || product.variantId}
+                      shopDomain={shopDomain}
+                      quantity={1}
+                      compact={true}
+                      onAnimationComplete={() => setShowCheckout(true)}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -385,6 +392,7 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   });
 
   const [currentVariant, setCurrentVariant] = React.useState(normalized.variants[0] || null);
+  const [showCheckout, setShowCheckout] = React.useState(false);
 
   React.useEffect(() => {
     const found = normalized.variants.find(
@@ -407,12 +415,16 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   const footer = (
     <>
       {isAvailableResult && (currentVariant || normalized.variants[0]) ? (
-        <AddToCartButton
-          variantId={currentVariant?.id || normalized.variants[0].id}
-          shopDomain={shopDomain}
-          quantity={1}
-          onAnimationComplete={onClose}
-        />
+        showCheckout ? (
+          <CheckoutButton />
+        ) : (
+          <AddToCartButton
+            variantId={currentVariant?.id || normalized.variants[0].id}
+            shopDomain={shopDomain}
+            quantity={1}
+            onAnimationComplete={() => setShowCheckout(true)}
+          />
+        )
       ) : (
         <button className="yuume-add-to-cart-btn disabled" disabled>
           Prodotto Esaurito

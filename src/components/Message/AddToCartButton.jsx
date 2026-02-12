@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, memo } from 'react';
+import React, { useRef, useEffect, useState, memo } from 'react';
 import { extractVariantId } from '../../utils/shopifyUtils';
 import './AddToCartButton.css';
 
@@ -15,6 +15,14 @@ const AddToCartButton = memo(
     compact = false,
   }) => {
     const buttonRef = useRef(null);
+    const isMounted = useRef(true);
+
+    useEffect(() => {
+      isMounted.current = true;
+      return () => {
+        isMounted.current = false;
+      };
+    }, []);
 
     const addToCart = async () => {
       try {
@@ -72,12 +80,14 @@ const AddToCartButton = memo(
       if (!button) return;
 
       const handlePointerDown = (e) => {
-        if (button.classList.contains('active')) {
+        if (!button || button.classList.contains('active')) {
           return;
         }
-        button.style.setProperty('--background-scale', '0.97');
+        if (button.style) {
+          button.style.setProperty('--background-scale', '0.97');
+        }
         setTimeout(() => {
-          if (!button.classList.contains('active')) {
+          if (button && button.classList && !button.classList.contains('active') && button.style) {
             button.style.setProperty('--background-scale', '1');
           }
         }, 150);
@@ -105,20 +115,24 @@ const AddToCartButton = memo(
         const morphPath = button.querySelector('.morph path');
         if (morphPath) {
           setTimeout(() => {
-            morphPath.style.transition = 'd 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            morphPath.setAttribute(
-              'd',
-              'M0 12C6 12 20 10 32 0C43.9024 9.99999 58 12 64 12V13H0V12Z',
-            );
+            const path = button.querySelector('.morph path');
+            if (path) {
+              path.style.transition = 'd 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+              path.setAttribute('d', 'M0 12C6 12 20 10 32 0C43.9024 9.99999 58 12 64 12V13H0V12Z');
+            }
           }, 0);
           setTimeout(() => {
-            morphPath.style.transition = 'd 0.15s ease-in';
-            morphPath.setAttribute('d', 'M0 12C6 12 17 12 32 12C47.9024 12 58 12 64 12V13H0V12Z');
+            const path = button.querySelector('.morph path');
+            if (path) {
+              path.style.transition = 'd 0.15s ease-in';
+              path.setAttribute('d', 'M0 12C6 12 17 12 32 12C47.9024 12 58 12 64 12V13H0V12Z');
+            }
           }, 250);
         }
 
         // Package animation - PARTE DOPO 200ms invece di 150ms (rallentato per effetto pressione)
         setTimeout(() => {
+          if (!button) return;
           button.style.setProperty('--package-scale', '1');
           button.style.setProperty('--package-y', '-42px');
           button.style.setProperty('--cart-x', '0px');
@@ -126,47 +140,52 @@ const AddToCartButton = memo(
         }, 200);
 
         setTimeout(() => {
-          button.style.setProperty('--package-y', '-40px');
+          if (button) button.style.setProperty('--package-y', '-40px');
         }, 550);
 
         setTimeout(() => {
+          if (!button) return;
           button.style.setProperty('--package-y', '16px');
           button.style.setProperty('--package-scale', '0.9');
         }, 850);
 
         setTimeout(() => {
-          button.style.setProperty('--package-scale', '0');
+          if (button) button.style.setProperty('--package-scale', '0');
         }, 1100);
 
         // Package second reveal
         setTimeout(() => {
-          button.style.setProperty('--package-second-y', '0px');
+          if (button) button.style.setProperty('--package-second-y', '0px');
         }, 985);
 
         // Text fade
-        button.style.setProperty('--text-o', '0');
+        if (button) button.style.setProperty('--text-o', '0');
 
         // Cart animation
         setTimeout(() => {
+          if (!button) return;
           button.style.setProperty('--cart-clip', '12px');
           button.style.setProperty('--cart-clip-x', '3px');
         }, 1050);
 
         setTimeout(() => {
-          button.style.setProperty('--cart-y', '2px');
+          if (button) button.style.setProperty('--cart-y', '2px');
         }, 1110);
 
         setTimeout(() => {
+          if (!button) return;
           button.style.setProperty('--cart-tick-offset', '0px');
           button.style.setProperty('--cart-y', '0px');
         }, 1210);
 
         setTimeout(() => {
+          if (!button) return;
           button.style.setProperty('--cart-x', '52px');
           button.style.setProperty('--cart-rotate', '-15deg');
         }, 1410);
 
         setTimeout(() => {
+          if (!button) return;
           button.style.setProperty('--cart-x', '104px');
           button.style.setProperty('--cart-rotate', '0deg');
           button.style.overflow = 'hidden';
@@ -175,6 +194,7 @@ const AddToCartButton = memo(
         setTimeout(() => {
           // Disabilita le transizioni per il reset istantaneo
           const cart = button.querySelector('.cart');
+          if (!cart) return;
           cart.style.transition = 'none';
 
           // Nascondi e resetta tutto istantaneamente
@@ -226,38 +246,40 @@ const AddToCartButton = memo(
     }, [variantId, quantity, onSuccess, onError]);
 
     return (
-      <button className={`add-to-cart ${compact ? 'yuume-add-to-cart-btn' : ''}`} ref={buttonRef}>
-        <span>Add to cart</span>
-        <svg className="morph" viewBox="0 0 64 13">
-          <path d="M0 12C6 12 17 12 32 12C47.9024 12 58 12 64 12V13H0V12Z" />
-        </svg>
-        <div className="package">
-          <svg className="first" viewBox="0 0 24 24">
-            <path d="M5 3L5 20L19 20L19 3L5 3Z" />
-            <rect x="4" y="10" width="16" height="2" />
-            <rect x="11" y="3" width="2" height="17" />
+      <div className={`yuume-add-to-cart-container ${compact ? 'compact' : ''}`}>
+        <button className={`add-to-cart ${compact ? 'yuume-add-to-cart-btn' : ''}`} ref={buttonRef}>
+          <span>Add to cart</span>
+          <svg className="morph" viewBox="0 0 64 13">
+            <path d="M0 12C6 12 17 12 32 12C47.9024 12 58 12 64 12V13H0V12Z" />
           </svg>
-          <svg className="second" viewBox="0 0 24 24">
-            <path d="M5 3L5 20L19 20L19 3L5 3Z" />
-            <rect x="4" y="10" width="16" height="2" />
-            <rect x="11" y="3" width="2" height="17" />
-          </svg>
-        </div>
-        <div className="cart">
-          <svg viewBox="0 0 36 26">
-            <path d="M1 2.5H6L10 18.5H25.5L28.5 7.5L7.5 7.5" className="shape" />
-            <path
-              d="M11.5 25C12.6046 25 13.5 24.1046 13.5 23C13.5 21.8954 12.6046 21 11.5 21C10.3954 21 9.5 21.8954 9.5 23C9.5 24.1046 10.3954 25 11.5 25Z"
-              className="wheel"
-            />
-            <path
-              d="M24 25C25.1046 25 26 24.1046 26 23C26 21.8954 25.1046 21 24 21C22.8954 21 22 21.8954 22 23C22 24.1046 22.8954 25 24 25Z"
-              className="wheel"
-            />
-            <path d="M14.5 13.5L16.5 15.5L21.5 10.5" className="tick" />
-          </svg>
-        </div>
-      </button>
+          <div className="package">
+            <svg className="first" viewBox="0 0 24 24">
+              <path d="M5 3L5 20L19 20L19 3L5 3Z" />
+              <rect x="4" y="10" width="16" height="2" />
+              <rect x="11" y="3" width="2" height="17" />
+            </svg>
+            <svg className="second" viewBox="0 0 24 24">
+              <path d="M5 3L5 20L19 20L19 3L5 3Z" />
+              <rect x="4" y="10" width="16" height="2" />
+              <rect x="11" y="3" width="2" height="17" />
+            </svg>
+          </div>
+          <div className="cart">
+            <svg viewBox="0 0 36 26">
+              <path d="M1 2.5H6L10 18.5H25.5L28.5 7.5L7.5 7.5" className="shape" />
+              <path
+                d="M11.5 25C12.6046 25 13.5 24.1046 13.5 23C13.5 21.8954 12.6046 21 11.5 21C10.3954 21 9.5 21.8954 9.5 23C9.5 24.1046 10.3954 25 11.5 25Z"
+                className="wheel"
+              />
+              <path
+                d="M24 25C25.1046 25 26 24.1046 26 23C26 21.8954 25.1046 21 24 21C22.8954 21 22 21.8954 22 23C22 24.1046 22.8954 25 24 25Z"
+                className="wheel"
+              />
+              <path d="M14.5 13.5L16.5 15.5L21.5 10.5" className="tick" />
+            </svg>
+          </div>
+        </button>
+      </div>
     );
   },
 );

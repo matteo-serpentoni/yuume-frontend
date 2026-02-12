@@ -23,11 +23,11 @@
 
   const isDevelopment =
     ['localhost', '127.0.0.1', ''].includes(window.location.hostname) ||
-    ['8080', '3000'].includes(window.location.port);
+    ['8080', '3000', '5173'].includes(window.location.port);
 
   const config = {
     development: {
-      widgetUrl: 'http://localhost:3000/?embed=true',
+      widgetUrl: 'http://localhost:5173/?embed=true',
       apiUrl: 'http://localhost:5001',
     },
     production: {
@@ -366,6 +366,13 @@
             WIDGET_ORIGIN,
           );
         });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CHECKOUT
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (event.data.type === 'YUUME:checkout') {
+      window.location.href = '/checkout';
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
