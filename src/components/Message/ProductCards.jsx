@@ -1,7 +1,6 @@
 import React, { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import AddToCartButton from './AddToCartButton';
-import CheckoutButton from './CheckoutButton';
 import MessageBubble from '../Chat/MessageBubble';
 import Drawer from '../UI/Drawer';
 import { formatPrice } from '../../utils/messageHelpers';
@@ -94,89 +93,77 @@ const Icons = {
   ),
 };
 
-const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
+const ProductCard = memo(
+  ({ product, index, onOpen, onImageClick, shopDomain, onProductAction }) => {
+    const [isFlipped, setIsFlipped] = useState(false);
 
-  const normalizedProduct = normalizeStorefrontProduct(product);
+    const normalizedProduct = normalizeStorefrontProduct(product);
 
-  const {
-    primaryImage: image,
-    images: allImages,
-    isAvailable,
-    hasVariants,
-    name,
-    description,
-    productType,
-    vendor,
-    price,
-    compareAtPrice,
-    discountPercentage,
-    discountCode,
-    isAutomatic,
-    currency,
-    variants,
-    url,
-    totalInventory,
-  } = normalizedProduct;
+    const {
+      primaryImage: image,
+      images: allImages,
+      isAvailable,
+      hasVariants,
+      name,
+      description,
+      productType,
+      vendor,
+      price,
+      compareAtPrice,
+      discountPercentage,
+      discountCode,
+      isAutomatic,
+      currency,
+      variants,
+      url,
+      totalInventory,
+    } = normalizedProduct;
 
-  const toggleFlip = (e) => {
-    e.stopPropagation();
-    setIsFlipped(!isFlipped);
-  };
+    const toggleFlip = (e) => {
+      e.stopPropagation();
+      setIsFlipped(!isFlipped);
+    };
 
-  // Ensure images is always a non-empty array for the gallery
-  const galleryImages = allImages && allImages.length > 0 ? allImages : image ? [image] : [];
+    // Ensure images is always a non-empty array for the gallery
+    const galleryImages = allImages && allImages.length > 0 ? allImages : image ? [image] : [];
 
-  return (
-    <div className="yuume-product-card-perspective">
-      <motion.div
-        className={`yuume-product-card-minimal ${isFlipped ? 'is-flipped' : ''} clickable`}
-        role="button"
-        tabIndex={0}
-        aria-label={`Visualizza dettagli per ${name}`}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{
-          opacity: 1,
-          y: 0,
-          rotateY: isFlipped ? 180 : 0,
-        }}
-        whileHover={!isFlipped ? { y: -4, transition: { duration: 0.2 } } : {}}
-        transition={{
-          opacity: { delay: index * 0.1, duration: 0.6 },
-          y: { delay: index * 0.1, duration: 0.6 },
-          rotateY: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-        }}
-        style={{ transformStyle: 'preserve-3d' }}
-        onClick={!isFlipped && hasVariants ? () => onOpen(product) : undefined}
-        onKeyDown={(e) => {
-          if (!isFlipped && hasVariants && (e.key === 'Enter' || e.key === ' ')) {
-            e.preventDefault();
-            onOpen(product);
-          }
-        }}
-      >
-        {/* --- FRONT SIDE --- */}
-        <div className="yuume-product-side yuume-card-front">
-          <div
-            className={`yuume-product-image-container ${!image ? 'no-image' : ''}`}
-            role={image ? 'button' : 'img'}
-            tabIndex={image ? 0 : -1}
-            aria-label={image ? 'Ingrandisci immagine' : 'Immagine non disponibile'}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!image) return;
-              onImageClick &&
-                onImageClick({
-                  images: galleryImages,
-                  index: 0,
-                  product: product,
-                });
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
+    return (
+      <div className="yuume-product-card-perspective">
+        <motion.div
+          className={`yuume-product-card-minimal ${isFlipped ? 'is-flipped' : ''} clickable`}
+          role="button"
+          tabIndex={0}
+          aria-label={`Visualizza dettagli per ${name}`}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            rotateY: isFlipped ? 180 : 0,
+          }}
+          whileHover={!isFlipped ? { y: -4, transition: { duration: 0.2 } } : {}}
+          transition={{
+            opacity: { delay: index * 0.1, duration: 0.6 },
+            y: { delay: index * 0.1, duration: 0.6 },
+            rotateY: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+          }}
+          style={{ transformStyle: 'preserve-3d' }}
+          onClick={!isFlipped && hasVariants ? () => onOpen(product) : undefined}
+          onKeyDown={(e) => {
+            if (!isFlipped && hasVariants && (e.key === 'Enter' || e.key === ' ')) {
+              e.preventDefault();
+              onOpen(product);
+            }
+          }}
+        >
+          {/* --- FRONT SIDE --- */}
+          <div className="yuume-product-side yuume-card-front">
+            <div
+              className={`yuume-product-image-container ${!image ? 'no-image' : ''}`}
+              role={image ? 'button' : 'img'}
+              tabIndex={image ? 0 : -1}
+              aria-label={image ? 'Ingrandisci immagine' : 'Immagine non disponibile'}
+              onClick={(e) => {
                 e.stopPropagation();
-                e.preventDefault();
                 if (!image) return;
                 onImageClick &&
                   onImageClick({
@@ -184,187 +171,202 @@ const ProductCard = memo(({ product, index, onOpen, onImageClick, shopDomain }) 
                     index: 0,
                     product: product,
                   });
-              }
-            }}
-          >
-            {image ? (
-              <img src={image.url || image} alt={product.name} />
-            ) : (
-              <div className="yuume-product-placeholder">
-                <Icons.Image />
-              </div>
-            )}
-            {(discountCode || isAutomatic || discountPercentage > 0) && (
-              <div className="yuume-product-discount-badge">
-                {discountCode
-                  ? `SCONTO: ${discountCode}`
-                  : discountPercentage > 0
-                    ? `-${discountPercentage}%`
-                    : 'OFFERTA'}
-              </div>
-            )}
-            {isAvailable && (
-              <div className="yuume-stock-status-badge-container">
-                {totalInventory > 0 && totalInventory <= 10 ? (
-                  <span className="yuume-stock-urgency-badge">Solo {totalInventory} rimasti</span>
-                ) : (
-                  <span className="yuume-stock-status-badge">
-                    <span className="yuume-stock-dot" />
-                    In stock
-                  </span>
-                )}
-              </div>
-            )}
-            {image && (
-              <div className="yuume-image-zoom-overlay" aria-hidden="true">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  role="img"
-                  aria-label="Ingrandisci immagine"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  <line x1="11" y1="8" x2="11" y2="14"></line>
-                  <line x1="8" y1="11" x2="14" y2="11"></line>
-                </svg>
-              </div>
-            )}
-          </div>
-
-          <div className="yuume-product-info">
-            <a
-              href={url}
-              className="yuume-product-link-wrapper"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (!image) return;
+                  onImageClick &&
+                    onImageClick({
+                      images: galleryImages,
+                      index: 0,
+                      product: product,
+                    });
+                }
+              }}
             >
-              <h3 className="yuume-product-name">
-                {name}
-                <Icons.ExternalLink />
-              </h3>
-            </a>
-            <div className="yuume-product-price-row">
-              <div className="yuume-price-stack">
-                {compareAtPrice > price && (
-                  <span className="yuume-original-price">
-                    {formatPrice(compareAtPrice, currency)}
-                  </span>
-                )}
-                <span className="yuume-current-price">{formatPrice(price, currency)}</span>
-              </div>
-              <button
-                className="yuume-product-details-toggle"
-                onClick={toggleFlip}
-                aria-label="Mostra descrizione prodotto"
-              >
-                DETTAGLI
-              </button>
-            </div>
-          </div>
-
-          {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
-            <div className="yuume-product-card-footer" onClick={(e) => e.stopPropagation()}>
-              {hasVariants ? (
-                <button
-                  className="yuume-options-btn"
-                  aria-label={`Seleziona opzioni per ${product.name}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    onOpen(product);
-                  }}
-                >
-                  Customize
-                </button>
+              {image ? (
+                <img src={image.url || image} alt={product.name} />
               ) : (
-                <div className="yuume-card-spacer" />
+                <div className="yuume-product-placeholder">
+                  <Icons.Image />
+                </div>
               )}
-              {isAvailable && (product.variants[0] || product.variantId) && (
-                <div className="yuume-add-to-cart-wrapper">
-                  {showCheckout ? (
-                    <CheckoutButton compact={true} />
+              {(discountCode || isAutomatic || discountPercentage > 0) && (
+                <div className="yuume-product-discount-badge">
+                  {discountCode
+                    ? `SCONTO: ${discountCode}`
+                    : discountPercentage > 0
+                      ? `-${discountPercentage}%`
+                      : 'OFFERTA'}
+                </div>
+              )}
+              {isAvailable && (
+                <div className="yuume-stock-status-badge-container">
+                  {totalInventory > 0 && totalInventory <= 10 ? (
+                    <span className="yuume-stock-urgency-badge">Solo {totalInventory} rimasti</span>
                   ) : (
+                    <span className="yuume-stock-status-badge">
+                      <span className="yuume-stock-dot" />
+                      In stock
+                    </span>
+                  )}
+                </div>
+              )}
+              {image && (
+                <div className="yuume-image-zoom-overlay" aria-hidden="true">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    role="img"
+                    aria-label="Ingrandisci immagine"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            <div className="yuume-product-info">
+              <a
+                href={url}
+                className="yuume-product-link-wrapper"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="yuume-product-name">
+                  {name}
+                  <Icons.ExternalLink />
+                </h3>
+              </a>
+              <div className="yuume-product-price-row">
+                <div className="yuume-price-stack">
+                  {compareAtPrice > price && (
+                    <span className="yuume-original-price">
+                      {formatPrice(compareAtPrice, currency)}
+                    </span>
+                  )}
+                  <span className="yuume-current-price">{formatPrice(price, currency)}</span>
+                </div>
+                <button
+                  className="yuume-product-details-toggle"
+                  onClick={toggleFlip}
+                  aria-label="Mostra descrizione prodotto"
+                >
+                  DETTAGLI
+                </button>
+              </div>
+            </div>
+
+            {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
+              <div className="yuume-product-card-footer" onClick={(e) => e.stopPropagation()}>
+                {hasVariants ? (
+                  <button
+                    className="yuume-options-btn"
+                    aria-label={`Seleziona opzioni per ${product.name}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      onOpen(product);
+                    }}
+                  >
+                    Customize
+                  </button>
+                ) : (
+                  <div className="yuume-card-spacer" />
+                )}
+                {isAvailable && (product.variants[0] || product.variantId) && (
+                  <div className="yuume-add-to-cart-wrapper">
                     <AddToCartButton
                       variantId={product.variants[0]?.id || product.variantId}
                       shopDomain={shopDomain}
                       quantity={1}
                       compact={true}
-                      onAnimationComplete={() => setShowCheckout(true)}
+                      onAnimationComplete={() => onProductAction && onProductAction('add_to_cart')}
                     />
-                  )}
-                </div>
-              )}
-            </div>
-          ) : null}
-        </div>
-
-        {/* --- BACK SIDE --- */}
-        <div className="yuume-product-side yuume-card-back">
-          <div className="yuume-back-content">
-            <div className="yuume-back-header">
-              <div className="yuume-back-title">{name}</div>
-            </div>
-
-            <div className="yuume-product-details-list">
-              <div className="yuume-detail-item">
-                <p className="yuume-product-description">
-                  {description || 'No description available for this product.'}
-                </p>
-              </div>
-
-              <div className="yuume-detail-grid">
-                {vendor && (
-                  <div className="yuume-detail-item">
-                    <span className="label">Brand</span>
-                    <span className="value">{vendor}</span>
-                  </div>
-                )}
-
-                {productType && (
-                  <div className="yuume-detail-item">
-                    <span className="label">Type</span>
-                    <span className="value">{productType}</span>
                   </div>
                 )}
               </div>
-
-              {product.tags && product.tags.length > 0 && (
-                <div className="yuume-detail-item">
-                  <span className="label">Tags</span>
-                  <div className="yuume-product-tags">
-                    {product.tags.slice(0, 5).map((tag) => (
-                      <span key={tag} className="yuume-tag-pill">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            <a href={url} className="yuume-view-in-store-btn" onClick={(e) => e.stopPropagation()}>
-              View in Store
-              <Icons.ExternalLink />
-            </a>
+            ) : null}
           </div>
 
-          <button className="yuume-back-return-overlay-btn" onClick={toggleFlip}>
-            <Icons.Close />
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  );
-});
+          {/* --- BACK SIDE --- */}
+          <div className="yuume-product-side yuume-card-back">
+            <div className="yuume-back-content">
+              <div className="yuume-back-header">
+                <div className="yuume-back-title">{name}</div>
+              </div>
 
-export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
+              <div className="yuume-product-details-list">
+                <div className="yuume-detail-item">
+                  <p className="yuume-product-description">
+                    {description || 'No description available for this product.'}
+                  </p>
+                </div>
+
+                <div className="yuume-detail-grid">
+                  {vendor && (
+                    <div className="yuume-detail-item">
+                      <span className="label">Brand</span>
+                      <span className="value">{vendor}</span>
+                    </div>
+                  )}
+
+                  {productType && (
+                    <div className="yuume-detail-item">
+                      <span className="label">Type</span>
+                      <span className="value">{productType}</span>
+                    </div>
+                  )}
+                </div>
+
+                {product.tags && product.tags.length > 0 && (
+                  <div className="yuume-detail-item">
+                    <span className="label">Tags</span>
+                    <div className="yuume-product-tags">
+                      {product.tags.slice(0, 5).map((tag) => (
+                        <span key={tag} className="yuume-tag-pill">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <a
+                href={url}
+                className="yuume-view-in-store-btn"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                View in Store
+                <Icons.ExternalLink />
+              </a>
+            </div>
+
+            <button className="yuume-back-return-overlay-btn" onClick={toggleFlip}>
+              <Icons.Close />
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  },
+);
+
+export const ProductDrawer = memo(({ product, onClose, shopDomain, onProductAction }) => {
   React.useEffect(() => {
     return () => {};
   }, [product.name]);
@@ -393,7 +395,6 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   });
 
   const [currentVariant, setCurrentVariant] = React.useState(normalized.variants[0] || null);
-  const [showCheckout, setShowCheckout] = React.useState(false);
 
   React.useEffect(() => {
     const found = normalized.variants.find(
@@ -416,16 +417,12 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   const footer = (
     <>
       {isAvailableResult && (currentVariant || normalized.variants[0]) ? (
-        showCheckout ? (
-          <CheckoutButton />
-        ) : (
-          <AddToCartButton
-            variantId={currentVariant?.id || normalized.variants[0].id}
-            shopDomain={shopDomain}
-            quantity={1}
-            onAnimationComplete={() => setShowCheckout(true)}
-          />
-        )
+        <AddToCartButton
+          variantId={currentVariant?.id || normalized.variants[0].id}
+          shopDomain={shopDomain}
+          quantity={1}
+          onAnimationComplete={() => onProductAction && onProductAction('add_to_cart')}
+        />
       ) : (
         <button className="yuume-add-to-cart-btn disabled" disabled>
           Prodotto Esaurito
@@ -491,7 +488,16 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
 });
 
 const ProductCards = memo(
-  ({ message, shopDomain, onOpen, onImageClick, activeProduct, chatColors, sendFeedback }) => {
+  ({
+    message,
+    shopDomain,
+    onOpen,
+    onImageClick,
+    activeProduct,
+    chatColors,
+    sendFeedback,
+    onProductAction,
+  }) => {
     const { products = [], message: displayMessage } = message;
     const scrollRef = React.useRef(null);
     const [showLeftArrow, setShowLeftArrow] = React.useState(false);
@@ -584,6 +590,7 @@ const ProductCards = memo(
                 onOpen={onOpen}
                 onImageClick={onImageClick}
                 shopDomain={shopDomain}
+                onProductAction={onProductAction}
               />
             ))}
           </div>

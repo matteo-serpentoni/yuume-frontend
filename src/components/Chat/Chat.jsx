@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useChat } from '../../hooks/useChat';
 import './Chat.css';
 
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import MessageInput from './MessageInput';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
@@ -39,6 +39,8 @@ const Chat = ({
   const [activeProduct, setActiveProduct] = useState(null);
   const [activeOrder, setActiveOrder] = useState(null);
   const [activeGallery, setActiveGallery] = useState(null); // { images: [], index: 0 }
+  const [showCheckoutSuggestion, setShowCheckoutSuggestion] = useState(false);
+  const [hasActedOnProduct, setHasActedOnProduct] = useState(false);
 
   // Use custom hook for live chat logic, but ONLY if NOT in preview mode
   const liveChat = useChat(devShopDomain, null, { disabled: isPreview });
@@ -192,6 +194,10 @@ const Chat = ({
               handleSuggestionClick={handleSuggestionClick}
               sendFeedback={sendFeedback}
               onImageClick={setActiveGallery}
+              onProductAction={() => {
+                setShowCheckoutSuggestion(true);
+                setHasActedOnProduct(true);
+              }}
             />
 
             {/* Conversation Ended Separator & Rating */}
@@ -207,15 +213,46 @@ const Chat = ({
               </div>
             )}
 
-            {/* Initial Suggestions (Show only at the very beginning) */}
-            {initialSuggestions.length > 0 && messages.length <= 1 && (
-              <div className="initial-suggestions-container">
-                <Suggestions
-                  suggestions={initialSuggestions}
-                  onSuggestionClick={handleSuggestionClick}
-                />
+            {/* Global Suggestions Area (Initial or Action-based) */}
+            {(initialSuggestions.length > 0 && messages.length <= 1 && !hasActedOnProduct) ||
+            showCheckoutSuggestion ? (
+              <div className="global-suggestions-container">
+                <AnimatePresence mode="wait">
+                  {showCheckoutSuggestion ? (
+                    <motion.div
+                      key="checkout-suggestion"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                    >
+                      <Suggestions
+                        suggestions={[
+                          { label: 'Checkout 🛍️', value: 'Checkout', variant: 'checkout' },
+                        ]}
+                        onSuggestionClick={() => {
+                          setShowCheckoutSuggestion(false);
+                          window.parent.postMessage({ type: 'YUUME:checkout' }, '*');
+                        }}
+                      />
+                    </motion.div>
+                  ) : (
+                    messages.length <= 1 && (
+                      <motion.div
+                        key="initial-suggestions"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                      >
+                        <Suggestions
+                          suggestions={initialSuggestions}
+                          onSuggestionClick={handleSuggestionClick}
+                        />
+                      </motion.div>
+                    )
+                  )}
+                </AnimatePresence>
               </div>
-            )}
+            ) : null}
 
             <MessageInput
               onSendMessage={(text) => {
@@ -301,6 +338,10 @@ const Chat = ({
             product={activeProduct}
             onClose={() => setActiveProduct(null)}
             shopDomain={shopDomain}
+            onProductAction={() => {
+              setShowCheckoutSuggestion(true);
+              setHasActedOnProduct(true);
+            }}
           />
         )}
       </AnimatePresence>

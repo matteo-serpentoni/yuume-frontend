@@ -14,7 +14,7 @@ const Suggestions = memo(({ suggestions, onSuggestionClick }) => {
       {suggestions.map((s, idx) => (
         <motion.button
           key={idx}
-          className="yuume-suggestion-chip"
+          className={`yuume-suggestion-chip ${s.variant || ''}`}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{

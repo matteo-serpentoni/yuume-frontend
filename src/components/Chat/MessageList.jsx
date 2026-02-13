@@ -32,6 +32,7 @@ const MessageList = ({
   handleSuggestionClick,
   sendFeedback,
   onImageClick,
+  onProductAction,
 }) => {
   const messagesAreaRef = useRef(null);
   const lastMessageRef = useRef(null);
@@ -131,6 +132,7 @@ const MessageList = ({
           activeProduct={activeProduct}
           chatColors={chatColors}
           sendFeedback={sendFeedback}
+          onProductAction={onProductAction}
         />
       );
     }

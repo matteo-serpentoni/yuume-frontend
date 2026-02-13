@@ -45,12 +45,12 @@
   padding: 0 var(--orb-h-padding-messages, 16px) 24px var(--orb-h-padding-messages, 16px);
 }
 
-.initial-suggestions-container {
+.global-suggestions-container {
   padding: 0 var(--orb-h-padding-messages, 20px);
   margin-bottom: 8px;
 }
 
-.initial-suggestions-container .yuume-suggestions {
+.global-suggestions-container .yuume-suggestions {
   margin-top: 0;
   justify-content: flex-start;
 }

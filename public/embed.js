@@ -372,7 +372,7 @@
     // CHECKOUT
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === 'YUUME:checkout') {
-      window.location.href = '/checkout';
+      window.open('/checkout', '_blank');
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
