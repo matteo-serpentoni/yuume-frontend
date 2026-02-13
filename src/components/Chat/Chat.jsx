@@ -54,6 +54,7 @@ const Chat = ({
   const connectionStatus = isPreview ? previewConnectionStatus : liveChat.connectionStatus;
   const assignedTo = isPreview ? previewAssignedTo || null : liveChat.assignedTo;
   const initialSuggestions = isPreview ? [] : liveChat.initialSuggestions;
+  const cartCount = isPreview ? 0 : liveChat.cartCount;
 
   const isThinking = isPreview ? false : liveChat.isThinking;
   const thinkingIntent = isPreview ? null : liveChat.thinkingIntent;
@@ -227,7 +228,11 @@ const Chat = ({
                     >
                       <Suggestions
                         suggestions={[
-                          { label: 'Checkout 🛍️', value: 'Checkout', variant: 'checkout' },
+                          {
+                            label: `Vai al checkout (${cartCount})`,
+                            value: 'Checkout',
+                            variant: 'checkout',
+                          },
                         ]}
                         onSuggestionClick={() => {
                           setShowCheckoutSuggestion(false);

@@ -93,6 +93,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   // Connection Status logic
   const [connectionStatus, setConnectionStatus] = useState('online');
+  const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
     if (disabled) return;
@@ -248,12 +249,12 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     return () => clearInterval(interval);
   }, [clearChat, disabled]);
 
-  // Listen for Identity from Parent (Shopify Storefront)
+  // Listen for Identity and Cart from Parent (Shopify Storefront)
   useEffect(() => {
     if (disabled) return;
 
     const handleMessage = (event) => {
-      // Listen for both YUUME:identity and YUUME:shopDomain
+      // 1. Identity & ShopDomain
       if (event.data?.type === 'YUUME:identity' || event.data?.type === 'YUUME:shopDomain') {
         const customer = event.data.customer || event.data.shopifyCustomer;
 
@@ -273,11 +274,24 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           localStorage.removeItem('yuume_shopify_customer');
         }
       }
+
+      // 2. Cart Updates (initial or after add-to-cart)
+      if (
+        event.data?.type === 'YUUME:cartUpdate' ||
+        event.data?.type === 'YUUME:addToCartResponse'
+      ) {
+        const cart = event.data.cart || event.data.data?.cart;
+        if (cart) {
+          setCartCount(cart.item_count || 0);
+        }
+      }
     };
 
     window.addEventListener('message', handleMessage);
-    // Request identity from parent in case it was already sent
+
+    // Request identity and current cart status from parent
     window.parent?.postMessage({ type: 'YUUME:ready' }, '*');
+    window.parent?.postMessage({ type: 'YUUME:getCart' }, '*');
 
     return () => window.removeEventListener('message', handleMessage);
   }, [disabled]);
@@ -662,7 +676,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     messages,
     loading,
     shopDomain,
-    connectionStatus, // Return connection status
+    connectionStatus,
+    cartCount,
     sessionId,
     sessionStatus,
     assignedTo, // Return assignedTo

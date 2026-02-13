@@ -248,6 +248,24 @@
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // GET CART
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (event.data.type === 'YUUME:getCart') {
+      fetch('/cart.js', { credentials: 'same-origin' })
+        .then((r) => r.json())
+        .then((cart) => {
+          iframe.contentWindow.postMessage(
+            {
+              type: 'YUUME:cartUpdate',
+              cart: cart,
+            },
+            WIDGET_ORIGIN,
+          );
+        })
+        .catch(() => {});
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // ADD TO CART
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === 'YUUME:addToCart') {
