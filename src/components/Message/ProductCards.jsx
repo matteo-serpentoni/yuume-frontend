@@ -2,6 +2,7 @@ import React, { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import AddToCartButton from './AddToCartButton';
 import CheckoutButton from './CheckoutButton';
+import MessageBubble from '../Chat/MessageBubble';
 import Drawer from '../UI/Drawer';
 import { formatPrice } from '../../utils/messageHelpers';
 import { normalizeStorefrontProduct, isDefaultVariant } from '../../utils/shopifyUtils';
@@ -489,110 +490,126 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain }) => {
   );
 });
 
-const ProductCards = memo(({ message, shopDomain, onOpen, onImageClick, activeProduct }) => {
-  const { products = [], message: displayMessage } = message;
-  const scrollRef = React.useRef(null);
-  const [showLeftArrow, setShowLeftArrow] = React.useState(false);
-  const [showRightArrow, setShowRightArrow] = React.useState(true);
+const ProductCards = memo(
+  ({ message, shopDomain, onOpen, onImageClick, activeProduct, chatColors, sendFeedback }) => {
+    const { products = [], message: displayMessage } = message;
+    const scrollRef = React.useRef(null);
+    const [showLeftArrow, setShowLeftArrow] = React.useState(false);
+    const [showRightArrow, setShowRightArrow] = React.useState(true);
 
-  const checkScroll = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setShowLeftArrow(scrollLeft > 10);
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    const checkScroll = () => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        setShowLeftArrow(scrollLeft > 10);
+        setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+      }
+    };
+
+    React.useEffect(() => {
+      const el = scrollRef.current;
+      if (el) {
+        el.addEventListener('scroll', checkScroll);
+        // Initial check
+        checkScroll();
+        return () => el.removeEventListener('scroll', checkScroll);
+      }
+    }, [products]);
+
+    const scroll = (direction) => {
+      if (scrollRef.current) {
+        const container = scrollRef.current;
+        const cardWidth =
+          container.querySelector('.yuume-product-card-minimal')?.offsetWidth || 240;
+        const gap = 12;
+        const scrollAmount = direction === 'next' ? cardWidth + gap : -(cardWidth + gap);
+
+        container.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth',
+        });
+      }
+    };
+
+    if (!Array.isArray(products) || products.length === 0) {
+      return (
+        <div className="yuume-no-products">
+          Non ho trovato prodotti che corrispondono alla tua ricerca.
+        </div>
+      );
     }
-  };
 
-  React.useEffect(() => {
-    const el = scrollRef.current;
-    if (el) {
-      el.addEventListener('scroll', checkScroll);
-      // Initial check
-      checkScroll();
-      return () => el.removeEventListener('scroll', checkScroll);
-    }
-  }, [products]);
-
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const container = scrollRef.current;
-      const cardWidth = container.querySelector('.yuume-product-card-minimal')?.offsetWidth || 240;
-      const gap = 12;
-      const scrollAmount = direction === 'next' ? cardWidth + gap : -(cardWidth + gap);
-
-      container.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth',
-      });
-    }
-  };
-
-  if (!Array.isArray(products) || products.length === 0) {
     return (
-      <div className="yuume-no-products">
-        Non ho trovato prodotti che corrispondono alla tua ricerca.
+      <div className="yuume-products-container">
+        {displayMessage && (
+          <MessageBubble
+            sender={message.sender || 'assistant'}
+            timestamp={message.timestamp}
+            chatColors={chatColors}
+            className="yuume-products-message-bubble"
+            feedback={message.feedback}
+            onFeedback={(type) => sendFeedback(message.id, type, message.text)}
+            showFeedback={
+              message.sender === 'assistant' && !message.error && !message.disableFeedback
+            }
+          >
+            {displayMessage}
+          </MessageBubble>
+        )}
+        <div className="yuume-carousel-wrapper">
+          {showLeftArrow && (
+            <button
+              className="yuume-carousel-nav-btn prev"
+              onClick={() => scroll('prev')}
+              aria-label="Prodotto precedente"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+          )}
+
+          <div className="yuume-products-list" ref={scrollRef}>
+            {products.map((product, index) => (
+              <ProductCard
+                key={product.id || index}
+                product={product}
+                index={index}
+                onOpen={onOpen}
+                onImageClick={onImageClick}
+                shopDomain={shopDomain}
+              />
+            ))}
+          </div>
+
+          {showRightArrow && products.length > 1 && (
+            <button
+              className="yuume-carousel-nav-btn next"
+              onClick={() => scroll('next')}
+              aria-label="Prodotto successivo"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
     );
-  }
-
-  return (
-    <div className="yuume-products-container">
-      {/* displayMessage removed to save space as per user request */}
-
-      <div className="yuume-carousel-wrapper">
-        {showLeftArrow && (
-          <button
-            className="yuume-carousel-nav-btn prev"
-            onClick={() => scroll('prev')}
-            aria-label="Prodotto precedente"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-          </button>
-        )}
-
-        <div className="yuume-products-list" ref={scrollRef}>
-          {products.map((product, index) => (
-            <ProductCard
-              key={product.id || index}
-              product={product}
-              index={index}
-              onOpen={onOpen}
-              onImageClick={onImageClick}
-              shopDomain={shopDomain}
-            />
-          ))}
-        </div>
-
-        {showRightArrow && products.length > 1 && (
-          <button
-            className="yuume-carousel-nav-btn next"
-            onClick={() => scroll('next')}
-            aria-label="Prodotto successivo"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </button>
-        )}
-      </div>
-    </div>
-  );
-});
+  },
+);
 
 export default ProductCards;

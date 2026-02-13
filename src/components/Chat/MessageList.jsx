@@ -129,6 +129,8 @@ const MessageList = ({
           onOpen={setActiveProduct}
           onImageClick={onImageClick}
           activeProduct={activeProduct}
+          chatColors={chatColors}
+          sendFeedback={sendFeedback}
         />
       );
     }
