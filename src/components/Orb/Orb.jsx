@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo, Suspense, lazy } from 'react';
 import { Renderer, Program, Mesh, Triangle, Vec3 } from 'ogl';
 import Chat from '../Chat/Chat';
 import ChatPreview from '../Chat/ChatPreview';
-import DevTools from '../Dev/DevTools';
+// Lazy-load DevTools only in development (tree-shaken from prod bundle)
+const DevTools = import.meta.env.DEV ? lazy(() => import('../Dev/DevTools')) : null;
 import { useOrb } from '../../hooks/useOrb';
 import { getCssVariable } from '../../utils/domUtils';
 import { vec3ToRgbString } from '../../utils/colorUtils';
@@ -405,13 +406,15 @@ const Orb = memo(
       <>
         {/* ✅ FUNZIONALITÀ: Dev Tools (Solo in sviluppo locale e non preview) */}
         {/* Rendered outside the orb-container to avoid mobile clipping/centering issues */}
-        {mode === 'development' && (
-          <DevTools
-            currentConfig={config}
-            onConfigChange={setConfig}
-            onSiteChange={setShopDomain}
-            onMobileToggle={setForcedMobile}
-          />
+        {import.meta.env.DEV && DevTools && mode === 'development' && (
+          <Suspense fallback={null}>
+            <DevTools
+              currentConfig={config}
+              onConfigChange={setConfig}
+              onSiteChange={setShopDomain}
+              onMobileToggle={setForcedMobile}
+            />
+          </Suspense>
         )}
 
         <div
