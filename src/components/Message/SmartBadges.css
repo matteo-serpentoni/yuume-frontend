@@ -1,0 +1,149 @@
+/* ─── Smart Badges Bars ─────────────────────────────────── */
+.yuume-smart-badges-bars {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  padding-top: 0px;
+}
+
+/* ─── Badge Bar ───────────────────────────────────────── */
+.yuume-smart-badge-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1 1 calc(50% - 2px); /* Exactly half minus half-gap → always 2 per row */
+  min-width: 0; /* Allow full shrink so they always fit */
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.yuume-smart-badge-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.yuume-smart-badge-bar:hover {
+  transform: translateX(4px);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ─── Icon & Text ─────────────────────────────────────── */
+.yuume-smart-badge-bar .badge-icon-container {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.yuume-smart-badge-bar .badge-icon-container svg {
+  width: 9px;
+  height: 9px;
+}
+
+/* Status indicators (✓ / ✗) for constraint badges */
+.yuume-smart-badge-bar .badge-status-icon {
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.yuume-smart-badge-bar.match .badge-status-icon {
+  color: #22c55e;
+}
+
+.yuume-smart-badge-bar.mismatch .badge-status-icon {
+  color: #ef4444;
+}
+
+.yuume-smart-badge-bar .badge-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+  min-width: 0; /* Critical for truncation in flex */
+}
+
+.yuume-smart-badge-bar .badge-label {
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.yuume-smart-badge-bar .badge-value {
+  font-size: 10px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Themes (Based on concept) ───────────────────────── */
+
+/* Gold (Skin Type) */
+.yuume-smart-badge-bar:has(.badge-icon-container [class*='skin_type']),
+.yuume-smart-badge-bar.skin_type {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(120, 53, 15, 0.1) 100%);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+.yuume-smart-badge-bar:has(.badge-icon-container [class*='skin_type']) .badge-icon-container,
+.yuume-smart-badge-bar.skin_type .badge-icon-container {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #451a03;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+}
+
+/* Purple (Nickel Free) */
+.yuume-smart-badge-bar:has(.badge-icon-container [class*='nickel_free']),
+.yuume-smart-badge-bar.nickel_free {
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(91, 33, 182, 0.1) 100%);
+  border-color: rgba(167, 139, 250, 0.3);
+}
+.yuume-smart-badge-bar:has(.badge-icon-container [class*='nickel_free']) .badge-icon-container,
+.yuume-smart-badge-bar.nickel_free .badge-icon-container {
+  background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+  color: #1e1b4b;
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.4);
+}
+
+/* Blue (Ingredient) */
+.yuume-smart-badge-bar:has(.badge-icon-container [class*='ingredient']),
+.yuume-smart-badge-bar.ingredient {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, rgba(30, 64, 175, 0.1) 100%);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+.yuume-smart-badge-bar:has(.badge-icon-container [class*='ingredient']) .badge-icon-container,
+.yuume-smart-badge-bar.ingredient .badge-icon-container {
+  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+  color: #082f49;
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+}
+
+/* Ingredients: Always full width */
+.yuume-smart-badge-bar.ingredient {
+  flex: 1 1 100% !important;
+}

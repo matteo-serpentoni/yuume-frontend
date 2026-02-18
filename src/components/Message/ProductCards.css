@@ -89,7 +89,7 @@
 
 .yuume-product-card-perspective {
   perspective: 1000px;
-  flex: 0 0 240px; /* Snimmer width for portrait layout */
+  flex: 0 0 270px; /* Wider for better text readability */
   scroll-snap-align: start;
 }
 
@@ -105,17 +105,14 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  height: 345px; /* Final compact height to eliminate dead space */
-}
-
-.yuume-product-card-minimal.is-flipped {
-  transform: rotateY(180deg);
+  min-height: 0; /* Let content define height */
+  height: auto;
+  display: grid; /* Use grid to stack sides */
+  grid-template-areas: 'stack';
 }
 
 .yuume-product-side {
-  position: absolute;
-  top: 0;
-  left: 0;
+  grid-area: stack; /* Both sides occupy same space */
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
@@ -124,21 +121,27 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 5px; /* Tight padding */
+  padding: 6px; /* Tighter breathing room */
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
-  gap: 2px; /* Minimal gap */
+  gap: 8px;
+  position: relative; /* Default relative for the first side to define height */
 }
 
+/* Back side MUST be absolute to not affect height if it's different, 
+   but ideally we want them same height. For flip cards, we take the largest. */
 .yuume-card-back {
+  position: absolute;
+  top: 0;
+  left: 0;
   transform: rotateY(180deg);
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px;
+  padding: 16px;
 }
 
 /* Interaction layers */
@@ -170,7 +173,7 @@
 /* Hero Image Section */
 .yuume-product-card-minimal .yuume-product-image-container {
   width: 100%;
-  aspect-ratio: 1 / 1; /* Square for perfect product fit */
+  aspect-ratio: 1 / 0.45; /* Ultra-compact image */
   border-radius: 12px;
   background: #ffffff; /* White background to blend with product images */
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -230,7 +233,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain; /* Safe for products, no cropping */
-  padding: 0; /* Align perfectly with edges */
+  padding: 6px; /* Tighter contained image look */
   transition: transform 0.4s cubic-bezier(0.2, 0, 0.2, 1);
 }
 
@@ -298,8 +301,9 @@
 .yuume-product-info {
   display: flex;
   flex-direction: column;
-  padding: 4px 6px 0 6px;
-  gap: 2px; /* Close the gap between title and price */
+  padding: 4px 8px 2px 8px;
+  gap: 4px;
+  flex: 1; /* Take remaining space */
 }
 
 .yuume-product-card-minimal .yuume-product-name {
@@ -314,7 +318,7 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: 34px; /* Tight fixed height for 2 lines */
+  height: 30px; /* Tight fixed height for 2 lines */
 }
 
 .yuume-product-link-wrapper {
@@ -350,8 +354,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 24px; /* Compact height */
-  padding-bottom: 2px;
+  height: 20px; /* Ultra compact */
+  padding-bottom: 0px;
 }
 
 .yuume-price-stack {
@@ -397,33 +401,34 @@
 
 .yuume-options-btn {
   flex: 1;
-  height: 32px !important;
-  border-radius: 10px;
-  border: 1.5px solid #f1f5f9;
+  height: 30px !important;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
   background: #ffffff;
-  color: #64748b;
-  font-family: 'Inter', Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: none;
   letter-spacing: -0.01em;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   margin: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .yuume-options-btn:hover {
   background: #f8fafc;
-  border-color: #e2e8f0;
-  color: #0f172a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
 }
 
 .yuume-product-card-footer .yuume-add-to-cart-wrapper {
-  flex: 1;
+  flex: 1.2;
   display: flex;
   width: 100%;
 }
@@ -687,18 +692,19 @@
 }
 
 .yuume-stock-status-badge {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 9px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 10px;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .yuume-stock-urgency-badge {

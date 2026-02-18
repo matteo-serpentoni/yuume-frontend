@@ -1,6 +1,7 @@
 import React, { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import AddToCartButton from './AddToCartButton';
+import SmartBadges from './SmartBadges';
 import MessageBubble from '../Chat/MessageBubble';
 import Drawer from '../UI/Drawer';
 import { formatPrice } from '../../utils/messageHelpers';
@@ -94,7 +95,7 @@ const Icons = {
 };
 
 const ProductCard = memo(
-  ({ product, index, onOpen, onImageClick, shopDomain, onProductAction }) => {
+  ({ product, index, onOpen, onImageClick, shopDomain, onProductAction, sendMessage }) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
     const normalizedProduct = normalizeStorefrontProduct(product);
@@ -264,9 +265,15 @@ const ProductCard = memo(
                   onClick={toggleFlip}
                   aria-label="Mostra descrizione prodotto"
                 >
-                  DETTAGLI
+                  DETAILS
                 </button>
               </div>
+
+              {product.smartBadges?.length > 0 && (
+                <div className="yuume-card-badges-wrapper">
+                  <SmartBadges badges={product.smartBadges} />
+                </div>
+              )}
             </div>
 
             {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
@@ -497,6 +504,7 @@ const ProductCards = memo(
     chatColors,
     sendFeedback,
     onProductAction,
+    sendMessage,
   }) => {
     const { products = [], message: displayMessage } = message;
     const scrollRef = React.useRef(null);
@@ -591,6 +599,7 @@ const ProductCards = memo(
                 onImageClick={onImageClick}
                 shopDomain={shopDomain}
                 onProductAction={onProductAction}
+                sendMessage={sendMessage}
               />
             ))}
           </div>
