@@ -187,19 +187,22 @@
 .add-to-cart.yuume-add-to-cart-btn {
   --text-x: 6px; /* Even closer as requested */
   --cart-x: -38px; /* Adjusted for tighter space */
+  --text-color: #ffffff;
   padding: 0;
   width: 100% !important;
-  height: 32px !important;
+  height: 34px !important; /* Match Customize btn */
   transform: none !important;
 }
 
 .add-to-cart.yuume-add-to-cart-btn span {
-  font-size: 12px !important;
-  line-height: 32px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 34px !important;
+  color: #ffffff !important;
 }
 
 .add-to-cart.yuume-add-to-cart-btn .cart {
-  top: 3px;
+  top: 4px;
 }
 
 .add-to-cart.yuume-add-to-cart-btn .morph {
@@ -213,7 +216,10 @@
 }
 
 .add-to-cart.yuume-add-to-cart-btn:before {
-  border-radius: 10px;
+  border-radius: 14px;
+  background: #0f172a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* CONTAINER */

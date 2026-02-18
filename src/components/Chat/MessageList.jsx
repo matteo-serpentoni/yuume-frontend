@@ -133,6 +133,7 @@ const MessageList = ({
           chatColors={chatColors}
           sendFeedback={sendFeedback}
           onProductAction={onProductAction}
+          sendMessage={sendMessage}
         />
       );
     }
