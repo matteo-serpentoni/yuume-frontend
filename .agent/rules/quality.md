@@ -6,11 +6,13 @@ These rules define the code style and quality standards for yuume-widget.
 
 - **ESLint**: No code should be committed if 'npm run lint' fails.
 - **Prettier**: Run 'npm run format' before committing.
+- **Knip**: Run 'npm run knip' periodically to detect unused exports, dead code, and orphan files. Address findings before they accumulate.
 
 ## 2. Imports
 
 - **Order**: Organize imports: React first, then external libs, then internal modules, then styles.
 - **ESM**: Use ES Modules exclusively ('import/export').
+- **No Unused Imports**: Remove unused imports immediately. Do not leave them "for later".
 
 ## 3. DRY Principle & UI Consistency
 
@@ -23,3 +25,9 @@ These rules define the code style and quality standards for yuume-widget.
 - **Value-Driven**: Add comments only if they explain "why" something is done or provide non-obvious context. Avoid redundant comments that restate the code.
 - **Tone**: Keep comments professional and technical. No emojis allowed in the codebase.
 - **No Emojis**: **NEVER use emojis in code comments.** They are reserved for commit messages and UI feedback if necessary, but not the codebase.
+
+## 5. Debugging & Logging
+
+- **No debug console.error**: NEVER use 'console.error' as a debugging tool. These appear as red errors in production and mislead developers. Use devtools, breakpoints, or WDYR instead.
+- **Legitimate console.error**: Only use 'console.error' for actual error handling in catch blocks where the error is meaningful to surface.
+- **Dev-only tools**: The project includes 'why-did-you-render' (WDYR) for tracking unnecessary re-renders. It activates automatically in dev mode via 'src/wdyr.js'.
