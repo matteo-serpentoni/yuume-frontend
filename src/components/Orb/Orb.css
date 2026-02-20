@@ -10,7 +10,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition:
+    width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-radius 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: default;
   z-index: 1000;
 }
@@ -41,10 +44,10 @@
   width: 100%;
   height: 100%;
   z-index: 10;
-  /* Visually on top */
   pointer-events: none;
-  /* Let clicks pass through to chat */
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition:
+    opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .orb-canvas-layer canvas {
@@ -79,7 +82,10 @@
   -webkit-mask-image: none;
 
   will-change: transform;
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition:
+    width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* LIQUID GLASS LAYER - Inner content with filter */
@@ -326,7 +332,11 @@
   border: none;
 
   pointer-events: auto;
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition:
+    width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* DESKTOP-ONLY LIGHTER GLASS */
@@ -378,8 +388,8 @@
   right: auto;
 
   /* Optimize performance */
-  will-change: width, height, top, left, transform, border-radius;
-  /* NO transition on top/left/transform for mobile to prevent jumping during layout updates */
+  /* Optimize performance — limit will-change to transition properties only */
+  will-change: width, height, border-radius;
   transition:
     width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
     height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -444,25 +454,29 @@
 
 .orb-container.mobile-device:not(.minimized) .orb-glass-layer {
   border-radius: 24px;
-  /* Boost brightness/saturation for mobile to make it pop */
-  filter: brightness(1.2) saturate(1.4);
-
-  /* RESTORE BACKDROP BLUR for Premium Feel - Optimized for Mobile Performance */
-  /* Reduced from 20px to 10px to minimize GPU workload on average devices */
-  backdrop-filter: blur(10px) saturate(180%) brightness(1.05);
-  -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.05);
+  /* Lighter blur than desktop (12px vs 20px) to reduce GPU load while keeping frosted glass look */
+  backdrop-filter: blur(12px) saturate(150%) brightness(1.05);
+  -webkit-backdrop-filter: blur(12px) saturate(150%) brightness(1.05);
+  filter: none;
 
   /* Glass Edge - Subtle luminous border */
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-sizing: border-box;
 
-  /* Enhanced Gradient: More opaque center for legibility, milky fade */
+  /* Slightly more opaque gradient for mobile legibility */
   background: radial-gradient(
     circle at 50% 50%,
-    color-mix(in srgb, var(--orb-theme-color, #6464ff), transparent 30%),
+    color-mix(in srgb, var(--orb-theme-color, #6464ff), transparent 20%),
     rgba(255, 255, 255, 0.05) 80%,
     transparent 100%
   );
+}
+
+/* Disable expensive blob animations on mobile card mode */
+.orb-container.mobile-device:not(.minimized) .glass-blobs,
+.orb-container.mobile-device:not(.minimized) .glass-blobs::before,
+.orb-container.mobile-device:not(.minimized) .glass-blobs::after {
+  animation: none;
 }
 
 /* FEEDBACK ANIMATION */

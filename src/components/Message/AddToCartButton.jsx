@@ -79,6 +79,9 @@ const AddToCartButton = memo(
       const button = buttonRef.current;
       if (!button) return;
 
+      // Collect all animation timer IDs so we can cancel them on cleanup
+      const timers = [];
+
       const handlePointerDown = (e) => {
         if (!button || button.classList.contains('active')) {
           return;
@@ -86,11 +89,18 @@ const AddToCartButton = memo(
         if (button.style) {
           button.style.setProperty('--background-scale', '0.97');
         }
-        setTimeout(() => {
-          if (button && button.classList && !button.classList.contains('active') && button.style) {
-            button.style.setProperty('--background-scale', '1');
-          }
-        }, 150);
+        timers.push(
+          setTimeout(() => {
+            if (
+              button &&
+              button.classList &&
+              !button.classList.contains('active') &&
+              button.style
+            ) {
+              button.style.setProperty('--background-scale', '1');
+            }
+          }, 150),
+        );
       };
 
       const handleClick = async (e) => {
@@ -99,147 +109,174 @@ const AddToCartButton = memo(
           return;
         }
 
-        // Chiamata API Shopify
         await addToCart();
 
         button.classList.add('active');
 
-        // Simulazione animazioni GSAP con CSS transitions e timeouts
         // Background scale
         button.style.setProperty('--background-scale', '0.97');
-        setTimeout(() => {
-          button.style.setProperty('--background-scale', '1');
-        }, 275);
+        timers.push(
+          setTimeout(() => {
+            button.style.setProperty('--background-scale', '1');
+          }, 275),
+        );
 
-        // Morph animation (the "hole" effect) - PARTE SUBITO (effetto pressione)
+        // Morph animation
         const morphPath = button.querySelector('.morph path');
         if (morphPath) {
-          setTimeout(() => {
-            const path = button.querySelector('.morph path');
-            if (path) {
-              path.style.transition = 'd 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-              path.setAttribute('d', 'M0 12C6 12 20 10 32 0C43.9024 9.99999 58 12 64 12V13H0V12Z');
-            }
-          }, 0);
-          setTimeout(() => {
-            const path = button.querySelector('.morph path');
-            if (path) {
-              path.style.transition = 'd 0.15s ease-in';
-              path.setAttribute('d', 'M0 12C6 12 17 12 32 12C47.9024 12 58 12 64 12V13H0V12Z');
-            }
-          }, 250);
+          timers.push(
+            setTimeout(() => {
+              const path = button.querySelector('.morph path');
+              if (path) {
+                path.style.transition = 'd 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                path.setAttribute(
+                  'd',
+                  'M0 12C6 12 20 10 32 0C43.9024 9.99999 58 12 64 12V13H0V12Z',
+                );
+              }
+            }, 0),
+          );
+          timers.push(
+            setTimeout(() => {
+              const path = button.querySelector('.morph path');
+              if (path) {
+                path.style.transition = 'd 0.15s ease-in';
+                path.setAttribute('d', 'M0 12C6 12 17 12 32 12C47.9024 12 58 12 64 12V13H0V12Z');
+              }
+            }, 250),
+          );
         }
 
-        // Package animation - PARTE DOPO 200ms invece di 150ms (rallentato per effetto pressione)
-        setTimeout(() => {
-          if (!button) return;
-          button.style.setProperty('--package-scale', '1');
-          button.style.setProperty('--package-y', '-42px');
-          button.style.setProperty('--cart-x', '0px');
-          button.style.setProperty('--cart-scale', '1');
-        }, 200);
+        // Package animation
+        timers.push(
+          setTimeout(() => {
+            if (!button) return;
+            button.style.setProperty('--package-scale', '1');
+            button.style.setProperty('--package-y', '-42px');
+            button.style.setProperty('--cart-x', '0px');
+            button.style.setProperty('--cart-scale', '1');
+          }, 200),
+        );
 
-        setTimeout(() => {
-          if (button) button.style.setProperty('--package-y', '-40px');
-        }, 550);
+        timers.push(
+          setTimeout(() => {
+            if (button) button.style.setProperty('--package-y', '-40px');
+          }, 550),
+        );
 
-        setTimeout(() => {
-          if (!button) return;
-          button.style.setProperty('--package-y', '16px');
-          button.style.setProperty('--package-scale', '0.9');
-        }, 850);
+        timers.push(
+          setTimeout(() => {
+            if (!button) return;
+            button.style.setProperty('--package-y', '16px');
+            button.style.setProperty('--package-scale', '0.9');
+          }, 850),
+        );
 
-        setTimeout(() => {
-          if (button) button.style.setProperty('--package-scale', '0');
-        }, 1100);
+        timers.push(
+          setTimeout(() => {
+            if (button) button.style.setProperty('--package-scale', '0');
+          }, 1100),
+        );
 
         // Package second reveal
-        setTimeout(() => {
-          if (button) button.style.setProperty('--package-second-y', '0px');
-        }, 985);
+        timers.push(
+          setTimeout(() => {
+            if (button) button.style.setProperty('--package-second-y', '0px');
+          }, 985),
+        );
 
         // Text fade
         if (button) button.style.setProperty('--text-o', '0');
 
         // Cart animation
-        setTimeout(() => {
-          if (!button) return;
-          button.style.setProperty('--cart-clip', '12px');
-          button.style.setProperty('--cart-clip-x', '3px');
-        }, 1050);
+        timers.push(
+          setTimeout(() => {
+            if (!button) return;
+            button.style.setProperty('--cart-clip', '12px');
+            button.style.setProperty('--cart-clip-x', '3px');
+          }, 1050),
+        );
 
-        setTimeout(() => {
-          if (button) button.style.setProperty('--cart-y', '2px');
-        }, 1110);
+        timers.push(
+          setTimeout(() => {
+            if (button) button.style.setProperty('--cart-y', '2px');
+          }, 1110),
+        );
 
-        setTimeout(() => {
-          if (!button) return;
-          button.style.setProperty('--cart-tick-offset', '0px');
-          button.style.setProperty('--cart-y', '0px');
-        }, 1210);
+        timers.push(
+          setTimeout(() => {
+            if (!button) return;
+            button.style.setProperty('--cart-tick-offset', '0px');
+            button.style.setProperty('--cart-y', '0px');
+          }, 1210),
+        );
 
-        setTimeout(() => {
-          if (!button) return;
-          button.style.setProperty('--cart-x', '52px');
-          button.style.setProperty('--cart-rotate', '-15deg');
-        }, 1410);
+        timers.push(
+          setTimeout(() => {
+            if (!button) return;
+            button.style.setProperty('--cart-x', '52px');
+            button.style.setProperty('--cart-rotate', '-15deg');
+          }, 1410),
+        );
 
-        setTimeout(() => {
-          if (!button) return;
-          button.style.setProperty('--cart-x', '104px');
-          button.style.setProperty('--cart-rotate', '0deg');
-          button.style.overflow = 'hidden';
-        }, 1610);
+        timers.push(
+          setTimeout(() => {
+            if (!button) return;
+            button.style.setProperty('--cart-x', '104px');
+            button.style.setProperty('--cart-rotate', '0deg');
+            button.style.overflow = 'hidden';
+          }, 1610),
+        );
 
-        setTimeout(() => {
-          // Disabilita le transizioni per il reset istantaneo
-          const cart = button.querySelector('.cart');
-          if (!cart) return;
-          cart.style.transition = 'none';
+        timers.push(
+          setTimeout(() => {
+            const cart = button.querySelector('.cart');
+            if (!cart) return;
+            cart.style.transition = 'none';
 
-          // Nascondi e resetta tutto istantaneamente
-          button.style.setProperty('--cart-opacity', '0');
-          button.style.setProperty('--text-o', '0');
-          button.style.setProperty('--text-x', '0px');
-          button.style.setProperty('--cart-x', compact ? '-90px' : '-104px');
-          button.style.setProperty('--cart-rotate', '0deg');
-          button.style.setProperty('--cart-scale', '0.75');
-          button.style.setProperty('--package-y', '-16px');
-          button.style.setProperty('--package-scale', '0');
-          button.style.setProperty('--package-second-y', '24px');
-          button.style.setProperty('--cart-clip', '0px');
-          button.style.setProperty('--cart-clip-x', '0px');
-          button.style.setProperty('--cart-tick-offset', '10px');
-          button.style.setProperty('--background-scale', '1');
+            button.style.setProperty('--cart-opacity', '0');
+            button.style.setProperty('--text-o', '0');
+            button.style.setProperty('--text-x', '0px');
+            button.style.setProperty('--cart-x', compact ? '-90px' : '-104px');
+            button.style.setProperty('--cart-rotate', '0deg');
+            button.style.setProperty('--cart-scale', '0.75');
+            button.style.setProperty('--package-y', '-16px');
+            button.style.setProperty('--package-scale', '0');
+            button.style.setProperty('--package-second-y', '24px');
+            button.style.setProperty('--cart-clip', '0px');
+            button.style.setProperty('--cart-clip-x', '0px');
+            button.style.setProperty('--cart-tick-offset', '10px');
+            button.style.setProperty('--background-scale', '1');
 
-          // Forza il reflow per applicare le modifiche
-          void cart.offsetHeight;
+            void cart.offsetHeight;
 
-          // Riabilita le transizioni
-          cart.style.transition = '';
-        }, 1810);
+            cart.style.transition = '';
+          }, 1810),
+        );
 
-        setTimeout(() => {
-          // Mostra e anima da sinistra
-          const resetCartX = compact ? '-38px' : '-48px';
-          const resetTextX = compact ? '6px' : '12px';
+        timers.push(
+          setTimeout(() => {
+            const resetCartX = compact ? '-38px' : '-48px';
+            const resetTextX = compact ? '6px' : '12px';
 
-          button.style.setProperty('--cart-opacity', '1');
-          button.style.setProperty('--cart-x', resetCartX);
-          button.style.setProperty('--text-o', '1');
-          button.style.setProperty('--text-x', resetTextX);
-          button.style.overflow = '';
-          button.classList.remove('active');
+            button.style.setProperty('--cart-opacity', '1');
+            button.style.setProperty('--cart-x', resetCartX);
+            button.style.setProperty('--text-o', '1');
+            button.style.setProperty('--text-x', resetTextX);
+            button.style.overflow = '';
+            button.classList.remove('active');
 
-          // ✅ Signal animation completion
-          if (onAnimationComplete) onAnimationComplete();
-        }, 1820);
+            if (onAnimationComplete) onAnimationComplete();
+          }, 1820),
+        );
       };
 
       button.addEventListener('pointerdown', handlePointerDown);
       button.addEventListener('click', handleClick);
 
       return () => {
+        // Cancel all pending animation timers on cleanup
+        timers.forEach((id) => clearTimeout(id));
         button.removeEventListener('pointerdown', handlePointerDown);
         button.removeEventListener('click', handleClick);
       };

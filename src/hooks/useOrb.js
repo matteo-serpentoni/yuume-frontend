@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { getWidgetConfig } from '../services/customizationApi';
-import { hexToVec3 } from '../utils/colorUtils';
 import { BRIDGE_CONFIG } from '../config/bridge';
 
 const DEFAULT_CONFIG = {

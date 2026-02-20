@@ -66,7 +66,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
             welcomeText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
           }
         }
-      } catch (e) {
+      } catch (_e) {
         // Fallback to default if storage fails
       }
 
@@ -98,20 +98,21 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   useEffect(() => {
     if (disabled) return;
 
-    const updateStatus = () => {
-      if (!window.navigator.onLine) {
-        setConnectionStatus('offline');
-      }
-    };
+    // Named handlers so the same reference is used for add and remove
+    const handleOnline = () => setConnectionStatus('online');
+    const handleOffline = () => setConnectionStatus('offline');
 
-    window.addEventListener('online', () => setConnectionStatus('online'));
-    window.addEventListener('offline', () => setConnectionStatus('offline'));
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
-    updateStatus();
+    // Set initial status
+    if (!window.navigator.onLine) {
+      setConnectionStatus('offline');
+    }
 
     return () => {
-      window.removeEventListener('online', () => setConnectionStatus('online'));
-      window.removeEventListener('offline', () => setConnectionStatus('offline'));
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, [disabled]);
 
@@ -121,7 +122,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     try {
       const saved = localStorage.getItem('yuume_shopify_customer');
       return saved ? JSON.parse(saved) : null;
-    } catch (e) {
+    } catch (_e) {
       return null;
     }
   }); // Certified identity
@@ -264,7 +265,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           // Persist identity to localStorage
           try {
             localStorage.setItem('yuume_shopify_customer', JSON.stringify(customer));
-          } catch (e) {
+          } catch (_e) {
             // Storage full or restricted
           }
         } else {

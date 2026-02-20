@@ -21,8 +21,17 @@ const LookupResult = ({ message, onRetry, loading }) => (
   </motion.div>
 );
 
-// 🚀 Ultra-stable navigation cache to survive component unmounts
+// Navigation cache to survive component unmounts (capped to prevent unbounded growth)
+const NAV_CACHE_MAX = 50;
 const navCache = new Map();
+const navCacheSet = (key, value) => {
+  navCache.set(key, value);
+  if (navCache.size > NAV_CACHE_MAX) {
+    // Evict oldest entry (Maps iterate in insertion order)
+    const oldest = navCache.keys().next().value;
+    navCache.delete(oldest);
+  }
+};
 
 const DynamicForm = ({ message, onSubmit, loading, children }) => {
   console.error('🚀 [DynamicForm] Mounting/Rendering', {
@@ -54,7 +63,7 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
 
   // Persist state to cache whenever it changes
   useEffect(() => {
-    navCache.set(msgId, navState);
+    navCacheSet(msgId, navState);
   }, [msgId, navState]);
 
   // 2. Form Data State (synchronized with active config)
@@ -193,7 +202,7 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
     });
 
     // 🛡️ Synchronous cache update
-    navCache.set(msgId, newState);
+    navCacheSet(msgId, newState);
     setNavState(newState);
 
     setFormData(prev.formData);

@@ -93,7 +93,7 @@ export const getSessionStatus = async (sessionId, shopDomain) => {
 
     if (!response.ok) return null;
     return await response.json();
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };

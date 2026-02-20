@@ -95,7 +95,7 @@ const Icons = {
 };
 
 const ProductCard = memo(
-  ({ product, index, onOpen, onImageClick, shopDomain, onProductAction, sendMessage }) => {
+  ({ product, index, onOpen, onImageClick, shopDomain, onProductAction }) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
     const normalizedProduct = normalizeStorefrontProduct(product);
@@ -380,15 +380,12 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain, onProductActi
   // Normalize product data using unified utility
   const normalized = normalizeStorefrontProduct(product);
   const {
-    images,
     isAvailable,
     name,
-    description,
     price: initialPrice,
     compareAtPrice: initialCompareAtPrice,
     currency,
     variants,
-    options,
   } = normalized;
 
   const [selectedOptions, setSelectedOptions] = React.useState(() => {
@@ -495,17 +492,7 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain, onProductActi
 });
 
 const ProductCards = memo(
-  ({
-    message,
-    shopDomain,
-    onOpen,
-    onImageClick,
-    activeProduct,
-    chatColors,
-    sendFeedback,
-    onProductAction,
-    sendMessage,
-  }) => {
+  ({ message, shopDomain, onOpen, onImageClick, chatColors, sendFeedback, onProductAction }) => {
     const { products = [], message: displayMessage } = message;
     const scrollRef = React.useRef(null);
     const [showLeftArrow, setShowLeftArrow] = React.useState(false);
@@ -599,7 +586,6 @@ const ProductCards = memo(
                 onImageClick={onImageClick}
                 shopDomain={shopDomain}
                 onProductAction={onProductAction}
-                sendMessage={sendMessage}
               />
             ))}
           </div>

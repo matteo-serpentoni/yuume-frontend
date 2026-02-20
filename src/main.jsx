@@ -1,3 +1,4 @@
+import './wdyr'; // Must be first — patches React for re-render tracking (dev only)
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
