@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { getOrderStatusClass, normalizeOrderNumber } from '../../utils/shopifyUtils';
 import './OrderCards.css';
 
-export const OrderItemRow = memo(({ item, index, theme = 'dark' }) => {
+const OrderItemRow = memo(({ item, index, theme = 'dark' }) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: -5 }}

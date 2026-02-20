@@ -12,12 +12,3 @@ export const validateEmail = (email) => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 };
-
-/**
- * Validates if a string is not empty or just whitespace.
- * @param {string} value - The value to check.
- * @returns {boolean}
- */
-export const isNotEmpty = (value) => {
-  return typeof value === 'string' && value.trim().length > 0;
-};

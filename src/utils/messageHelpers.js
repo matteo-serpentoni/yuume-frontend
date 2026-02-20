@@ -71,14 +71,6 @@ export const processMessage = (text = '') => {
 };
 
 /**
- * Truncates text to a maximum length.
- */
-export const truncateText = (text, maxLength = 100) => {
-  if (!text || text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
-};
-
-/**
  * Formats a timestamp into HH:MM.
  * @param {string|number|Date} timestamp - The timestamp to format.
  * @returns {string} - Formatted time string.

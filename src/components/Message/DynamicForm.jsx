@@ -34,13 +34,7 @@ const navCacheSet = (key, value) => {
 };
 
 const DynamicForm = ({ message, onSubmit, loading, children }) => {
-  console.error('🚀 [DynamicForm] Mounting/Rendering', {
-    id: message?.id,
-    formId: message?.config?.formId,
-    hasConfig: !!message?.config,
-  });
   if (!message || (!message.config && !navCache.has(message.id))) {
-    console.error('🚀 [DynamicForm] Early return - no config/cache');
     return null;
   }
 
@@ -55,7 +49,6 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
       lastResultsStr: JSON.stringify(results),
       lastStoredState: null,
     };
-    console.error('🚀 [DynamicForm] Initializing State', { msgId, fromCache: !!cached, initial });
     return initial;
   });
 
@@ -107,18 +100,9 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
 
   // 4. Synchronize state with incoming props
   useEffect(() => {
-    console.error('🔄 [DynamicForm] sync-effect running', {
-      msgId,
-      activeFormId: activeConfig.formId,
-      step: activeConfig.currentStep,
-      hasOverride: !!override,
-      resultsChanged: currentResultsStr !== lastResultsStr,
-    });
-
     // Handle Override Expiry: If server sends NEW data, we exit back-mode
     if (override) {
       if (currentResultsStr !== lastResultsStr) {
-        console.error('🔄 [DynamicForm] CLEARING OVERRIDE: New server results detected');
         setNavState((prev) => ({
           ...prev,
           override: null,
@@ -135,10 +119,6 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
         lastStoredState.currentStep < activeConfig.currentStep);
 
     if (isProgression) {
-      console.error('🔄 [DynamicForm] RECORDING HISTORY: Progression detected', {
-        from: { id: lastStoredState.formId, step: lastStoredState.currentStep },
-        to: { id: activeConfig.formId, step: activeConfig.currentStep },
-      });
       setNavState((prev) => ({
         ...prev,
         history: [...prev.history, lastStoredState],
@@ -169,7 +149,6 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
     }
 
     if (isErrorState && history.length > 0) {
-      console.error('🔄 [DynamicForm] CLEARING HISTORY: Error state detected');
       setNavState((prev) => ({ ...prev, history: [] }));
     }
 
@@ -183,7 +162,6 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
   }, [msgId, activeConfig.formId, activeConfig.currentStep, currentResultsStr]);
 
   const handleBack = () => {
-    console.error('🔙 [DynamicForm] handleBack called. History length:', history.length);
     if (history.length === 0) return;
 
     const prev = history[history.length - 1];
@@ -192,16 +170,10 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
       ...navState,
       history: history.slice(0, -1),
       override: prev,
-      lastResultsStr: currentResultsStr, // Sync results to avoid immediate clear
+      lastResultsStr: currentResultsStr,
       lastStoredState: prev,
     };
 
-    console.error('🔙 [DynamicForm] Navigating BACK to:', {
-      formId: prev.formId,
-      step: prev.currentStep,
-    });
-
-    // 🛡️ Synchronous cache update
     navCacheSet(msgId, newState);
     setNavState(newState);
 
@@ -240,7 +212,6 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
 
     // Clear override on submit
     if (override) {
-      console.error('🚀 [DynamicForm] SUBMIT: Clearing override');
       setNavState((prev) => ({ ...prev, override: null }));
     }
 

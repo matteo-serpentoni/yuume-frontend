@@ -180,20 +180,3 @@ export async function resetCustomization(siteId) {
     throw error;
   }
 }
-
-/**
- * Converte un colore hex in un array RGB normalizzato [0-1]
- * @param {string} hex - Colore in formato hex (#RRGGBB)
- * @returns {Array<number>} [r, g, b] normalizzati
- */
-export function hexToVec3(hex) {
-  // Rimuovi il # se presente
-  hex = hex.replace('#', '');
-
-  // Parse RGB
-  const r = parseInt(hex.substring(0, 2), 16) / 255;
-  const g = parseInt(hex.substring(2, 4), 16) / 255;
-  const b = parseInt(hex.substring(4, 6), 16) / 255;
-
-  return [r, g, b];
-}
