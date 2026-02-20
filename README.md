@@ -1,46 +1,87 @@
-# Yuume Widget Chat
+# Yuume Widget
 
-Widget chat embeddabile e personalizzabile per i siti web, basato su Yuume AI. Questo repository contiene il codice sorgente del frontend del widget.
+Embeddable AI-powered chat widget for e-commerce websites. Renders as an iframe with a WebGL orb interface, glassmorphism UI, and real-time messaging via Socket.io.
 
-## 🚀 Guida Rapida
+## Tech Stack
 
-### Requisiti
+| Layer | Technology |
+|-------|-----------|
+| Framework | React 19 |
+| Build | Vite 7 |
+| Animation | Framer Motion 12 |
+| WebGL | OGL |
+| Real-time | Socket.io Client |
+| Styling | Vanilla CSS (scoped, no Tailwind) |
 
-- Node.js (v18 o superiore)
-- npm o yarn
-
-### Installazione
+## Quick Start
 
 ```bash
+# Install dependencies
 npm install
-```
 
-### Sviluppo Locali
-
-Avvia l'ambiente di sviluppo:
-
-```bash
+# Start dev server
 npm run dev
-```
 
-### Compilazione (Build)
-
-Per generare la versione ottimizzata da distribuire:
-
-```bash
+# Production build
 npm run build
 ```
 
-I file compilati saranno disponibili nella cartella `dist/`.
+## Available Scripts
 
-## 📂 Struttura del Progetto
+| Script | Purpose |
+|--------|---------|
+| `npm run dev` | Start Vite dev server with HMR |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Preview production build locally |
+| `npm run lint` | Run ESLint on all source files |
+| `npm run format` | Format code with Prettier |
+| `npm run knip` | Detect unused exports, files, and dependencies |
 
-- `src/components/`: Componenti React (organizzati in cartelle PascalCase).
-- `src/hooks/`: Hook personalizzati per la gestione dello stato e della chat.
-- `src/services/`: Client per l'interazione con le API di Yuume.
-- `src/utils/`: Funzioni di utilità e formattazione condivise.
+## Project Structure
 
-## 🔧 Configurazione
+```
+src/
+├── main.jsx                 # Entry point
+├── wdyr.js                  # Why Did You Render (dev-only)
+├── App.jsx                  # Root component, routing
+├── components/
+│   ├── Orb/                 # WebGL orb + glassmorphism container
+│   ├── Chat/                # Chat UI (MessageList, MessageBubble, InputBar)
+│   ├── Message/             # Message types (ProductCards, OrderCards, DynamicForm)
+│   ├── UI/                  # Shared UI atoms (Drawer, ErrorBoundary, ImageLightbox)
+│   └── Dev/                 # Dev-only tools (DevTools, MockStorefront)
+├── hooks/
+│   ├── useChat.js           # Chat state, messaging, socket events
+│   └── useOrb.js            # Widget config, theme, bridge communication
+├── services/
+│   ├── chatApi.js           # REST API client (messages, profile, feedback)
+│   └── customizationApi.js  # Widget config & theme API
+├── config/
+│   └── bridge.js            # postMessage security (origin validation)
+└── utils/
+    ├── colorUtils.js        # Color conversion (hex to vec3)
+    ├── messageHelpers.js    # Text formatting, price display
+    ├── shopifyUtils.js      # Product/order data normalization
+    └── validators.js        # Input validation
+```
 
-Le variabili d'ambiente possono essere configurate nel file `.env.development` (locale) o `.env.production` (live).
-L'URL dell'API principale è configurabile tramite `VITE_API_URL`.
+## Embedding
+
+The widget is embedded on merchant sites via `public/embed.js`, which creates an iframe pointing to the hosted widget build.
+
+```html
+<script src="https://cdn.yuume.io/embed.js" data-shop="merchant-store.myshopify.com"></script>
+```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | Yuume API base URL | `http://localhost:5001` |
+
+## Architecture Notes
+
+- **Iframe isolation**: The widget runs in an iframe to avoid CSS/JS conflicts with the host site.
+- **postMessage bridge**: All communication with the host page goes through `postMessage` with origin validation (see `config/bridge.js`).
+- **ErrorBoundary**: The global error boundary renders `null` on crash — the widget disappears rather than showing broken UI on the merchant's site.
+- **Performance**: WebGL RAF loop throttles when minimized and stops when hidden. WDYR tracks unnecessary re-renders in dev mode.
