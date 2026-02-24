@@ -279,10 +279,21 @@ const MessageList = memo(
               {content}
             </MessageBubble>
           ) : (
-            <div className="yuume-standalone-content">
-              {content}
-              {/* Timestamp removed to save space for products */}
-            </div>
+            <>
+              {/* Bubble + standalone split: show text bubble above standalone content */}
+              {msg.text && type === 'form_request' && (
+                <MessageBubble
+                  sender={msg.sender}
+                  timestamp={msg.timestamp}
+                  chatColors={chatColors}
+                  type="default"
+                  showFeedback={false}
+                >
+                  <TextMessage message={{ text: msg.text }} />
+                </MessageBubble>
+              )}
+              <div className="yuume-standalone-content">{content}</div>
+            </>
           )}
 
           {/* Suggestion Chips - External to Bubble */}
