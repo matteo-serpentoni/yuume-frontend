@@ -113,7 +113,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    background 0.3s ease,
+    transform 0.3s ease;
   color: var(--orb-theme-color, white);
   border-color: color-mix(in srgb, var(--orb-theme-color, white), transparent 80%);
 }
@@ -173,7 +175,9 @@
 .profile-input {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .orb-container:not(.mobile-device) .profile-input {

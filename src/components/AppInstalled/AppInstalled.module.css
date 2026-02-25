@@ -118,7 +118,7 @@
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease;
 }
 
 .errorButton:hover {
@@ -221,7 +221,9 @@
   padding: 16px 32px;
   font-size: 16px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition:
+    background 0.3s ease,
+    transform 0.3s ease;
   display: inline-block;
 }
 
@@ -239,7 +241,9 @@
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .secondaryButton:hover {

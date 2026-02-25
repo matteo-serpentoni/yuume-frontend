@@ -95,7 +95,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s;
+  transition:
+    background 0.3s,
+    transform 0.3s;
   pointer-events: auto;
   backdrop-filter: blur(15px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
@@ -151,7 +153,10 @@
   overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: all 0.2s;
+  transition:
+    opacity 0.2s,
+    border-color 0.2s,
+    transform 0.2s;
   opacity: 0.6;
 }
 
@@ -182,7 +187,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s;
+  transition:
+    background 0.3s,
+    transform 0.3s;
   backdrop-filter: blur(15px);
   pointer-events: auto;
   z-index: 120;
