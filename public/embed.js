@@ -197,6 +197,40 @@
   });
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // CART SYNC (detect store-side changes)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  let lastCartCount = -1;
+
+  function syncCart() {
+    fetch('/cart.js', { credentials: 'same-origin' })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (cart) {
+        var count = cart.item_count || 0;
+        // Only send update if item count actually changed
+        if (count !== lastCartCount) {
+          lastCartCount = count;
+          iframe.contentWindow.postMessage({ type: 'YUUME:cartUpdate', cart: cart }, WIDGET_ORIGIN);
+        }
+      })
+      .catch(function () {});
+  }
+
+  // Poll every 5 seconds (lightweight — /cart.js is cached by Shopify CDN)
+  const cartSyncInterval = setInterval(syncCart, 5000);
+
+  // Also sync on Shopify theme cart events
+  ['cart:refresh', 'cart:updated', 'yuume:cart-updated'].forEach(function (evt) {
+    document.addEventListener(evt, syncCart);
+  });
+
+  // Sync on page focus (user comes back from another tab)
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) syncCart();
+  });
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // MESSAGE LISTENER
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   window.addEventListener('message', function (event) {
@@ -251,18 +285,7 @@
     // GET CART
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === 'YUUME:getCart') {
-      fetch('/cart.js', { credentials: 'same-origin' })
-        .then((r) => r.json())
-        .then((cart) => {
-          iframe.contentWindow.postMessage(
-            {
-              type: 'YUUME:cartUpdate',
-              cart: cart,
-            },
-            WIDGET_ORIGIN,
-          );
-        })
-        .catch(() => {});
+      syncCart();
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -439,6 +462,7 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   window.addEventListener('beforeunload', function () {
     clearInterval(heartbeatInterval);
+    clearInterval(cartSyncInterval);
     notifyLeave();
   });
 

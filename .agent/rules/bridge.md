@@ -21,3 +21,4 @@ These rules ensure secure and reliable communication between the widget and the 
 - **YUUME:close**: Request the host to hide or remove the widget.
 - **YUUME:ready**: Notify the host that the widget is fully loaded.
 - **YUUME:addToCart**: Request the host to add a product to cart (for Shopify integration).
+- **YUUME:cartUpdate**: Sent from host to widget when the Shopify cart changes (polling + events).

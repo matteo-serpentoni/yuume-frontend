@@ -40,7 +40,7 @@ const Chat = ({
   const [activeProduct, setActiveProduct] = useState(null);
   const [activeOrder, setActiveOrder] = useState(null);
   const [activeGallery, setActiveGallery] = useState(null); // { images: [], index: 0 }
-  const [showCheckoutSuggestion, setShowCheckoutSuggestion] = useState(false);
+  // Cart awareness: show checkout suggestion whenever cart has items
   const [hasActedOnProduct, setHasActedOnProduct] = useState(false);
 
   // Use custom hook for live chat logic, but ONLY if NOT in preview mode
@@ -56,6 +56,7 @@ const Chat = ({
   const assignedTo = isPreview ? previewAssignedTo || null : liveChat.assignedTo;
   const initialSuggestions = isPreview ? [] : liveChat.initialSuggestions;
   const cartCount = isPreview ? 0 : liveChat.cartCount;
+  const showCheckoutSuggestion = cartCount > 0;
 
   const isThinking = isPreview ? false : liveChat.isThinking;
   const thinkingIntent = isPreview ? null : liveChat.thinkingIntent;
@@ -197,7 +198,6 @@ const Chat = ({
               sendFeedback={sendFeedback}
               onImageClick={setActiveGallery}
               onProductAction={() => {
-                setShowCheckoutSuggestion(true);
                 setHasActedOnProduct(true);
               }}
             />
@@ -236,7 +236,6 @@ const Chat = ({
                           },
                         ]}
                         onSuggestionClick={() => {
-                          setShowCheckoutSuggestion(false);
                           window.parent.postMessage({ type: 'YUUME:checkout' }, '*');
                         }}
                       />
@@ -345,7 +344,6 @@ const Chat = ({
             onClose={() => setActiveProduct(null)}
             shopDomain={shopDomain}
             onProductAction={() => {
-              setShowCheckoutSuggestion(true);
               setHasActedOnProduct(true);
             }}
           />
