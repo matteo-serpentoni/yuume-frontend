@@ -6,6 +6,7 @@ These rules define the code style and quality standards for yuume-widget.
 
 - **ESLint**: No code should be committed if 'npm run lint' fails.
 - **Prettier**: Run 'npm run format' before committing.
+- **Lint on touch**: Every file you modify MUST be linted before committing. Fix ALL errors and warnings in that file — not just the lines you changed. Leave every touched file at zero lint issues.
 - **Knip**: Run 'npm run knip' periodically to detect unused exports, dead code, and orphan files. Address findings before they accumulate.
 
 ## 2. Imports

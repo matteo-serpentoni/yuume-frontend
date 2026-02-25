@@ -362,6 +362,75 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
 
           <div style={{ height: '1px', background: '#333', margin: '4px 0' }} />
 
+          {/* Cart Simulation */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '11px', color: '#8b92a7' }}>Cart Simulation</label>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <button
+                onClick={() =>
+                  window.postMessage(
+                    { type: 'YUUME:cartUpdate', cart: { item_count: 1, token: 'dev_1' } },
+                    '*',
+                  )
+                }
+                style={{
+                  flex: 1,
+                  padding: '6px',
+                  background: '#4a5568',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                }}
+              >
+                🛒 +1
+              </button>
+              <button
+                onClick={() =>
+                  window.postMessage(
+                    { type: 'YUUME:cartUpdate', cart: { item_count: 3, token: 'dev_3' } },
+                    '*',
+                  )
+                }
+                style={{
+                  flex: 1,
+                  padding: '6px',
+                  background: '#4a5568',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                }}
+              >
+                🛒 +3
+              </button>
+              <button
+                onClick={() =>
+                  window.postMessage(
+                    { type: 'YUUME:cartUpdate', cart: { item_count: 0, token: 'dev_0' } },
+                    '*',
+                  )
+                }
+                style={{
+                  flex: 1,
+                  padding: '6px',
+                  background: '#e53e3e',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                }}
+              >
+                🗑️ Empty
+              </button>
+            </div>
+          </div>
+
+          <div style={{ height: '1px', background: '#333', margin: '4px 0' }} />
+
           {/* Storefront Preview */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '11px', color: '#8b92a7' }}>Experimental Preview</label>

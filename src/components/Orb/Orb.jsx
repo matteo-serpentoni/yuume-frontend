@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback, memo, Suspense, lazy }
 import { Renderer, Program, Mesh, Triangle, Vec3 } from 'ogl';
 import Chat from '../Chat/Chat';
 import ChatPreview from '../Chat/ChatPreview';
+import OrbBubble from './OrbBubble';
 // Lazy-load DevTools only in development (tree-shaken from prod bundle)
 const DevTools = import.meta.env.DEV ? lazy(() => import('../Dev/DevTools')) : null;
 import { useOrb } from '../../hooks/useOrb';
@@ -409,12 +410,71 @@ const Orb = memo(
       return () => clearInterval(interval);
     }, [isMinimized]);
 
+    // ✅ FUNZIONALITÀ: Cart bubble notification
+    const [cartCount, setCartCount] = useState(0);
+    const [bubbleDismissed, setBubbleDismissed] = useState(false);
+    const [bubbleReady, setBubbleReady] = useState(false);
+    const lastCartCountRef = useRef(0);
+
+    // Listen for cart updates from parent (same bridge messages as useChat)
+    useEffect(() => {
+      if (mode === 'preview') return;
+
+      const handleCartMessage = (event) => {
+        if (
+          event.data?.type === 'YUUME:cartUpdate' ||
+          event.data?.type === 'YUUME:addToCartResponse'
+        ) {
+          const cart = event.data.cart || event.data.data?.cart;
+          if (cart) {
+            const count = cart.item_count || 0;
+            // Reset dismiss state when cart changes
+            if (count !== lastCartCountRef.current) {
+              lastCartCountRef.current = count;
+              setBubbleDismissed(false);
+            }
+            setCartCount(count);
+          }
+        }
+      };
+
+      window.addEventListener('message', handleCartMessage);
+      return () => window.removeEventListener('message', handleCartMessage);
+    }, [mode]);
+
+    // Initial delay before showing bubble (3s after mount)
+    useEffect(() => {
+      if (mode === 'preview') return;
+      const timer = setTimeout(() => setBubbleReady(true), 3000);
+      return () => clearTimeout(timer);
+    }, [mode]);
+
+    const showCartBubble = isMinimized && bubbleReady && cartCount > 0 && !bubbleDismissed;
+
+    const handleBubbleDismiss = useCallback(() => {
+      setBubbleDismissed(true);
+    }, []);
+
+    const handleBubbleClick = useCallback(() => {
+      setBubbleDismissed(true);
+      handleExpand();
+    }, [handleExpand]);
+
     // ✅ Calcola colore tema da baseColor1 (che è il colore principale dell'orb WebGL)
     // baseColor1 è un array [r, g, b] con valori 0-1
     const themeColor = vec3ToRgbString(baseColor1);
 
     return (
       <>
+        {/* ✅ Cart bubble notification (rendered outside orb-container for proper positioning) */}
+        <OrbBubble
+          message={`Hai ${cartCount} ${cartCount === 1 ? 'prodotto' : 'prodotti'} nel carrello`}
+          icon="🛒"
+          visible={showCartBubble}
+          onDismiss={handleBubbleDismiss}
+          onClick={handleBubbleClick}
+          themeColor={themeColor}
+        />
         {/* ✅ FUNZIONALITÀ: Dev Tools (Solo in sviluppo locale e non preview) */}
         {/* Rendered outside the orb-container to avoid mobile clipping/centering issues */}
         {import.meta.env.DEV && DevTools && mode === 'development' && (
