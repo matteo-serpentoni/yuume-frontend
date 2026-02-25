@@ -141,8 +141,7 @@ export const useOrb = (modeOverride = null) => {
         }
         setLoading(false);
       })
-      .catch((err) => {
-        console.error('❌ [useOrb] Failed to load config:', err);
+      .catch(() => {
         setLoading(false);
       });
   }, [shopDomain, mode]);

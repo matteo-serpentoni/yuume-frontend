@@ -27,7 +27,6 @@ const Drawer = ({
     if (el) {
       setTarget(el);
     } else {
-      console.warn(`⚠️ [Drawer] Portal target #${portalId} not found, falling back to body`);
       setTarget(document.body);
     }
   }, [portalId]);

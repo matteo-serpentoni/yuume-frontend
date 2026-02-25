@@ -33,7 +33,6 @@ const AddToCartButton = memo(
         }
 
         if (!shopDomain) {
-          console.error('ERRORE: shopDomain non disponibile!');
           throw new Error('Shop domain non disponibile');
         }
 
@@ -57,7 +56,6 @@ const AddToCartButton = memo(
             if (event.data.success) {
               if (onSuccess) onSuccess(event.data.data);
             } else {
-              console.error('❌ Errore aggiunta al carrello:', event.data.error);
               if (onError) onError(new Error(event.data.error));
             }
           }
@@ -70,7 +68,6 @@ const AddToCartButton = memo(
           window.removeEventListener('message', handleResponse);
         }, 5000);
       } catch (error) {
-        console.error('Errore aggiunta al carrello:', error);
         if (onError) onError(error);
       }
     };

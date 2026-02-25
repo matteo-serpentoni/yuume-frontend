@@ -58,8 +58,7 @@ export const getProfile = async (sessionId, shopDomain) => {
 
     if (!response.ok) throw new Error('Failed to fetch profile');
     return await response.json();
-  } catch (error) {
-    console.error('Error fetching profile:', error);
+  } catch (_e) {
     return null;
   }
 };
@@ -77,7 +76,6 @@ export const updateProfile = async (sessionId, shopDomain, data) => {
     if (!response.ok) throw new Error('Failed to update profile');
     return await response.json();
   } catch (error) {
-    console.error('Error updating profile:', error);
     throw error;
   }
 };
@@ -114,7 +112,6 @@ export const submitFeedback = async (feedbackData) => {
     if (!response.ok) throw new Error('Failed to submit feedback');
     return await response.json();
   } catch (error) {
-    console.error('Error submitting feedback:', error);
     throw error;
   }
 };

@@ -31,8 +31,7 @@ export async function getWidgetConfig(siteId) {
     }
 
     return result.data;
-  } catch (error) {
-    console.error('❌ Error fetching widget config:', error);
+  } catch (_e) {
     // Ritorna configurazione di default in caso di errore
     return {
       orbTheme: {
@@ -77,7 +76,6 @@ export async function getCustomization(siteId) {
 
     return result.data;
   } catch (error) {
-    console.error('❌ Error fetching customization:', error);
     throw error;
   }
 }
@@ -112,7 +110,6 @@ export async function updateCustomization(siteId, customization) {
 
     return result.data;
   } catch (error) {
-    console.error('❌ Error updating customization:', error);
     throw error;
   }
 }
@@ -144,7 +141,6 @@ export async function getAllThemesWithAccess(siteId) {
 
     return result.data;
   } catch (error) {
-    console.error('❌ Error fetching themes:', error);
     throw error;
   }
 }
@@ -176,7 +172,6 @@ export async function resetCustomization(siteId) {
 
     return result.data;
   } catch (error) {
-    console.error('❌ Error resetting customization:', error);
     throw error;
   }
 }

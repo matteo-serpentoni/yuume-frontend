@@ -79,8 +79,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           disableFeedback: true, // Disable feedback for welcome message
         },
       ];
-    } catch (error) {
-      console.error('Errore caricamento messaggi:', error);
+    } catch (_e) {
       return [];
     }
   });
@@ -223,8 +222,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     if (disabled) return;
     try {
       localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
-    } catch (error) {
-      console.error('Errore salvataggio messaggi:', error);
+    } catch (_e) {
+      // Storage full or restricted — non-critical
     }
   }, [messages, disabled]);
 
@@ -260,7 +259,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         const customer = event.data.customer || event.data.shopifyCustomer;
 
         if (customer) {
-          console.log('Shopify Identity Detected:', customer.email || customer.id);
           setShopifyCustomer(customer);
           // Persist identity to localStorage
           try {
@@ -270,7 +268,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           }
         } else {
           // LOGOUT SYNC: Clear identity if parent sends null/undefined
-          console.log('Shopify Logout Detected: Clearing identity');
           setShopifyCustomer(null);
           localStorage.removeItem('yuume_shopify_customer');
         }
@@ -564,8 +561,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           // But usually we expect a message or empty message
         }
       } catch (error) {
-        console.error('Chat error:', error);
-
         if (error.status === 410 || error.message?.includes('session_expired')) {
           clearChat();
 
@@ -666,8 +661,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           rating,
           type,
         });
-      } catch (error) {
-        console.error('Error sending feedback:', error);
+      } catch (_e) {
+        // Feedback is best-effort, don't block UX
       }
     },
     [messages, shopDomain, sessionId],
