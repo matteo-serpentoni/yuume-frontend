@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, memo } from 'react';
+import React, { useRef, useEffect, memo } from 'react';
 import { extractVariantId } from '../../utils/shopifyUtils';
 import './AddToCartButton.css';
 
@@ -79,7 +79,7 @@ const AddToCartButton = memo(
       // Collect all animation timer IDs so we can cancel them on cleanup
       const timers = [];
 
-      const handlePointerDown = (e) => {
+      const handlePointerDown = () => {
         if (!button || button.classList.contains('active')) {
           return;
         }

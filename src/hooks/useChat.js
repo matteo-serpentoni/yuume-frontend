@@ -66,7 +66,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
             welcomeText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
           }
         }
-      } catch (_e) {
+      } catch {
         // Fallback to default if storage fails
       }
 
@@ -79,7 +79,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           disableFeedback: true, // Disable feedback for welcome message
         },
       ];
-    } catch (_e) {
+    } catch {
       return [];
     }
   });
@@ -121,7 +121,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     try {
       const saved = localStorage.getItem('yuume_shopify_customer');
       return saved ? JSON.parse(saved) : null;
-    } catch (_e) {
+    } catch {
       return null;
     }
   }); // Certified identity
@@ -222,7 +222,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     if (disabled) return;
     try {
       localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
-    } catch (_e) {
+    } catch {
       // Storage full or restricted — non-critical
     }
   }, [messages, disabled]);
@@ -263,7 +263,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           // Persist identity to localStorage
           try {
             localStorage.setItem('yuume_shopify_customer', JSON.stringify(customer));
-          } catch (_e) {
+          } catch {
             // Storage full or restricted
           }
         } else {
@@ -661,7 +661,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           rating,
           type,
         });
-      } catch (_e) {
+      } catch {
         // Feedback is best-effort, don't block UX
       }
     },

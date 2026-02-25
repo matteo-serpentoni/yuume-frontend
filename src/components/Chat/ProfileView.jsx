@@ -71,7 +71,7 @@ const ProfileView = ({
       setTimeout(() => {
         onBack();
       }, 1500);
-    } catch (error) {
+    } catch {
       setSaving(false);
       setMessage({ type: 'error', text: 'Errore durante il salvataggio.' });
       setTimeout(() => {
@@ -94,7 +94,7 @@ const ProfileView = ({
       setTimeout(() => {
         setMessage(null);
       }, 2000);
-    } catch (error) {
+    } catch {
       setSaving(false);
       setMessage({ type: 'error', text: 'Errore durante il reset.' });
     }

@@ -116,6 +116,7 @@ export const useOrb = (modeOverride = null) => {
   useEffect(() => {
     if (!shopDomain) {
       if (mode === 'production') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: set loading state during init
         setLoading(true);
       } else {
         setLoading(false);

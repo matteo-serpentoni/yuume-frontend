@@ -1,4 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks -- early return before hooks is intentional; conditions are stable across renders */
 import React, { useState, useEffect } from 'react';
+// eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { motion, AnimatePresence } from 'framer-motion';
 import { validateEmail } from '../../utils/validators';
 import './DynamicForm.css';

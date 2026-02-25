@@ -1,4 +1,5 @@
 import { memo } from 'react';
+// eslint-disable-next-line no-unused-vars -- motion.button used in JSX
 import { motion } from 'framer-motion';
 import './MessageBubble.css';
 import { formatTime } from '../../utils/messageHelpers';

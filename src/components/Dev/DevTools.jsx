@@ -7,7 +7,7 @@ import './DevTools.css';
  * Componente per lo sviluppo che permette di cambiare tema al volo.
  * Usato solo in modalità 'development'.
  */
-const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle }) => {
+const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
   const [themes, setThemes] = useState([]);
   const [sites, setSites] = useState([]);
   const [selectedThemeId, setSelectedThemeId] = useState('purple-dream');
@@ -15,7 +15,7 @@ const DevTools = ({ currentConfig, onConfigChange, onSiteChange, onMobileToggle 
     return localStorage.getItem('yuume_dev_shop_domain') || '';
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [forceMobile, setForceMobile] = useState(false);

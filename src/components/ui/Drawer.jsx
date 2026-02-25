@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+// eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { motion, AnimatePresence } from 'framer-motion';
 import './Drawer.css';
 

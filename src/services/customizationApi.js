@@ -31,7 +31,7 @@ export async function getWidgetConfig(siteId) {
     }
 
     return result.data;
-  } catch (_e) {
+  } catch {
     // Ritorna configurazione di default in caso di errore
     return {
       orbTheme: {
@@ -55,29 +55,25 @@ export async function getWidgetConfig(siteId) {
  * @returns {Promise<Object>} Customization data
  */
 export async function getCustomization(siteId) {
-  try {
-    const response = await fetch(`${API_URL}/api/customization/${siteId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // Include cookies per autenticazione
-    });
+  const response = await fetch(`${API_URL}/api/customization/${siteId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    const result = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.message || 'Failed to fetch customization');
-    }
-
-    return result.data;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
   }
+
+  const result = await response.json();
+
+  if (!result.success) {
+    throw new Error(result.message || 'Failed to fetch customization');
+  }
+
+  return result.data;
 }
 
 /**
@@ -87,31 +83,27 @@ export async function getCustomization(siteId) {
  * @returns {Promise<Object>} Updated customization
  */
 export async function updateCustomization(siteId, customization) {
-  try {
-    const response = await fetch(`${API_URL}/api/customization/${siteId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // Include cookies per autenticazione
-      body: JSON.stringify(customization),
-    });
+  const response = await fetch(`${API_URL}/api/customization/${siteId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(customization),
+  });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `API error: ${response.status}`);
-    }
-
-    const result = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.message || 'Failed to update customization');
-    }
-
-    return result.data;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `API error: ${response.status}`);
   }
+
+  const result = await response.json();
+
+  if (!result.success) {
+    throw new Error(result.message || 'Failed to update customization');
+  }
+
+  return result.data;
 }
 
 /**
@@ -120,29 +112,25 @@ export async function updateCustomization(siteId, customization) {
  * @returns {Promise<Object>} { available: [...], locked: [...] }
  */
 export async function getAllThemesWithAccess(siteId) {
-  try {
-    const response = await fetch(`${API_URL}/api/customization/themes/${siteId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
+  const response = await fetch(`${API_URL}/api/customization/themes/${siteId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    const result = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.message || 'Failed to fetch themes');
-    }
-
-    return result.data;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
   }
+
+  const result = await response.json();
+
+  if (!result.success) {
+    throw new Error(result.message || 'Failed to fetch themes');
+  }
+
+  return result.data;
 }
 
 /**
@@ -151,27 +139,23 @@ export async function getAllThemesWithAccess(siteId) {
  * @returns {Promise<Object>} Default customization
  */
 export async function resetCustomization(siteId) {
-  try {
-    const response = await fetch(`${API_URL}/api/customization/${siteId}/reset`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
+  const response = await fetch(`${API_URL}/api/customization/${siteId}/reset`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    const result = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.message || 'Failed to reset customization');
-    }
-
-    return result.data;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
   }
+
+  const result = await response.json();
+
+  if (!result.success) {
+    throw new Error(result.message || 'Failed to reset customization');
+  }
+
+  return result.data;
 }

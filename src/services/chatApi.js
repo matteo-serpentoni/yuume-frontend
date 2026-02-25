@@ -58,26 +58,22 @@ export const getProfile = async (sessionId, shopDomain) => {
 
     if (!response.ok) throw new Error('Failed to fetch profile');
     return await response.json();
-  } catch (_e) {
+  } catch {
     return null;
   }
 };
 
 export const updateProfile = async (sessionId, shopDomain, data) => {
-  try {
-    const headers = { 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json' };
 
-    const response = await fetch(`${API_BASE_URL}/api/chat/profile`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ sessionId, shopDomain, ...data }),
-    });
+  const response = await fetch(`${API_BASE_URL}/api/chat/profile`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ sessionId, shopDomain, ...data }),
+  });
 
-    if (!response.ok) throw new Error('Failed to update profile');
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  if (!response.ok) throw new Error('Failed to update profile');
+  return await response.json();
 };
 
 export const getSessionStatus = async (sessionId, shopDomain) => {
@@ -91,7 +87,7 @@ export const getSessionStatus = async (sessionId, shopDomain) => {
 
     if (!response.ok) return null;
     return await response.json();
-  } catch (_error) {
+  } catch {
     return null;
   }
 };
@@ -101,17 +97,13 @@ export const getSessionStatus = async (sessionId, shopDomain) => {
  * Sends user feedback (message rating) to the backend.
  */
 export const submitFeedback = async (feedbackData) => {
-  try {
-    const headers = { 'Content-Type': 'application/json' };
-    const response = await fetch(`${API_BASE_URL}/api/feedback`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(feedbackData),
-    });
+  const headers = { 'Content-Type': 'application/json' };
+  const response = await fetch(`${API_BASE_URL}/api/feedback`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(feedbackData),
+  });
 
-    if (!response.ok) throw new Error('Failed to submit feedback');
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  if (!response.ok) throw new Error('Failed to submit feedback');
+  return await response.json();
 };

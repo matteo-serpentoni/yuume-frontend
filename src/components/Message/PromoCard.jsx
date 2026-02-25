@@ -1,4 +1,5 @@
 import React, { useState, memo } from 'react';
+// eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPromoExpiry } from '../../utils/shopifyUtils';
 import './PromoCard.css';

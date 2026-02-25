@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useChat } from '../../hooks/useChat';
 import './Chat.css';
 
+// eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { motion, AnimatePresence } from 'framer-motion';
 import MessageInput from './MessageInput';
 import ChatHeader from './ChatHeader';

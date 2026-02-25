@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+// eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { motion } from 'framer-motion';
 import { getOrderStatusClass, normalizeOrderNumber } from '../../utils/shopifyUtils';
 import './OrderCards.css';

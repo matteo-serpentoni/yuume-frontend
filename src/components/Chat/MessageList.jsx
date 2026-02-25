@@ -1,4 +1,5 @@
 import { useRef, useEffect, memo } from 'react';
+// eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { AnimatePresence, motion } from 'framer-motion';
 import './MessageList.css';
 import CategoryCards from '../Message/CategoryCards';

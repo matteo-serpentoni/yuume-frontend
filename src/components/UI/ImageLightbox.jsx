@@ -1,5 +1,6 @@
 import React, { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
+// eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import './ImageLightbox.css';
 
@@ -38,6 +39,7 @@ const ImageLightbox = ({
     setIsPinching(false);
   };
 
+  /* eslint-disable react-hooks/set-state-in-effect -- portal target lookup requires sync setState */
   useLayoutEffect(() => {
     const el = document.getElementById(portalId);
     if (el) {
@@ -46,6 +48,7 @@ const ImageLightbox = ({
       setTarget(document.getElementById('yuume-drawer-portal') || document.body);
     }
   }, [portalId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleNavigate = useCallback(
     (newIndex, newDirection) => {
