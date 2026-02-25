@@ -233,12 +233,26 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
       return (
         <div key={field.id} className="yuume-dynamic-list-container">
           {field.label && <div className="yuume-dynamic-info-text">{field.label}</div>}
-          <div className="yuume-dynamic-list">
+          <div
+            className="yuume-dynamic-list"
+            role="listbox"
+            aria-label={field.label || "Seleziona un'opzione"}
+          >
             {field.options?.map((opt) => (
               <div
                 key={opt.id}
                 className={`yuume-dynamic-list-option ${formData[field.id] === opt.id ? 'active' : ''} ${opt.disabled ? 'disabled' : ''}`}
                 onClick={() => !opt.disabled && handleInputChange(field.id, opt.id)}
+                role="option"
+                aria-label={opt.title || opt.label}
+                aria-selected={formData[field.id] === opt.id}
+                tabIndex={opt.disabled ? -1 : 0}
+                onKeyDown={(e) => {
+                  if ((e.key === 'Enter' || e.key === ' ') && !opt.disabled) {
+                    e.preventDefault();
+                    handleInputChange(field.id, opt.id);
+                  }
+                }}
               >
                 <div className="yuume-dynamic-radio">
                   {formData[field.id] === opt.id && <div className="yuume-dynamic-radio-inner" />}

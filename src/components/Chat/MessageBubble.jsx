@@ -55,6 +55,7 @@ const MessageBubble = memo(
                   type="button"
                   className={`feedback-btn ${feedback === 'positive' ? 'active' : ''}`}
                   title="Utile"
+                  aria-label="Risposta utile"
                 >
                   <svg
                     width="12"
@@ -79,6 +80,7 @@ const MessageBubble = memo(
                   type="button"
                   className={`feedback-btn ${feedback === 'negative' ? 'active' : ''}`}
                   title="Non utile"
+                  aria-label="Risposta non utile"
                 >
                   <svg
                     width="12"
