@@ -57,15 +57,24 @@
 }
 
 .status-dot {
+  position: relative;
   width: 6px;
   height: 6px;
   border-radius: 50%;
+  overflow: visible;
 }
 
 .status-dot.status-online {
   background-color: #10b981;
-  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  animation: pulse-green 2s infinite;
+}
+
+.status-dot.status-online::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.7);
+  animation: status-pulse 2s infinite;
 }
 
 .status-dot.status-offline {
@@ -74,37 +83,30 @@
 
 .status-dot.status-reconnecting {
   background-color: #f59e0b;
-  animation: pulse-orange 2s infinite;
+}
+
+.status-dot.status-reconnecting::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.7);
+  animation: status-pulse 2s infinite;
 }
 
 /* Redundant mobile block removed as base styles now cover both */
 
-@keyframes pulse-green {
+@keyframes status-pulse {
   0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    opacity: 0.7;
+    transform: scale(1);
   }
   70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+    opacity: 0;
+    transform: scale(3);
   }
   100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
-}
-
-@keyframes pulse-orange {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    opacity: 0;
+    transform: scale(3);
   }
 }
