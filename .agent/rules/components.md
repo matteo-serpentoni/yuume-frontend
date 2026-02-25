@@ -19,7 +19,13 @@ These rules define the React component patterns for yuume-widget.
 - **Silent Error Boundaries**: Critical subtrees should be wrapped with 'ErrorBoundary'.
 - **Graceful Failure**: The global ErrorBoundary MUST render 'null' on error. It is better for the widget to disappear than to show a broken UI on the merchant's site.
 
-## 4. File Naming
+## 4. Centralized Icons
+
+- **No inline SVGs**: SVG icons MUST be defined as named exports in 'components/UI/Icons.jsx', not hardcoded inline in component JSX.
+- **Incremental migration**: When modifying a file that has inline SVGs, extract them to 'Icons.jsx' in the same PR. Do not do bulk refactors.
+- **Naming**: Use descriptive PascalCase names (e.g., 'ChevronLeft', 'CartIcon', 'ThumbsUp').
+
+## 5. File Naming
 
 - **Components**: PascalCase (e.g., 'ChatMessage.jsx').
 - **Hooks**: camelCase with 'use' prefix (e.g., 'useChat.js').
