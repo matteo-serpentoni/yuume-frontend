@@ -3,12 +3,18 @@ import { AnimatePresence } from 'framer-motion';
 import MessageBubble from './MessageBubble';
 import './HumanThinking.css';
 
+/** Pick a random phrase at module load time — outside React's render cycle */
+const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
 const INTENT_PHRASES = {
-  PRODUCT_ADVICE: [
-    'Fammi capire cosa cerchi...',
+  PRODUCT_SEARCH: [
+    'Cerco nel catalogo...',
+    'Sbircio in magazzino...',
+    'Vediamo cosa trovo per te...',
+    'Controllo subito la disponibilità...',
+    'Cerco i prodotti migliori per te...',
     'Ti aiuto a scegliere...',
     'Vediamo qual è il prodotto perfetto per te...',
-    'Cerco di capire le tue esigenze...',
   ],
   PRODUCT_DETAIL: [
     'Recupero le info sul prodotto...',
@@ -16,13 +22,6 @@ const INTENT_PHRASES = {
     'Controllo le caratteristiche...',
     'Fammi vedere cosa so su questo...',
     'Un attimo che trovo le specifiche...',
-  ],
-  PRODUCT_SEARCH: [
-    'Cerco nel catalogo...',
-    'Sbircio in magazzino...',
-    'Vediamo cosa trovo per te...',
-    'Controllo subito la disponibilità...',
-    'Cerco i prodotti migliori per te...',
   ],
   ORDER_TRACK: [
     'Verifico lo stato della spedizione...',
@@ -77,7 +76,7 @@ const INTENT_PHRASES = {
 const HumanThinking = ({ chatColors, intent }) => {
   const phrase = useMemo(() => {
     const list = INTENT_PHRASES[intent] || INTENT_PHRASES.DEFAULT;
-    return list[Math.floor(Math.random() * list.length)];
+    return pickRandom(list);
   }, [intent]);
 
   return (

@@ -93,12 +93,10 @@ export const predictIntent = (text) => {
   const input = text.toLowerCase().trim();
 
   const PATTERNS = {
-    PRODUCT_ADVICE:
-      /\b(consigli|sugg|miglior|quale|raccomand|cosa mi consig|cosa compro|devo comprar|meglio)\b/i,
     PRODUCT_DETAIL:
       /\b(parlami|dettagli|caratteristiche|specifiche|dimmi di più|info su|descriv|racconta|spieg)\b/i,
     PRODUCT_SEARCH:
-      /\b(cerco|trov|prodott|scarp|giacc|pantal|felp|magli|accessori|compr|guard|ved|catalog|disponib|magazzin)\b/i,
+      /\b(cerco|trov|prodott|scarp|giacc|pantal|felp|magli|accessori|compr|guard|ved|catalog|disponib|magazzin|consigli|sugg|miglior|quale|raccomand|cosa mi consig|cosa compro|devo comprar|meglio)\b/i,
     ORDER_TRACK: /\b(ordine|pacco|spediz|dov|arriv|consegn|tracking|stato|stiamo|corrier)\b/i,
     SHIPPING: /\b(cost|temp|spedire|spediamo|consegna|tempi|paes)\b/i,
     REFUND: /\b(reso|rimbors|cambi|restitu|indietr|politica|procedur|sbagliat)\b/i,
