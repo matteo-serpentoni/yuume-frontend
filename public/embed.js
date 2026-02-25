@@ -357,14 +357,31 @@
             });
           });
 
-          // Auto-detect sections
+          // Universal section detection — works across ALL Shopify themes
           const detectedSections = new Set();
-          const bubble = document.getElementById('cart-icon-bubble');
-          const parentSection = bubble && bubble.closest('[id^="shopify-section-"]');
-          if (parentSection) detectedSections.add(parentSection.id.replace('shopify-section-', ''));
 
-          ['cart-icon-bubble', 'cart-drawer', 'cart-notification', 'header'].forEach((id) => {
-            if (document.getElementById(`shopify-section-${id}`)) detectedSections.add(id);
+          // 1. Find any shopify-section that contains cart-related elements
+          document.querySelectorAll('[id^="shopify-section-"]').forEach(function (section) {
+            var hasCartElement = section.querySelector(
+              '[data-cart-count], [data-cart-item-count], [data-header-cart-count], ' +
+                '.cart-count, .cart-count-bubble, .cart__count, .cart-link__bubble, .cart-icon-bubble, ' +
+                '[class*="cart-count"], [class*="cart-drawer"], [class*="cart-icon"], ' +
+                '[id*="cart"], [data-section-type*="cart"]',
+            );
+            if (hasCartElement) {
+              detectedSections.add(section.id.replace('shopify-section-', ''));
+            }
+          });
+
+          // 2. Also check for common section IDs that some themes use
+          [
+            'header',
+            'cart-drawer',
+            'cart-notification',
+            'cart-icon-bubble',
+            'announcement-bar',
+          ].forEach(function (id) {
+            if (document.getElementById('shopify-section-' + id)) detectedSections.add(id);
           });
 
           const ids = Array.from(detectedSections);
