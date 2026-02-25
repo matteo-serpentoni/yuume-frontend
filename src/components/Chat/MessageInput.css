@@ -190,3 +190,9 @@
   mask-composite: exclude;
   pointer-events: none;
 }
+
+/* Mobile GPU optimization: reduce backdrop-filter blur */
+.mobile-device .chat-input {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}

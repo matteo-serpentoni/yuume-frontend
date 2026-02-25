@@ -203,3 +203,9 @@
   width: 18px;
   height: 18px;
 }
+
+/* Mobile GPU optimization: reduce backdrop-filter blur */
+.mobile-device .profile-input {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}

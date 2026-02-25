@@ -355,3 +355,8 @@
   font-size: 14px;
   margin-bottom: 12px;
 }
+
+/* Mobile GPU optimization: reduce backdrop-filter blur */
+.mobile-device .yuume-order-detail-card {
+  backdrop-filter: blur(6px);
+}

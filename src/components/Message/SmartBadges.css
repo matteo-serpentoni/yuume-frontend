@@ -150,3 +150,9 @@
 .yuume-smart-badge-bar.ingredient {
   flex: 1 1 100% !important;
 }
+
+/* Mobile GPU optimization: reduce backdrop-filter blur */
+.mobile-device .yuume-smart-badge-bar {
+  backdrop-filter: blur(6px) saturate(150%);
+  -webkit-backdrop-filter: blur(6px) saturate(150%);
+}

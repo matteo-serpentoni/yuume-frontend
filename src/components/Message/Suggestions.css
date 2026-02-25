@@ -74,3 +74,8 @@
     transform: scale(1.4);
   }
 }
+
+/* Mobile GPU optimization: reduce backdrop-filter blur */
+.mobile-device .yuume-suggestion-chip {
+  backdrop-filter: blur(6px);
+}

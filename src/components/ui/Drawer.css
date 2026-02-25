@@ -141,3 +141,9 @@
   justify-content: center;
   align-items: center;
 }
+
+/* Mobile GPU optimization: reduce backdrop-filter blur */
+.mobile-device .yuume-drawer {
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}

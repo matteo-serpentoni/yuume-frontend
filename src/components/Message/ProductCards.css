@@ -836,3 +836,19 @@
   font-size: 14px;
   padding: 10px;
 }
+
+/* Mobile GPU optimization: reduce backdrop-filter blur */
+.mobile-device .yuume-product-card-side {
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+.mobile-device .yuume-stock-status-badge {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.mobile-device .yuume-back-gallery {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}

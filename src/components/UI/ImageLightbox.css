@@ -255,3 +255,22 @@
     transform: rotate(90deg) scale(1.1);
   }
 }
+
+/* Mobile GPU optimization: reduce backdrop-filter blur */
+.mobile-device .yuume-lightbox-backdrop {
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+.mobile-device .yuume-lightbox-nav {
+  backdrop-filter: blur(8px);
+}
+
+.mobile-device .yuume-lightbox-thumbnails {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.mobile-device .yuume-lightbox-close {
+  backdrop-filter: blur(8px);
+}
