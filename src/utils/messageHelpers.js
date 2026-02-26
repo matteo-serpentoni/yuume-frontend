@@ -17,16 +17,17 @@ const currencySymbols = {
  * Formats a numeric price into a localized string with currency symbol at the beginning.
  * Uses caching for performance and handles string-to-number conversion.
  * @param {number|string} amount - The numeric or string price.
- * @param {string} currency - The currency code (default: "EUR").
+ * @param {string} currency - The currency code (e.g., "USD", "EUR").
  * @returns {string} - Formatted price string (e.g., "€ 10,00").
  */
-export const formatPrice = (amount, currency = 'EUR') => {
+export const formatPrice = (amount, currency) => {
   const num = Number(amount);
   if (isNaN(num)) return amount || '---';
 
-  const symbol = currencySymbols[currency] || currency;
   const formattedNum = numberFormatter.format(num);
+  if (!currency) return formattedNum;
 
+  const symbol = currencySymbols[currency] || currency;
   return `${symbol} ${formattedNum}`;
 };
 
