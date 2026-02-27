@@ -685,5 +685,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     sendFeedback,
     isThinking,
     thinkingIntent,
+    socketRef, // Exposed for idle nudge
   };
 };

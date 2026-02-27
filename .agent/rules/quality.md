@@ -22,13 +22,19 @@ These rules define the code style and quality standards for yuume-widget.
 - **No Duplication**: If similar logic or styling appears in multiple components, extract it to a shared component, hook, or utility.
 - **localStorage**: All localStorage access MUST go through 'utils/storage.js'. Never call 'localStorage.getItem/setItem' directly in components or hooks. The storage helper handles try/catch for Safari private browsing and provides the 'yuume_' prefix automatically.
 
-## 4. Comments & Documentation
+## 4. Extensibility
+
+- **Configuration over hardcoding**: When implementing a new hook or component, use configurable parameters (trigger types, timeouts, copy arrays, callbacks) instead of hardcoding values, when the cost delta is marginal.
+- **No premature abstraction**: If making something generic requires significant extra architecture (providers, registries, plugin systems), implement the concrete case first. Generalize only when a second concrete use case emerges.
+- **The test**: Ask "does making this configurable add more than 10% development time?" If no, make it configurable. If yes, hardcode and revisit later.
+
+## 5. Comments & Documentation
 
 - **Value-Driven**: Add comments only if they explain "why" something is done or provide non-obvious context. Avoid redundant comments that restate the code.
 - **Tone**: Keep comments professional and technical. No emojis allowed in the codebase.
 - **No Emojis**: **NEVER use emojis in code comments.** They are reserved for commit messages and UI feedback if necessary, but not the codebase.
 
-## 5. Debugging & Logging
+## 6. Debugging & Logging
 
 - **No debug console.error**: NEVER use 'console.error' as a debugging tool. These appear as red errors in production and mislead developers. Use devtools, breakpoints, or WDYR instead.
 - **Legitimate console.error**: Only use 'console.error' for actual error handling in catch blocks where the error is meaningful to surface.

@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useChat } from '../../hooks/useChat';
+import { useIdleNudge } from '../../hooks/useIdleNudge';
 import './Chat.css';
 
 // eslint-disable-next-line no-unused-vars -- motion.div used in JSX
@@ -43,11 +44,18 @@ const Chat = ({
   // Cart awareness: show checkout suggestion whenever cart has items
   const [hasActedOnProduct, setHasActedOnProduct] = useState(false);
 
+  // DOM refs for idle nudge (scroll container + input element)
+  const scrollRef = useRef(null);
+  const inputRef = useRef(null);
+
   // Use custom hook for live chat logic, but ONLY if NOT in preview mode
   const liveChat = useChat(devShopDomain, null, { disabled: isPreview });
 
   // ✅ Source of truth: use host props if preview, otherwise use live hook results
-  const messages = isPreview ? previewMessages || [] : liveChat.messages;
+  const messages = useMemo(
+    () => (isPreview ? previewMessages || [] : liveChat.messages),
+    [isPreview, previewMessages, liveChat.messages],
+  );
   const loading = isPreview ? previewLoading || false : liveChat.loading;
   const shopDomain = isPreview ? previewShopDomain || 'preview-shop' : liveChat.shopDomain;
   const sessionId = isPreview ? 'preview-session' : liveChat.sessionId;
@@ -57,6 +65,7 @@ const Chat = ({
   const initialSuggestions = isPreview ? [] : liveChat.initialSuggestions;
   const cartCount = isPreview ? 0 : liveChat.cartCount;
   const showCheckoutSuggestion = cartCount > 0;
+  const socketRef = isPreview ? { current: null } : liveChat.socketRef;
 
   const isThinking = isPreview ? false : liveChat.isThinking;
   const thinkingIntent = isPreview ? null : liveChat.thinkingIntent;
@@ -64,6 +73,25 @@ const Chat = ({
   const sendMessage = isPreview ? () => {} : liveChat.sendMessage;
   const sendFeedback = isPreview ? () => {} : liveChat.sendFeedback;
   const handleSuggestionClick = isPreview ? () => {} : liveChat.handleSuggestionClick;
+
+  // Capture DOM refs for idle nudge after mount
+  useEffect(() => {
+    const wrapper = document.querySelector('.chat-content-wrapper');
+    if (wrapper) {
+      scrollRef.current = wrapper.querySelector('.messages-area');
+      inputRef.current = wrapper.querySelector('textarea');
+    }
+  });
+
+  // Idle nudge: triggers after product cards shown with no user interaction
+  useIdleNudge({
+    messages,
+    socketRef,
+    sessionId,
+    isOpen: !isPreview,
+    scrollRef,
+    inputRef,
+  });
 
   // Group messages to handle "transforming" components (like OrderLookupForm)
   const chatBlocks = useMemo(() => {
