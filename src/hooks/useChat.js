@@ -623,7 +623,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   const handleSuggestionClick = useCallback(
     (suggestion) => {
       const text = suggestion.value || suggestion.label;
-      const options = suggestion.action ? { suggestionAction: suggestion.action } : {};
+      const options = {};
+      if (suggestion.action) options.suggestionAction = suggestion.action;
+      if (suggestion.meta) options.facetMeta = suggestion.meta;
       sendChatMessage(text, options);
     },
     [sendChatMessage],
