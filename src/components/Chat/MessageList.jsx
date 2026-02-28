@@ -1,4 +1,4 @@
-import { useRef, useEffect, memo } from 'react';
+import { useRef, useEffect, useCallback, memo } from 'react';
 // eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { AnimatePresence, motion } from 'framer-motion';
 import './MessageList.css';
@@ -9,6 +9,7 @@ import DynamicForm from '../Message/DynamicForm';
 import TextMessage from '../Message/TextMessage';
 import Suggestions from '../Message/Suggestions';
 import PromoCards from '../Message/PromoCards';
+import CartAction from '../Message/CartAction';
 import ErrorBoundary from '../UI/ErrorBoundary';
 import MessageFallback from './MessageFallback';
 import MessageBubble from './MessageBubble';
@@ -51,33 +52,36 @@ const MessageList = memo(
       }
     };
 
-    const scrollToNewMessage = (behavior = 'smooth') => {
-      if (lastMessageRef.current && messagesAreaRef.current) {
-        const containerHeight = messagesAreaRef.current.clientHeight;
-        const messageHeight = lastMessageRef.current.offsetHeight;
-        const lastBlock = chatBlocks[chatBlocks.length - 1];
+    const scrollToNewMessage = useCallback(
+      (behavior = 'smooth') => {
+        if (lastMessageRef.current && messagesAreaRef.current) {
+          const containerHeight = messagesAreaRef.current.clientHeight;
+          const messageHeight = lastMessageRef.current.offsetHeight;
+          const lastBlock = chatBlocks[chatBlocks.length - 1];
 
-        // Never scroll to top for forms or specific action-oriented intents
-        // These should behave like standard messages and stay at the bottom
-        const isInteraction =
-          lastBlock?.type?.toLowerCase() === 'form_request' ||
-          lastBlock?.detectedIntent === 'REFUND_ACTION' ||
-          lastBlock?.detectedIntent === 'ORDER_TRACK_ACTION';
+          // Never scroll to top for forms or specific action-oriented intents
+          // These should behave like standard messages and stay at the bottom
+          const isInteraction =
+            lastBlock?.type?.toLowerCase() === 'form_request' ||
+            lastBlock?.detectedIntent === 'REFUND_ACTION' ||
+            lastBlock?.detectedIntent === 'ORDER_TRACK_ACTION';
 
-        // Threshold: if message is taller than 40% of the viewport AND not an interaction (like a form)
-        // We prioritize showing the START of informational responses so the user doesn't miss the beginning.
-        if (!isInteraction && messageHeight > containerHeight * 0.4) {
-          lastMessageRef.current.scrollIntoView({
-            behavior,
-            block: 'start',
-          });
+          // Threshold: if message is taller than 40% of the viewport AND not an interaction (like a form)
+          // We prioritize showing the START of informational responses so the user doesn't miss the beginning.
+          if (!isInteraction && messageHeight > containerHeight * 0.4) {
+            lastMessageRef.current.scrollIntoView({
+              behavior,
+              block: 'start',
+            });
+          } else {
+            scrollToBottom(behavior);
+          }
         } else {
           scrollToBottom(behavior);
         }
-      } else {
-        scrollToBottom(behavior);
-      }
-    };
+      },
+      [chatBlocks],
+    );
 
     // Autoscroll logic
     useEffect(() => {
@@ -106,7 +110,7 @@ const MessageList = memo(
       // Sync refs for next render
       prevThinkingRef.current = isThinking;
       prevLoadingRef.current = loading;
-    }, [chatBlocks, loading, isThinking]);
+    }, [chatBlocks, loading, isThinking, scrollToNewMessage]);
 
     const renderMessageContent = (msg) => {
       // 1. Category Cards
@@ -170,6 +174,20 @@ const MessageList = memo(
       // 5.5 Promo Cards (OFFERS intent - no text, only cards)
       if (msg.type?.toLowerCase() === 'promo_cards') {
         return <PromoCards message={msg} onSearch={sendMessage} />;
+      }
+
+      // 5.6 Cart Action (ADD_TO_CART_ACTION — auto add-to-cart for no-variant products)
+      if (msg.type?.toLowerCase() === 'add_to_cart_action') {
+        return (
+          <CartAction
+            actionId={msg.actionId}
+            variantId={msg.variantId}
+            quantity={msg.quantity || 1}
+            pendingMessage={msg.pendingMessage}
+            successMessage={msg.message || msg.text}
+            errorMessage={msg.errorMessage}
+          />
+        );
       }
 
       // 6. Return Submitted (Final Step)

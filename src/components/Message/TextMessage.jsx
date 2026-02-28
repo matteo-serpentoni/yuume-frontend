@@ -1,16 +1,14 @@
 import { memo } from 'react';
-import { processMessage } from '../../utils/messageHelpers';
+import FormattedText from './FormattedText';
 import './TextMessage.css';
 
 const TextMessage = memo(({ message }) => {
   const rawContent = message.message || message.text || '';
 
-  const processed = processMessage(rawContent);
-
   return (
     <>
       {message.title && <div className="yuume-text-message-title">{message.title}</div>}
-      <div className="yuume-text-message-content" dangerouslySetInnerHTML={{ __html: processed }} />
+      <FormattedText text={rawContent} className="yuume-text-message-content" tag="div" />
     </>
   );
 });

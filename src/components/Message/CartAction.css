@@ -1,0 +1,29 @@
+.yuume-cart-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.yuume-cart-action__spinner {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--yuume-accent, #6c63ff);
+  border-radius: 50%;
+  animation: yuume-cart-spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+.yuume-cart-action__text {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+@keyframes yuume-cart-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

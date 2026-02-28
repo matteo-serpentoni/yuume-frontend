@@ -11,6 +11,7 @@ These rules define the security standards specific to yuume-widget, which runs a
 ## 2. XSS Prevention
 
 - **No `dangerouslySetInnerHTML`**: Never render raw HTML from API responses or merchant configuration. If rich text is needed, use a sanitization library with a strict tag whitelist.
+- **Exception**: `FormattedText` (`components/Message/FormattedText.jsx`) is the only authorized component to use `dangerouslySetInnerHTML`. It renders through `processMessage()` which escapes all HTML before converting safe markdown patterns (bold, italic, links, code). All other components MUST use `<FormattedText>` instead of calling `processMessage` or `dangerouslySetInnerHTML` directly.
 - **User-generated content**: Chat messages from users are plain text. Always render them as text nodes, never as HTML. Use React's default escaping.
 - **Merchant content**: Product descriptions from Shopify may contain HTML. Strip all tags before rendering in chat bubbles. Display only plain text content.
 

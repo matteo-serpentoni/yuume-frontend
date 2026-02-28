@@ -25,7 +25,13 @@ These rules define the React component patterns for yuume-widget.
 - **Incremental migration**: When modifying a file that has inline SVGs, extract them to 'Icons.jsx' in the same PR. Do not do bulk refactors.
 - **Naming**: Use descriptive PascalCase names (e.g., 'ChevronLeft', 'CartIcon', 'ThumbsUp').
 
-## 5. File Naming
+## 5. Text Rendering
+
+- **Always use `FormattedText`**: Any component that renders user-facing text from the API MUST use `<FormattedText text={...} />` (`components/Message/FormattedText.jsx`). This handles markdown-to-HTML conversion (bold, links, etc.) in a single place.
+- **Never call `processMessage` directly**: Do not import `processMessage` from `utils/messageHelpers` in components. Use `FormattedText` instead, which wraps it internally.
+- **Props**: `text` (string, required), `className` (string), `tag` (HTML element, default `'span'`).
+
+## 6. File Naming
 
 - **Components**: PascalCase (e.g., 'ChatMessage.jsx').
 - **Hooks**: camelCase with 'use' prefix (e.g., 'useChat.js').
