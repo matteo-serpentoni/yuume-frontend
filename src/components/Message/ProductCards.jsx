@@ -8,6 +8,7 @@ import Drawer from '../UI/Drawer';
 import { formatPrice } from '../../utils/messageHelpers';
 import { normalizeStorefrontProduct, isDefaultVariant } from '../../utils/shopifyUtils';
 import './ProductCards.css';
+import TextMessage from './TextMessage';
 
 const Icons = {
   Info: () => (
@@ -554,7 +555,7 @@ const ProductCards = memo(
               message.sender === 'assistant' && !message.error && !message.disableFeedback
             }
           >
-            {displayMessage}
+            <TextMessage message={{ message: displayMessage }} />
           </MessageBubble>
         )}
         <div className="yuume-carousel-wrapper">
