@@ -1,3 +1,5 @@
+import { getWidgetToken } from './widgetTokenStore';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 export class ChatApiError extends Error {
@@ -16,7 +18,7 @@ export const sendMessage = async (
   clientMessageId = null,
 ) => {
   try {
-    const headers = { 'Content-Type': 'application/json' };
+    const headers = { 'Content-Type': 'application/json', 'X-Widget-Token': getWidgetToken() };
 
     const response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: 'POST',
@@ -49,7 +51,7 @@ export const sendMessage = async (
 
 export const getProfile = async (sessionId, shopDomain) => {
   try {
-    const headers = { 'Content-Type': 'application/json' };
+    const headers = { 'Content-Type': 'application/json', 'X-Widget-Token': getWidgetToken() };
 
     const response = await fetch(
       `${API_BASE_URL}/api/chat/profile?sessionId=${sessionId}&shopDomain=${shopDomain}`,
@@ -64,7 +66,7 @@ export const getProfile = async (sessionId, shopDomain) => {
 };
 
 export const updateProfile = async (sessionId, shopDomain, data) => {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json', 'X-Widget-Token': getWidgetToken() };
 
   const response = await fetch(`${API_BASE_URL}/api/chat/profile`, {
     method: 'POST',
@@ -78,7 +80,7 @@ export const updateProfile = async (sessionId, shopDomain, data) => {
 
 export const getSessionStatus = async (sessionId, shopDomain) => {
   try {
-    const headers = { 'Content-Type': 'application/json' };
+    const headers = { 'Content-Type': 'application/json', 'X-Widget-Token': getWidgetToken() };
     const domainQuery = shopDomain ? `?shopDomain=${shopDomain}` : '';
 
     const response = await fetch(`${API_BASE_URL}/api/chat/session/${sessionId}${domainQuery}`, {
@@ -97,7 +99,7 @@ export const getSessionStatus = async (sessionId, shopDomain) => {
  * Sends user feedback (message rating) to the backend.
  */
 export const submitFeedback = async (feedbackData) => {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json', 'X-Widget-Token': getWidgetToken() };
   const response = await fetch(`${API_BASE_URL}/api/feedback`, {
     method: 'POST',
     headers,

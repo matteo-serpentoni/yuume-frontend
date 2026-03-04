@@ -3,6 +3,8 @@
  * Gestisce le chiamate API per recuperare e salvare le personalizzazioni del widget
  */
 
+import { getWidgetToken } from './widgetTokenStore';
+
 // Usa variabile d'ambiente per l'URL del backend
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -17,6 +19,7 @@ export async function getWidgetConfig(siteId) {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'X-Widget-Token': getWidgetToken(),
       },
     });
 

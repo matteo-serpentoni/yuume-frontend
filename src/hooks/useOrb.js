@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getWidgetConfig } from '../services/customizationApi';
+import { setWidgetToken } from '../services/widgetTokenStore';
 import { BRIDGE_CONFIG } from '../config/bridge';
 
 const DEFAULT_CONFIG = {
@@ -89,6 +90,11 @@ export const useOrb = (modeOverride = null) => {
       if (event.data.type === 'YUUME:shopDomain') {
         const isDev = mode === 'development';
         const incomingDomain = event.data.shopDomain;
+
+        // Store widget auth token
+        if (event.data.widgetToken) {
+          setWidgetToken(event.data.widgetToken);
+        }
 
         if (isDev) {
           const hasManualOverride = !!localStorage.getItem('yuume_dev_shop_domain');

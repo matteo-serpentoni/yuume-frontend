@@ -3,6 +3,8 @@
  * Handles error reporting to the backend.
  */
 
+import { getWidgetToken } from './widgetTokenStore';
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 /**
@@ -21,7 +23,7 @@ export const reportError = async (errorData) => {
   try {
     await fetch(`${API_URL}/api/widget/log-error`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Widget-Token': getWidgetToken() },
       body: JSON.stringify(errorData),
     });
   } catch {

@@ -13,6 +13,7 @@
       const url = new URL(scriptUrl);
       shopParam = url.searchParams.get('shop');
       siteIdParam = url.searchParams.get('siteId');
+      tokenParam = url.searchParams.get('token');
     } catch (e) {
       // Error parsing script URL
     }
@@ -20,6 +21,7 @@
 
   const SHOP_DOMAIN = shopParam || window.location.hostname;
   const SITE_ID = siteIdParam || 'shopify_' + SHOP_DOMAIN.split('.')[0];
+  var tokenParam = tokenParam || '';
 
   const isDevelopment =
     ['localhost', '127.0.0.1', ''].includes(window.location.hostname) ||
@@ -100,7 +102,7 @@
   function sendHeartbeat() {
     fetch(API_URL + '/api/tracking/heartbeat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Widget-Token': tokenParam },
       body: JSON.stringify({
         siteId: SITE_ID,
         sessionId: SESSION_ID,
@@ -172,6 +174,7 @@
       {
         type: 'YUUME:shopDomain',
         shopDomain: SHOP_DOMAIN,
+        widgetToken: tokenParam,
         shopifyCustomer: identity, // Pass identity on load
       },
       WIDGET_ORIGIN,
