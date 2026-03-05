@@ -152,7 +152,15 @@
   // Add timestamp to prevent caching of the widget itself
   const widgetUrl = WIDGET_URL;
   const separator = widgetUrl.includes('?') ? '&' : '?';
-  iframe.src = widgetUrl + separator + 't=' + Date.now();
+  // Pass token + shop in iframe URL for immediate availability (no postMessage race condition)
+  iframe.src =
+    widgetUrl +
+    separator +
+    't=' +
+    Date.now() +
+    (tokenParam ? '&widgetToken=' + encodeURIComponent(tokenParam) : '') +
+    '&shop=' +
+    encodeURIComponent(SHOP_DOMAIN);
 
   iframe.id = 'yuume-orb-iframe';
   iframe.allow = 'clipboard-write;';
@@ -251,6 +259,7 @@
         {
           type: 'YUUME:shopDomain',
           shopDomain: SHOP_DOMAIN,
+          widgetToken: tokenParam,
         },
         WIDGET_ORIGIN,
       );

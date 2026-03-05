@@ -33,6 +33,13 @@ export const useOrb = (modeOverride = null) => {
     // 1. Check URL
     const urlParams = new URLSearchParams(window.location.search);
     const urlShop = urlParams.get('shop') || urlParams.get('shopDomain');
+
+    // Initialize widget token from URL params immediately (no postMessage race)
+    const urlToken = urlParams.get('widgetToken');
+    if (urlToken) {
+      setWidgetToken(urlToken);
+    }
+
     if (urlShop) return urlShop;
 
     // 2. Check localStorage (Manual Override in Dev)
