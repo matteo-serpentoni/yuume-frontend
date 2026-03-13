@@ -431,6 +431,33 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
 
           <div style={{ height: '1px', background: '#333', margin: '4px 0' }} />
 
+          {/* Session Control */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '11px', color: '#8b92a7' }}>Session Control</label>
+            <button
+              onClick={() => {
+                Object.keys(localStorage).forEach((key) => {
+                  if (key.startsWith('yuume_') && key !== 'yuume_dev_shop_domain') {
+                    localStorage.removeItem(key);
+                  }
+                });
+                window.location.reload();
+              }}
+              style={{
+                padding: '8px',
+                background: '#e53e3e',
+                border: 'none',
+                borderRadius: '4px',
+                color: 'white',
+                fontSize: '12px',
+                cursor: 'pointer',
+              }}
+            >
+              🔄 Reset Session
+            </button>
+          </div>
+          <div style={{ height: '1px', background: '#333', margin: '4px 0' }} />
+
           {/* Storefront Preview */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '11px', color: '#8b92a7' }}>Experimental Preview</label>
