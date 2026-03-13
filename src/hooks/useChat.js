@@ -618,14 +618,16 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     ],
   );
 
-  // Centralized suggestion click handler
-  // Extracts label/value and action from suggestion object for consistent handling
+  // Centralized suggestion click handler (Chip System v2)
+  // Extracts label/value and structured action from chip object.
+  // Only 'query' type chips produce user text; action/navigation chips route via suggestionAction.
   const handleSuggestionClick = useCallback(
     (suggestion) => {
       const text = suggestion.value || suggestion.label;
       const options = {};
       if (suggestion.action) options.suggestionAction = suggestion.action;
       if (suggestion.meta) options.facetMeta = suggestion.meta;
+      if (suggestion.payload) options.chipPayload = suggestion.payload;
       sendChatMessage(text, options);
     },
     [sendChatMessage],
