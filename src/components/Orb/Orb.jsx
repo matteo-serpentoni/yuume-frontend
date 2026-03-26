@@ -179,6 +179,7 @@ const Orb = memo(
     forceHoverState = false,
     enlarged = false,
     setEnlarged = () => {},
+    onBubbleVisibilityChange,
     children,
     mode: modeOverride = null,
     mobileOverride = false,
@@ -408,7 +409,7 @@ const Orb = memo(
         setCurrentMessageIndex((prev) => (prev + 1) % messages.length);
       }, 4000);
       return () => clearInterval(interval);
-    }, [isMinimized]);
+    }, [isMinimized, messages.length]);
 
     // ✅ FUNZIONALITÀ: Cart bubble notification
     const [cartCount, setCartCount] = useState(0);
@@ -451,6 +452,10 @@ const Orb = memo(
 
     const showCartBubble = isMinimized && bubbleReady && cartCount > 0 && !bubbleDismissed;
 
+    useEffect(() => {
+      onBubbleVisibilityChange?.(showCartBubble);
+    }, [showCartBubble, onBubbleVisibilityChange]);
+
     const handleBubbleDismiss = useCallback(() => {
       setBubbleDismissed(true);
     }, []);
@@ -474,6 +479,7 @@ const Orb = memo(
           onDismiss={handleBubbleDismiss}
           onClick={handleBubbleClick}
           themeColor={themeColor}
+          isMobile={isMobileView}
         />
         {/* ✅ FUNZIONALITÀ: Dev Tools (Solo in sviluppo locale e non preview) */}
         {/* Rendered outside the orb-container to avoid mobile clipping/centering issues */}

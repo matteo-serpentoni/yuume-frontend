@@ -2,17 +2,31 @@
    OrbBubble — Liquid Glass Notification
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-.orb-bubble {
+.orb-bubble-anchor {
   position: fixed;
-  bottom: 68px;
-  right: 155px;
+  bottom: 32px;
+  right: 32px;
+  width: var(--orb-minimized-size, 132px);
+  height: var(--orb-minimized-size, 132px);
+  pointer-events: none;
   z-index: 999998;
+}
+
+.orb-bubble-anchor.mobile-device {
+  --orb-minimized-size: 119px;
+}
+
+.orb-bubble {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 12px);
 
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
   max-width: 240px;
+  width: max-content;
 
   /* Liquid Glass — tinted with orb theme color */
   background: linear-gradient(
@@ -46,6 +60,7 @@
   color: rgba(255, 255, 255, 0.92);
   line-height: 1.3;
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 /* Dismiss button */
@@ -76,23 +91,19 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    Mobile adjustments
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-@media (max-width: 768px) {
-  .orb-bubble {
-    right: 110px;
-    bottom: 42px;
-    max-width: 200px;
-    padding: 8px 14px;
-    /* Lighter blur on mobile */
-    backdrop-filter: blur(12px) saturate(140%);
-    -webkit-backdrop-filter: blur(12px) saturate(140%);
-  }
+.orb-bubble-anchor.mobile-device .orb-bubble {
+  max-width: 200px;
+  padding: 8px 14px;
+  /* Lighter blur on mobile */
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
 
-  .orb-bubble__text {
-    font-size: 0.78rem;
-  }
+.orb-bubble-anchor.mobile-device .orb-bubble__text {
+  font-size: 0.78rem;
+}
 
-  /* Always show dismiss on mobile (no hover) */
-  .orb-bubble__dismiss {
-    opacity: 1;
-  }
+/* Always show dismiss on mobile (no hover) */
+.orb-bubble-anchor.mobile-device .orb-bubble__dismiss {
+  opacity: 1;
 }

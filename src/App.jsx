@@ -10,6 +10,7 @@ function App() {
     const saved = localStorage.getItem(ORB_STATE_KEY);
     return saved === 'true';
   });
+  const [cartBubbleVisible, setCartBubbleVisible] = useState(false);
 
   useEffect(() => {
     const isEnlarged = typeof enlarged === 'object' ? enlarged.isEnlarged : enlarged;
@@ -18,7 +19,7 @@ function App() {
       const resizeData = {
         type: 'YUUME:resize',
         enlarged: isEnlarged,
-        width: isEnlarged ? 1000 : enlarged?.proactive ? 380 : 350,
+        width: isEnlarged ? 1000 : enlarged?.proactive ? 380 : cartBubbleVisible ? 460 : 350,
         height: isEnlarged ? 1000 : enlarged?.proactive ? 450 : 350,
       };
 
@@ -30,7 +31,7 @@ function App() {
       window.parent?.postMessage(resizeData, '*');
     };
 
-    if (isEnlarged) {
+    if (isEnlarged || cartBubbleVisible) {
       // Open immediately to avoid clipping during expansion
       performResize();
     } else {
@@ -38,7 +39,7 @@ function App() {
       const timer = setTimeout(performResize, 600);
       return () => clearTimeout(timer);
     }
-  }, [enlarged]);
+  }, [enlarged, cartBubbleVisible]);
 
   useEffect(() => {
     localStorage.setItem(ORB_STATE_KEY, enlarged.toString());
@@ -106,7 +107,7 @@ function App() {
                   <MockStorefront theme={devPreview.theme} />
                 </React.Suspense>
               )}
-              <Orb enlarged={enlarged} setEnlarged={setEnlarged} />
+              <Orb enlarged={enlarged} setEnlarged={setEnlarged} onBubbleVisibilityChange={setCartBubbleVisible} />
             </div>
           }
         />

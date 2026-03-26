@@ -21,6 +21,7 @@ const OrbBubble = ({
   onClick,
   autoHideMs = 6000,
   themeColor,
+  isMobile,
 }) => {
   const timerRef = useRef(null);
 
@@ -56,29 +57,31 @@ const OrbBubble = ({
   );
 
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          className="orb-bubble"
-          initial={{ opacity: 0, x: 20, scale: 0.9 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          exit={{ opacity: 0, x: 10, scale: 0.95 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          onClick={handleClick}
-          style={{ '--bubble-theme-color': themeColor || 'rgb(100, 100, 255)' }}
-        >
-          <span className="orb-bubble__icon">{icon}</span>
-          <span className="orb-bubble__text">{message}</span>
-          <button
-            className="orb-bubble__dismiss"
-            onClick={handleDismiss}
-            aria-label="Chiudi notifica"
+    <div className={`orb-bubble-anchor ${isMobile ? 'mobile-device' : ''}`}>
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            className="orb-bubble"
+            initial={{ opacity: 0, x: 20, y: '-50%', scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, y: '-50%', scale: 1 }}
+            exit={{ opacity: 0, x: 10, y: '-50%', scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            onClick={handleClick}
+            style={{ '--bubble-theme-color': themeColor || 'rgb(100, 100, 255)' }}
           >
-            ✕
-          </button>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            <span className="orb-bubble__icon">{icon}</span>
+            <span className="orb-bubble__text">{message}</span>
+            <button
+              className="orb-bubble__dismiss"
+              onClick={handleDismiss}
+              aria-label="Chiudi notifica"
+            >
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
