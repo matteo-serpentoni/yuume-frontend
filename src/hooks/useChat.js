@@ -511,15 +511,23 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
       setLoading(true);
 
-      // Local Prediction: Show thinking indicator immediately if it matches a pattern
-      const predicted = predictIntent(text);
-      if (predicted) {
+      // Local Prediction: Show thinking indicator immediately.
+      // Chip clicks (suggestionAction present) always show thinking since
+      // chip values (e.g. "dangle") won't match Italian predictIntent patterns.
+      // For regular text, predictIntent pattern-matches to set the right intent label.
+      if (options.suggestionAction) {
         setIsThinking(true);
-        setThinkingIntent(predicted);
+        setThinkingIntent('PRODUCT_SEARCH');
+      } else {
+        const predicted = predictIntent(text);
+        if (predicted) {
+          setIsThinking(true);
+          setThinkingIntent(predicted);
+        }
       }
 
       const userMsgId = Date.now(); // Generate ID here
-      addUserMessage(text, userMsgId, options.hidden);
+      addUserMessage(options.displayText ?? text, userMsgId, options.hidden);
 
       try {
         const response = await sendMessage(
@@ -620,15 +628,19 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   // Centralized suggestion click handler (Chip System v2)
   // Extracts label/value and structured action from chip object.
-  // Only 'query' type chips produce user text; action/navigation chips route via suggestionAction.
+  // - label: translated display text shown in the user bubble
+  // - value: raw query/payload sent to the API for routing and search
   const handleSuggestionClick = useCallback(
     (suggestion) => {
-      const text = suggestion.value || suggestion.label;
+      const queryText = suggestion.value || suggestion.label;
+      const displayText = suggestion.label || suggestion.value;
       const options = {};
       if (suggestion.action) options.suggestionAction = suggestion.action;
       if (suggestion.meta) options.facetMeta = suggestion.meta;
       if (suggestion.payload) options.chipPayload = suggestion.payload;
-      sendChatMessage(text, options);
+      // Show translated label in the bubble but send raw value to the API
+      if (displayText !== queryText) options.displayText = displayText;
+      sendChatMessage(queryText, options);
     },
     [sendChatMessage],
   );
