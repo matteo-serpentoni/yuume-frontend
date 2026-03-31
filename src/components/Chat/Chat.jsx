@@ -225,8 +225,15 @@ const Chat = ({
               handleSuggestionClick={handleSuggestionClick}
               sendFeedback={sendFeedback}
               onImageClick={setActiveGallery}
-              onProductAction={() => {
+              onProductAction={(action, payloadData) => {
                 setHasActedOnProduct(true);
+                if (action === 'add_to_cart' && payloadData?.id) {
+                  sendMessage('_SYS_EVENT_', {
+                    hidden: true,
+                    systemAction: 'ADD_TO_CART_MANUAL',
+                    payload: { productId: payloadData.id }
+                  });
+                }
               }}
             />
 
@@ -371,8 +378,15 @@ const Chat = ({
             product={activeProduct}
             onClose={() => setActiveProduct(null)}
             shopDomain={shopDomain}
-            onProductAction={() => {
+            onProductAction={(action, payloadData) => {
               setHasActedOnProduct(true);
+              if (action === 'add_to_cart' && payloadData?.id) {
+                sendMessage('_SYS_EVENT_', {
+                  hidden: true,
+                  systemAction: 'ADD_TO_CART_MANUAL',
+                  payload: { productId: payloadData.id }
+                });
+              }
             }}
           />
         )}

@@ -1,0 +1,252 @@
+/* ══════════════════════════════════════════════
+   CrossSellBlock — Cross-sell widget styles
+
+   Follows Liquid Glass Design System (styling.md §6):
+   - Background: rgba(255,255,255,0.08–0.12)
+   - Blur: backdrop-filter: blur(16px) saturate(150%) brightness(1.05)
+   - Borders: 1px solid rgba(255,255,255,0.12–0.15)
+   - Radius: 16px–20px for panels
+   - Shadows: multi-layer
+   ══════════════════════════════════════════════ */
+
+.yuume-cross-sell-block {
+  margin-top: 12px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  backdrop-filter: blur(16px) saturate(150%) brightness(1.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: yuume-xs-fade-in 0.35s ease-out;
+}
+
+@keyframes yuume-xs-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Header ── */
+
+.yuume-xs-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.yuume-xs-header svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.yuume-xs-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── Grid of cards ── */
+
+.yuume-xs-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.yuume-xs-grid::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Individual card ── */
+
+.yuume-xs-card {
+  flex: 0 0 136px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+  scroll-snap-align: start;
+  animation: yuume-xs-card-in 0.3s ease-out both;
+}
+
+@keyframes yuume-xs-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.yuume-xs-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Image ── */
+
+.yuume-xs-image-wrapper {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.yuume-xs-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.yuume-xs-image-wrapper:hover .yuume-xs-image {
+  transform: scale(1.04);
+}
+
+.yuume-xs-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.yuume-xs-promo-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+
+/* ── Info section ── */
+
+.yuume-xs-info {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.yuume-xs-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  line-height: 1.35;
+}
+
+.yuume-xs-name:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.yuume-xs-name svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.45;
+}
+
+.yuume-xs-name-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.yuume-xs-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.yuume-xs-original-price {
+  font-size: 9px;
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.yuume-xs-price {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ── CTA ── */
+
+.yuume-xs-cta {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  border: 1px solid;
+  letter-spacing: 0.02em;
+  margin-top: auto;
+}
+
+.yuume-xs-cta--view {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.yuume-xs-cta--view:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.yuume-xs-atc-wrapper {
+  margin-top: auto;
+}
+
+.yuume-xs-unavailable {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: auto;
+  padding: 4px 0;
+}
+
+/* ── Mobile performance (styling.md §3) ── */
+
+@media (max-width: 480px) {
+  .yuume-cross-sell-block {
+    backdrop-filter: blur(12px) saturate(130%);
+  }
+}

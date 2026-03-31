@@ -10,6 +10,7 @@ import TextMessage from '../Message/TextMessage';
 import Suggestions from '../Message/Suggestions';
 import PromoCards from '../Message/PromoCards';
 import CartAction from '../Message/CartAction';
+import CrossSellBlock from '../Message/CrossSellBlock';
 import ErrorBoundary from '../UI/ErrorBoundary';
 import MessageFallback from './MessageFallback';
 import MessageBubble from './MessageBubble';
@@ -179,14 +180,26 @@ const MessageList = memo(
       // 5.6 Cart Action (ADD_TO_CART_ACTION — auto add-to-cart for no-variant products)
       if (msg.type?.toLowerCase() === 'add_to_cart_action') {
         return (
-          <CartAction
-            actionId={msg.actionId}
-            variantId={msg.variantId}
-            quantity={msg.quantity || 1}
-            pendingMessage={msg.pendingMessage}
-            successMessage={msg.message || msg.text}
-            errorMessage={msg.errorMessage}
-          />
+          <>
+            <CartAction
+              actionId={msg.actionId}
+              variantId={msg.variantId}
+              quantity={msg.quantity || 1}
+              pendingMessage={msg.pendingMessage}
+              successMessage={msg.message || msg.text}
+              errorMessage={msg.errorMessage}
+            />
+            {msg.crossSell && (
+              <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} />
+            )}
+          </>
+        );
+      }
+
+      // 5.7 Cross Sell Block (Standalone V2/V1 recommendations rendering)
+      if (msg.type?.toLowerCase() === 'cross_sell_block') {
+        return (
+          msg.crossSell ? <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} /> : null
         );
       }
 
@@ -273,6 +286,8 @@ const MessageList = memo(
         type = 'form_request';
       } else if (msg.type?.toLowerCase() === 'promo_cards') {
         type = 'promo_cards';
+      } else if (msg.type?.toLowerCase() === 'cross_sell_block') {
+        type = 'cross_sell_block';
       }
 
       const isStandalone = [
@@ -281,6 +296,7 @@ const MessageList = memo(
         'return_submitted',
         'form_request',
         'promo_cards',
+        'cross_sell_block',
       ].includes(type?.toLowerCase());
 
       return (

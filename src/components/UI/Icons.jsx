@@ -9,13 +9,27 @@
 import React from 'react';
 
 const SIZE = 14;
-const common = { width: SIZE, height: SIZE, viewBox: '0 0 24 24', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' };
-const stroke = { stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' };
+const common = {
+  width: SIZE,
+  height: SIZE,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  xmlns: 'http://www.w3.org/2000/svg',
+};
+const stroke = {
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+};
 
 /** 📦 Package / order tracking */
 export const PackageIcon = () => (
   <svg {...common}>
-    <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" {...stroke} />
+    <path
+      d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"
+      {...stroke}
+    />
     <polyline points="3.27 6.96 12 12.01 20.73 6.96" {...stroke} />
     <line x1="12" y1="22.08" x2="12" y2="12" {...stroke} />
   </svg>
@@ -39,14 +53,20 @@ export const ReturnIcon = () => (
 /** ⭐ Star / popular */
 export const StarIcon = () => (
   <svg {...common}>
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" {...stroke} />
+    <polygon
+      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+      {...stroke}
+    />
   </svg>
 );
 
 /** 🏷️ Tag / offers */
 export const TagIcon = () => (
   <svg {...common}>
-    <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" {...stroke} />
+    <path
+      d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"
+      {...stroke}
+    />
     <line x1="7" y1="7" x2="7.01" y2="7" {...stroke} />
   </svg>
 );
@@ -78,3 +98,38 @@ export const CartIcon = () => (
   </svg>
 );
 
+/** External link arrow — used in cross-sell product cards */
+export const ExternalLinkIcon = ({ size = 12 } = {}) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    stroke="currentColor"
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+);
+
+/** Sparkle / cross-sell suggestion indicator */
+export const SparkleIcon = ({ size = 13 } = {}) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
