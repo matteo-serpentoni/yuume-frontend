@@ -190,7 +190,7 @@ const MessageList = memo(
               errorMessage={msg.errorMessage}
             />
             {msg.crossSell && (
-              <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} />
+              <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} onOpen={setActiveProduct} />
             )}
           </>
         );
@@ -199,7 +199,7 @@ const MessageList = memo(
       // 5.7 Cross Sell Block (Standalone V2/V1 recommendations rendering)
       if (msg.type?.toLowerCase() === 'cross_sell_block') {
         return (
-          msg.crossSell ? <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} /> : null
+          msg.crossSell ? <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} onOpen={setActiveProduct} /> : null
         );
       }
 

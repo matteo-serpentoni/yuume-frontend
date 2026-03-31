@@ -13,7 +13,7 @@ import { formatPrice } from '../../utils/messageHelpers';
 import { normalizeStorefrontProduct } from '../../utils/shopifyUtils';
 import './CrossSellBlock.css';
 
-const CrossSellCard = memo(({ product, shopDomain, index }) => {
+const CrossSellCard = memo(({ product, shopDomain, index, onOpen }) => {
   const normalized = normalizeStorefrontProduct(product);
   const {
     primaryImage: image,
@@ -75,14 +75,17 @@ const CrossSellCard = memo(({ product, shopDomain, index }) => {
 
         {isAvailable ? (
           hasVariants ? (
-            <a
-              href={url}
+            <button
               className="yuume-xs-cta yuume-xs-cta--view"
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onOpen) onOpen(product);
+              }}
+              aria-label={`View options for ${name}`}
             >
               View options
-            </a>
+            </button>
           ) : (
             variants[0]?.id && (
               <div className="yuume-xs-atc-wrapper">
@@ -110,7 +113,7 @@ CrossSellCard.displayName = 'CrossSellCard';
  *
  * @param {{ data: { title: string, vertical: string, products: Object[] }, shopDomain: string }} props
  */
-const CrossSellBlock = memo(({ data, shopDomain }) => {
+const CrossSellBlock = memo(({ data, shopDomain, onOpen }) => {
   if (!data?.products?.length) return null;
 
   return (
@@ -127,6 +130,7 @@ const CrossSellBlock = memo(({ data, shopDomain }) => {
             product={product}
             shopDomain={shopDomain}
             index={index}
+            onOpen={onOpen}
           />
         ))}
       </div>
