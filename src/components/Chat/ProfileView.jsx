@@ -22,19 +22,19 @@ const ProfileView = ({
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
+    const loadProfile = async () => {
+      setLoading(true);
+      const data = await getProfile(sessionId, shopDomain);
+      if (data) {
+        setName(data.name || '');
+        setEmail(data.email || '');
+        setIsIdentified(!!data.isIdentified);
+      }
+      setLoading(false);
+    };
+    
     loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    setLoading(true);
-    const data = await getProfile(sessionId, shopDomain);
-    if (data) {
-      setName(data.name || '');
-      setEmail(data.email || '');
-      setIsIdentified(!!data.isIdentified);
-    }
-    setLoading(false);
-  };
+  }, [sessionId, shopDomain]);
 
   const handleSave = async (e) => {
     e.preventDefault();

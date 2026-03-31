@@ -6,9 +6,9 @@
  *
  * Renders nothing if products array is empty.
  */
-import { memo } from 'react';
+import { memo, useRef, useState, useEffect } from 'react';
 import AddToCartButton from './AddToCartButton';
-import { ExternalLinkIcon, SparkleIcon } from '../UI/Icons';
+import { ExternalLinkIcon, SparkleIcon, ChevronLeftIcon, ChevronRightIcon } from '../UI/Icons';
 import { formatPrice } from '../../utils/messageHelpers';
 import { normalizeStorefrontProduct } from '../../utils/shopifyUtils';
 import './CrossSellBlock.css';
@@ -114,6 +114,42 @@ CrossSellCard.displayName = 'CrossSellCard';
  * @param {{ data: { title: string, vertical: string, products: Object[] }, shopDomain: string }} props
  */
 const CrossSellBlock = memo(({ data, shopDomain, onOpen }) => {
+  const scrollRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowLeftArrow(scrollLeft > 10);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) {
+      el.addEventListener('scroll', checkScroll);
+      // Initial check
+      checkScroll();
+      return () => el.removeEventListener('scroll', checkScroll);
+    }
+  }, [data?.products]);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const cardWidth = container.querySelector('.yuume-xs-card')?.offsetWidth || 136;
+      const gap = 8;
+      const scrollAmount = direction === 'next' ? cardWidth + gap : -(cardWidth + gap);
+
+      container.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   if (!data?.products?.length) return null;
 
   return (
@@ -123,16 +159,38 @@ const CrossSellBlock = memo(({ data, shopDomain, onOpen }) => {
         <span className="yuume-xs-title">{data.title}</span>
       </div>
 
-      <div className="yuume-xs-grid">
-        {data.products.slice(0, 3).map((product, index) => (
-          <CrossSellCard
-            key={product.id || product.productId || index}
-            product={product}
-            shopDomain={shopDomain}
-            index={index}
-            onOpen={onOpen}
-          />
-        ))}
+      <div className="yuume-carousel-wrapper">
+        {showLeftArrow && (
+          <button
+            className="yuume-carousel-nav-btn prev"
+            onClick={() => scroll('prev')}
+            aria-label="Prodotto precedente"
+          >
+            <ChevronLeftIcon size={16} />
+          </button>
+        )}
+
+        <div className="yuume-xs-grid" ref={scrollRef}>
+          {data.products.slice(0, 3).map((product, index) => (
+            <CrossSellCard
+              key={product.id || product.productId || index}
+              product={product}
+              shopDomain={shopDomain}
+              index={index}
+              onOpen={onOpen}
+            />
+          ))}
+        </div>
+
+        {showRightArrow && data.products.length > 1 && (
+          <button
+            className="yuume-carousel-nav-btn next"
+            onClick={() => scroll('next')}
+            aria-label="Prodotto successivo"
+          >
+            <ChevronRightIcon size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

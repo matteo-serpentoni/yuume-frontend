@@ -9,6 +9,7 @@ import { formatPrice } from '../../utils/messageHelpers';
 import { normalizeStorefrontProduct, isDefaultVariant } from '../../utils/shopifyUtils';
 import './ProductCards.css';
 import TextMessage from './TextMessage';
+import { ChevronLeftIcon, ChevronRightIcon } from '../UI/Icons';
 
 const Icons = {
   Info: () => (
@@ -571,16 +572,7 @@ const ProductCards = memo(
               onClick={() => scroll('prev')}
               aria-label="Prodotto precedente"
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
+              <ChevronLeftIcon size={16} />
             </button>
           )}
 
@@ -604,16 +596,7 @@ const ProductCards = memo(
               onClick={() => scroll('next')}
               aria-label="Prodotto successivo"
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
+              <ChevronRightIcon size={16} />
             </button>
           )}
         </div>
