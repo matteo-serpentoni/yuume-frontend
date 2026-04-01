@@ -33,7 +33,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       if (elapsed >= SESSION_TIMEOUT) {
         // Clear only Yuume keys from localStorage
         Object.values(STORAGE_KEYS).forEach((k) => localStorage.removeItem(k));
-        localStorage.removeItem('yuume_shopify_customer');
         localStorage.removeItem('yuume_profile');
         id = null;
       }
@@ -117,15 +116,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   }, [disabled]);
 
   const [assignedTo, setAssignedTo] = useState(null);
-  const [shopifyCustomer, setShopifyCustomer] = useState(() => {
-    if (disabled) return null;
-    try {
-      const saved = localStorage.getItem('yuume_shopify_customer');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  }); // Certified identity
+  const [shopifyCustomer, setShopifyCustomer] = useState(null); // In-memory only (GDPR: PII not persisted to localStorage)
   const [initialSuggestions, setInitialSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
@@ -261,16 +252,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
         if (customer) {
           setShopifyCustomer(customer);
-          // Persist identity to localStorage
-          try {
-            localStorage.setItem('yuume_shopify_customer', JSON.stringify(customer));
-          } catch {
-            // Storage full or restricted
-          }
+          // GDPR: shopifyCustomer stays in-memory only (PII received passively — no localStorage)
         } else {
           // LOGOUT SYNC: Clear identity if parent sends null/undefined
           setShopifyCustomer(null);
-          localStorage.removeItem('yuume_shopify_customer');
         }
       }
 

@@ -17,9 +17,33 @@ These rules define the security standards specific to yuume-widget, which runs a
 
 ## 3. Data Storage
 
-- **No localStorage for tokens**: Session identifiers and auth tokens must be stored in memory (React state/context) only. `localStorage` is shared across the merchant's domain and could leak data.
-- **No cookies**: The widget must not set any cookies on the merchant's domain.
-- **Session ephemeral**: Chat session data lives in memory for the duration of the page visit. When the page is closed, session state is lost (by design).
+The widget runs on the merchant's domain. Under the **ePrivacy Directive**, localStorage access requires either:  
+**(a) strict necessity** for a service explicitly requested by the user, or  
+**(b) explicit prior consent** (opt-in).
+
+### Permitted in localStorage (strictly necessary — no consent required)
+
+These keys are permitted because without them the chat service cannot function as requested:
+
+| Key | Reason |
+|---|---|
+| `yuume_session_id` | Chat session continuity across page navigations |
+| `yuume_messages` | Restoring the conversation the user was actively having |
+| `yuume_session_time` | Detecting session timeout (functional, not tracking) |
+| `yuume_session_status` | Displaying correct UI state on return |
+| `yuume_profile` | Name/email **actively submitted by the user** via the profile form |
+
+### Prohibited in localStorage
+
+- **`yuume_shopify_customer`** — PII (name, email, Shopify customer ID) received **passively** from the storefront via `postMessage`, without any user action. Must be stored **in React state (memory) only**. On page reload, the parent storefront re-sends it via `postMessage` immediately, so there is zero UX degradation.
+- **Auth tokens / API secrets** — Never in localStorage under any circumstances.
+- **Analytics/tracking data** — Must not be stored until the user has given **explicit consent**. Check consent via `/api/chat/consent` or `window.Shopify.customerPrivacy` before writing any tracking data.
+- **Cookies** — The widget must not set any cookies on the merchant's domain.
+
+### Cleanup on session expiry
+
+When a session times out (30 min), all `yuume_*` keys in `localStorage` MUST be removed. This is implemented in the `getOrCreateSessionId()` function in `useChat.js`.
+
 
 ## 4. CSP Compliance
 
