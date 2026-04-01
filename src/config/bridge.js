@@ -49,4 +49,12 @@ export const BRIDGE_CONFIG = {
   hasPrefix: (messageType) => {
     return typeof messageType === 'string' && messageType.startsWith(BRIDGE_CONFIG.prefix);
   },
+
+  // Standard checkout message types (for reference / documentation)
+  checkoutMessages: {
+    GET_URL: 'YUUME:getCheckoutUrl',
+    URL_RESPONSE: 'YUUME:checkoutUrlResponse',
+    FALLBACK: 'YUUME:checkoutFallback',
+    COMPLETE: 'YUUME:checkoutComplete',
+  },
 };

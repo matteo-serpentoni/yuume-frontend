@@ -439,10 +439,50 @@
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // CHECKOUT
+    // CHECKOUT — Get Checkout URL
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:checkout') {
+    if (event.data.type === 'YUUME:getCheckoutUrl') {
+      fetch('/cart.js', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (cart) {
+          var checkoutUrl = null;
+          if (cart && cart.items && cart.items.length > 0) {
+            // Build permalink checkout URL from cart token
+            checkoutUrl = '/checkout';
+            if (cart.token) {
+              checkoutUrl = '/cart/' + cart.token;
+            }
+          }
+          iframe.contentWindow.postMessage({
+            type: 'YUUME:checkoutUrlResponse',
+            checkoutUrl: checkoutUrl,
+            itemCount: cart ? cart.item_count : 0,
+          }, WIDGET_ORIGIN);
+        })
+        .catch(function () {
+          iframe.contentWindow.postMessage({
+            type: 'YUUME:checkoutUrlResponse',
+            checkoutUrl: null,
+            error: 'cart_fetch_failed',
+          }, WIDGET_ORIGIN);
+        });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CHECKOUT — Fallback (open in new tab)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (event.data.type === 'YUUME:checkoutFallback') {
       window.open('/checkout', '_blank');
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CHECKOUT — Complete (resync cart)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (event.data.type === 'YUUME:checkoutComplete') {
+      lastCartCount = -1; // Force resync
+      syncCart();
+      document.dispatchEvent(new Event('cart:refresh'));
+      document.dispatchEvent(new Event('cart:updated'));
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

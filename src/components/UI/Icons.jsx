@@ -167,3 +167,38 @@ export const ChevronRightIcon = ({ size = 24 } = {}) => (
     <polyline points="9 18 15 12 9 6" />
   </svg>
 );
+
+/** Check circle — checkout success confirmation */
+export const CheckCircleIcon = ({ size = 28 } = {}) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+    <polyline points="22 4 12 14.01 9 11.01" />
+  </svg>
+);
+
+/** Compact left chevron — checkout back button */
+export const ChevronLeft = ({ size = 14 } = {}) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    stroke="currentColor"
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);

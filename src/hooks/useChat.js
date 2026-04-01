@@ -93,6 +93,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   // Connection Status logic
   const [connectionStatus, setConnectionStatus] = useState('online');
   const [cartCount, setCartCount] = useState(0);
+  const [checkoutUrl, setCheckoutUrl] = useState(null);
 
   useEffect(() => {
     if (disabled) return;
@@ -281,6 +282,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         const cart = event.data.cart || event.data.data?.cart;
         if (cart) {
           setCartCount(cart.item_count || 0);
+          // Track checkout URL for embedded checkout flow
+          if (cart.checkout_url) {
+            setCheckoutUrl(cart.checkout_url);
+          }
         }
       }
     };
@@ -684,12 +689,22 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     [messages, shopDomain, sessionId],
   );
 
+  /**
+   * Resets cart state after checkout completion.
+   * Called by useCheckout when payment succeeds.
+   */
+  const resetCart = useCallback(() => {
+    setCartCount(0);
+    setCheckoutUrl(null);
+  }, []);
+
   return {
     messages,
     loading,
     shopDomain,
     connectionStatus,
     cartCount,
+    checkoutUrl,
     sessionId,
     sessionStatus,
     assignedTo, // Return assignedTo
@@ -698,6 +713,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     sendMessage: sendChatMessage,
     handleSuggestionClick, // Centralized suggestion handler
     clearChat,
+    resetCart,
     sendFeedback,
     isThinking,
     thinkingIntent,

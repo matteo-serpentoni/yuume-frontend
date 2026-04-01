@@ -1,5 +1,6 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useChat } from '../../hooks/useChat';
+import { useCheckout } from '../../hooks/useCheckout';
 import { useIdleNudge } from '../../hooks/useIdleNudge';
 import './Chat.css';
 
@@ -16,6 +17,7 @@ import ProfileView from './ProfileView';
 import StarRating from './StarRating';
 import ImageLightbox from '../UI/ImageLightbox';
 import Suggestions from '../Message/Suggestions';
+import CheckoutView from './CheckoutView';
 
 const Chat = ({
   onTyping,
@@ -64,8 +66,32 @@ const Chat = ({
   const assignedTo = isPreview ? previewAssignedTo || null : liveChat.assignedTo;
   const initialSuggestions = isPreview ? [] : liveChat.initialSuggestions;
   const cartCount = isPreview ? 0 : liveChat.cartCount;
+  const resetCart = isPreview ? () => {} : liveChat.resetCart;
   const showCheckoutSuggestion = cartCount > 0;
   const socketRef = isPreview ? { current: null } : liveChat.socketRef;
+
+  // Checkout: add confirmation message to chat on completion
+  const addSystemMessage = useCallback(
+    (msgData) => {
+      if (isPreview || !liveChat.messages) return;
+      // Use sendMessage with a special _SYS_CHECKOUT_ flag to inject message locally
+      // This is handled as a local-only message injection
+      liveChat.sendMessage('_SYS_CHECKOUT_COMPLETE_', { hidden: false, ...msgData });
+    },
+    [isPreview, liveChat],
+  );
+
+  // Checkout flow state machine
+  const {
+    checkoutState,
+    checkoutMode,
+    error: checkoutError,
+    startCheckout,
+    closeCheckout,
+  } = useCheckout({
+    onCartReset: resetCart,
+    onAddMessage: addSystemMessage,
+  });
 
   const isThinking = isPreview ? false : liveChat.isThinking;
   const thinkingIntent = isPreview ? null : liveChat.thinkingIntent;
@@ -270,9 +296,7 @@ const Chat = ({
                             variant: 'checkout',
                           },
                         ]}
-                        onSuggestionClick={() => {
-                          window.parent.postMessage({ type: 'YUUME:checkout' }, '*');
-                        }}
+                        onSuggestionClick={() => startCheckout()}
                       />
                     </motion.div>
                   ) : (
@@ -411,6 +435,18 @@ const Chat = ({
         onClose={() => setActiveGallery(null)}
         onNavigate={(newIndex) => setActiveGallery({ ...activeGallery, index: newIndex })}
       />
+
+      {/* Checkout overlay — renders above chat when checkout is active */}
+      <AnimatePresence>
+        {checkoutState !== 'idle' && (
+          <CheckoutView
+            checkoutState={checkoutState}
+            checkoutMode={checkoutMode}
+            error={checkoutError}
+            onClose={closeCheckout}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
