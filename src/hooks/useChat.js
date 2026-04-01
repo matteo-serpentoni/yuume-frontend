@@ -117,6 +117,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   const [assignedTo, setAssignedTo] = useState(null);
   const [shopifyCustomer, setShopifyCustomer] = useState(null); // In-memory only (GDPR: PII not persisted to localStorage)
+  const [analyticsConsent, setAnalyticsConsent] = useState(false); // Controlled by storefront parent postMessage
   const [initialSuggestions, setInitialSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
@@ -249,6 +250,11 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       // 1. Identity & ShopDomain
       if (event.data?.type === 'YUUME:identity' || event.data?.type === 'YUUME:shopDomain') {
         const customer = event.data.customer || event.data.shopifyCustomer;
+        const consent = event.data.analyticsConsent;
+
+        if (typeof consent === 'boolean') {
+          setAnalyticsConsent(consent);
+        }
 
         if (customer) {
           setShopifyCustomer(customer);
@@ -458,6 +464,35 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     };
   }, [sessionId, disabled, shopDomain]);
 
+  // Widget Event Emitter
+  const trackWidgetEvent = useCallback((eventType, properties = {}) => {
+    if (!analyticsConsent || disabled) return;
+
+    // Determine fallback anonId (storefront normally manages it, but widget can piggyback sessionId)
+    const payload = {
+      siteId: shopDomain || 'unknown', // Proxy used by middleware
+      sessionId,
+      source: 'widget',
+      identity: { 
+        anonId: sessionId, // Use session ID as fallback anonId
+        shopifyCustomerId: shopifyCustomer?.id?.toString() || undefined 
+      },
+      events: [{
+        eventType,
+        ...properties,
+      }]
+    };
+
+    fetch(`${API_URL}/api/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Widget-Token': new URLSearchParams(window.location.search).get('widgetToken') || '',
+      },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  }, [analyticsConsent, disabled, shopDomain, sessionId, shopifyCustomer]);
+
   const sendChatMessage = useCallback(
     async (text, options = {}) => {
       if (!text.trim() || loading) return;
@@ -598,6 +633,11 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       } finally {
         setLoading(false);
       }
+      
+      // Telemetry
+      if (!options.suggestionAction) {
+        trackWidgetEvent('jarbris_message_sent', { query: text, eventData: { isChip: false } });
+      }
     },
     [
       sessionId,
@@ -613,8 +653,20 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       setMessages,
       setAssignedTo,
       clearChat,
+      trackWidgetEvent,
     ],
   );
+
+  // Track session start when chat is genuinely opened and connected
+  useEffect(() => {
+    if (connectionStatus === 'online' && sessionStatus === 'active' && messages.length <= 1) {
+      // Fire and forget after delay to ensure consent state parsed
+      const t = setTimeout(() => {
+        trackWidgetEvent('jarbris_session_started');
+      }, 2000);
+      return () => clearTimeout(t);
+    }
+  }, [connectionStatus, sessionStatus, messages.length, trackWidgetEvent]);
 
   // Centralized suggestion click handler (Chip System v2)
   // Extracts label/value and structured action from chip object.
@@ -631,8 +683,11 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       // Show translated label in the bubble but send raw value to the API
       if (displayText !== queryText) options.displayText = displayText;
       sendChatMessage(queryText, options);
+
+      // Telemety tracker
+      trackWidgetEvent('jarbris_message_sent', { query: queryText, eventData: { isChip: true } });
     },
-    [sendChatMessage],
+    [sendChatMessage, trackWidgetEvent],
   );
 
   const sendFeedback = useCallback(
@@ -703,5 +758,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     isThinking,
     thinkingIntent,
     socketRef, // Exposed for idle nudge
+    trackWidgetEvent, // Expose for external button clicks in UI (e.g. products)
   };
 };

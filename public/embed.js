@@ -96,6 +96,17 @@
     return null;
   }
 
+  function hasAnalyticsConsent() {
+    // Check Shopify Customer Privacy API first
+    const shopifyPrivacy = window.Shopify && window.Shopify.customerPrivacy;
+    if (shopifyPrivacy && typeof shopifyPrivacy.analyticsProcessingAllowed === 'function') {
+      return shopifyPrivacy.analyticsProcessingAllowed() === true;
+    }
+    // Fallback: If strict GDPR is enforced on a site, this API will be present.
+    // If it's missing, it typically means the merchant hasn't enabled the strict cookie banner.
+    return true; 
+  }
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TRACKING FUNCTIONS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -178,12 +189,14 @@
   // Invia shopDomain al widget quando l'iframe è caricato
   iframe.onload = function () {
     const identity = getShopifyIdentity();
+    const consent = hasAnalyticsConsent();
     iframe.contentWindow.postMessage(
       {
         type: 'YUUME:shopDomain',
         shopDomain: SHOP_DOMAIN,
         widgetToken: tokenParam,
         shopifyCustomer: identity, // Pass identity on load
+        analyticsConsent: consent,
       },
       WIDGET_ORIGIN,
     );
@@ -252,6 +265,14 @@
     if (event.source !== iframe.contentWindow) return;
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // FATAL ERROR (Self-Destruct to avoid blocking UI)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (event.data.type === 'YUUME:fatalError') {
+      iframe.style.display = 'none';
+      return;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // SHOP DOMAIN REQUEST
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === 'YUUME:requestShopDomain') {
@@ -270,10 +291,12 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === 'YUUME:ready') {
       const identity = getShopifyIdentity();
+      const consent = hasAnalyticsConsent();
       iframe.contentWindow.postMessage(
         {
           type: 'YUUME:identity',
           customer: identity,
+          analyticsConsent: consent,
         },
         WIDGET_ORIGIN,
       );
