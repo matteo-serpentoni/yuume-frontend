@@ -1,5 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getProfile, updateProfile } from '../../services/chatApi';
+import { getPrivacyPreferences, updatePrivacyPreferences } from '../../services/privacyApi';
+import {
+  getBootConsent,
+  broadcastConsentChange,
+  rollbackConsent,
+  getAnonId,
+} from '../../utils/consentBridge';
+import { LockIcon } from '../UI/Icons';
 import { validateEmail } from '../../utils/validators';
 import './ProfileView.css';
 
@@ -20,6 +28,12 @@ const ProfileView = ({
   const [message, setMessage] = useState(null);
   const [isIdentified, setIsIdentified] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  // Phase 3: Privacy consent state — boot from localStorage for instant UI, sync from backend
+  const [analyticsConsent, setAnalyticsConsent] = useState(getBootConsent);
+  const [privacySaving, setPrivacySaving] = useState(false);
+  const [privacyError, setPrivacyError] = useState(null);
+  // Ref to cancel the error-dismissal timer if the component unmounts (state.md §3)
+  const privacyErrorTimerRef = useRef(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -32,9 +46,34 @@ const ProfileView = ({
       }
       setLoading(false);
     };
-    
+
     loadProfile();
   }, [sessionId, shopDomain]);
+
+  // Phase 3: Sync analytics consent from backend (backend is source of truth)
+  useEffect(() => {
+    let cancelled = false;
+    const syncConsent = async () => {
+      const anonId = getAnonId();
+      const serverConsent = await getPrivacyPreferences(sessionId, shopDomain, anonId);
+      if (!cancelled && serverConsent !== null) {
+        const serverValue = serverConsent.analytics === true;
+        setAnalyticsConsent(serverValue);
+        broadcastConsentChange(serverValue);
+      }
+    };
+
+    syncConsent();
+    // Cleanup: prevent state update after unmount if the fetch resolves late
+    return () => { cancelled = true; };
+  }, [sessionId, shopDomain]);
+
+  // Cleanup the error-dismissal timer on unmount (state.md §3: timer cleanup)
+  useEffect(() => {
+    return () => {
+      if (privacyErrorTimerRef.current) clearTimeout(privacyErrorTimerRef.current);
+    };
+  }, []);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -97,6 +136,38 @@ const ProfileView = ({
     } catch {
       setSaving(false);
       setMessage({ type: 'error', text: 'Errore durante il reset.' });
+    }
+  };
+
+  // Phase 3: Analytics consent toggle with optimistic update + rollback on failure
+  const handlePrivacyToggle = async () => {
+    if (privacySaving) return;
+
+    const previousValue = analyticsConsent;
+    const newValue = !analyticsConsent;
+
+    // 1. Optimistic UI update
+    setAnalyticsConsent(newValue);
+    setPrivacyError(null);
+    setPrivacySaving(true);
+
+    // 2. Persist to localStorage immediately (fast boot on next session)
+    broadcastConsentChange(newValue);
+
+    try {
+      const anonId = getAnonId();
+      // 3. Persist to backend (source of truth)
+      await updatePrivacyPreferences(sessionId, shopDomain, anonId, { analytics: newValue });
+      // 4. Backend confirmed — broadcast is already done, nothing more needed
+    } catch {
+      // 5. Backend KO — rollback UI and localStorage
+      setAnalyticsConsent(previousValue);
+      rollbackConsent(previousValue);
+      setPrivacyError('Non è stato possibile aggiornare la preferenza. Riprova.');
+      if (privacyErrorTimerRef.current) clearTimeout(privacyErrorTimerRef.current);
+      privacyErrorTimerRef.current = setTimeout(() => setPrivacyError(null), 4000);
+    } finally {
+      setPrivacySaving(false);
     }
   };
 
@@ -215,6 +286,43 @@ const ProfileView = ({
               >
                 Elimina
               </button>
+            )}
+          </div>
+
+          {/* Phase 3: Analytics consent section */}
+          <div className="privacy-section">
+            <div className="privacy-section-header">
+              <LockIcon />
+              <span>Privacy</span>
+            </div>
+
+            <div className="privacy-toggle-row">
+              <div className="privacy-toggle-label">
+                <p className="privacy-label-text">Raccolta dati di utilizzo</p>
+                <p className="privacy-description">
+                  Aiutaci a migliorare l&apos;esperienza attivando l&apos;analisi anonima delle interazioni.
+                  Puoi cambiare questa scelta in qualsiasi momento.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                id="jarbris-analytics-consent-toggle"
+                role="switch"
+                aria-checked={analyticsConsent}
+                aria-label="Attiva raccolta dati di utilizzo"
+                disabled={privacySaving}
+                onClick={handlePrivacyToggle}
+                className={`privacy-toggle ${analyticsConsent ? 'privacy-toggle--on' : ''} ${privacySaving ? 'privacy-toggle--saving' : ''}`}
+              >
+                <span className="privacy-toggle-thumb" />
+              </button>
+            </div>
+
+            {privacyError && (
+              <p className="privacy-error" role="alert">
+                {privacyError}
+              </p>
             )}
           </div>
         </form>

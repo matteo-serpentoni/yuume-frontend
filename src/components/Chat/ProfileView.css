@@ -235,3 +235,119 @@
   background: rgba(239, 68, 68, 0.1);
   border-color: rgba(239, 68, 68, 0.4);
 }
+
+/* ─── Phase 3: Privacy Section ─────────────────────────────────────────────── */
+
+.privacy-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.privacy-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.privacy-toggle-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.privacy-toggle-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.privacy-label-text {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.3;
+}
+
+.privacy-description {
+  margin: 0;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.45;
+}
+
+/* Custom toggle switch */
+.privacy-toggle {
+  flex-shrink: 0;
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease;
+  outline: none;
+}
+
+.privacy-toggle:focus-visible {
+  box-shadow: 0 0 0 2px var(--profile-header-color, #667eea);
+}
+
+.privacy-toggle--on {
+  background: var(--profile-header-color, #667eea);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--profile-header-color, #667eea) 40%, transparent);
+}
+
+.privacy-toggle--saving {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.privacy-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.privacy-toggle--on .privacy-toggle-thumb {
+  transform: translateX(18px);
+}
+
+/* Error message */
+.privacy-error {
+  margin: 8px 0 0 0;
+  font-size: 10.5px;
+  color: #ef4444;
+  line-height: 1.4;
+  animation: privacy-error-in 0.2s ease;
+}
+
+@keyframes privacy-error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

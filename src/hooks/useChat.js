@@ -15,6 +15,10 @@ const STORAGE_KEYS = {
 const SESSION_TIMEOUT = 30 * 60 * 1000;
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
+// Technical events that bypass analytics consent — mirrors backend privacyUtils.TECHNICAL_EVENTS_WHITELIST.
+// SCALE-LIMIT: keep this list tiny and in sync with the backend. Product + Legal sign-off required to add entries.
+const CONSENT_EXEMPT_EVENTS = new Set(['jarbris_session_started', 'privacy_consent_updated']);
+
 const generateSessionId = () => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
@@ -31,9 +35,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       const elapsed = Date.now() - parseInt(savedTime);
 
       if (elapsed >= SESSION_TIMEOUT) {
-        // Clear only Yuume keys from localStorage
+        // Clear only session-specific Yuume keys — preserve yuume_profile (user-submitted data, security.md §3)
         Object.values(STORAGE_KEYS).forEach((k) => localStorage.removeItem(k));
-        localStorage.removeItem('yuume_profile');
         id = null;
       }
     }
@@ -144,9 +147,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
     const newSessionId = generateSessionId();
 
-    // Surgical clear: only yuume keys
+    // Surgical clear: only session-specific yuume keys.
+    // yuume_profile is intentionally preserved — it contains user-submitted name/email (security.md §3).
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('yuume_') && key !== STORAGE_KEYS.SHOP_DOMAIN) {
+      if (key.startsWith('yuume_') && key !== STORAGE_KEYS.SHOP_DOMAIN && key !== 'yuume_profile') {
         localStorage.removeItem(key);
       }
     });
@@ -302,8 +306,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           if (statusData.assignedTo) setAssignedTo(statusData.assignedTo);
           if (statusData.initialSuggestions) setInitialSuggestions(statusData.initialSuggestions);
 
-          // Handle personalized welcome if customer info is found
-          if (statusData.customer) {
+          // Sync profile from backend — only when the Customer has actual data (name or email).
+          // Guard: do NOT overwrite a user-saved profile with an anonymous Customer (no PII).
+          if (statusData.customer && (statusData.customer.name || statusData.customer.email)) {
             localStorage.setItem('yuume_profile', JSON.stringify(statusData.customer));
 
             setMessages((prev) => {
@@ -466,7 +471,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   // Widget Event Emitter
   const trackWidgetEvent = useCallback((eventType, properties = {}) => {
-    if (!analyticsConsent || disabled) return;
+    const isTechnical = CONSENT_EXEMPT_EVENTS.has(eventType);
+    if (!isTechnical && (!analyticsConsent || disabled)) return;
+    if (disabled) return; // Even technical events are suppressed in preview/disabled mode
 
     // Determine fallback anonId (storefront normally manages it, but widget can piggyback sessionId)
     const payload = {
@@ -477,10 +484,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         anonId: sessionId, // Use session ID as fallback anonId
         shopifyCustomerId: shopifyCustomer?.id?.toString() || undefined 
       },
-      events: [{
-        eventType,
-        ...properties,
-      }]
+      events: [{ eventType, ...properties }]
     };
 
     fetch(`${API_URL}/api/events`, {
@@ -657,9 +661,12 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     ],
   );
 
-  // Track session start when chat is genuinely opened and connected
+  // Track session start when chat is genuinely opened and connected.
+  // Fires for both 'new' and 'active' sessions — 'new' is the initial state from localStorage
+  // before the getSessionStatus API response resolves.
   useEffect(() => {
-    if (connectionStatus === 'online' && sessionStatus === 'active' && messages.length <= 1) {
+    const isLiveSession = sessionStatus !== 'completed' && sessionStatus !== 'abandoned';
+    if (connectionStatus === 'online' && isLiveSession && messages.length <= 1) {
       // Fire and forget after delay to ensure consent state parsed
       const t = setTimeout(() => {
         trackWidgetEvent('jarbris_session_started');

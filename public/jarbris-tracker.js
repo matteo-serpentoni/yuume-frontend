@@ -27,6 +27,8 @@
   const SESSION_KEY = 'jarbris_sess_id';
   const ANON_KEY = 'jarbris_anon_id';
   const TOKEN_KEY = `jarbris_ingest_${SITE_ID}`;
+  // Phase 3: Jarbris analytics consent key (set by widget consentBridge.js)
+  const JARBRIS_CONSENT_KEY = 'jarbris_analytics_consent';
   
   const getSessionId = () => {
     let sid = sessionStorage.getItem(SESSION_KEY);
@@ -46,6 +48,28 @@
     return aid;
   };
 
+  // Phase 3: Boot-time Jarbris consent state.
+  // Reads window.JARBRIS_PRIVACY (set after widget backend sync) first,
+  // then falls back to localStorage (set by consentBridge on toggle).
+  // Default: false (opt-in required, never opt-out by default).
+  let jarbrisConsentGranted = (() => {
+    if (window.JARBRIS_PRIVACY?.analyticsConsent === true) return true;
+    if (window.JARBRIS_PRIVACY?.analyticsConsent === false) return false;
+    try { return localStorage.getItem(JARBRIS_CONSENT_KEY) === 'true'; } catch { return false; }
+  })();
+
+  // Phase 3: React instantly to consent changes from the widget
+  window.addEventListener('jarbris:analytics-consent-changed', (e) => {
+    jarbrisConsentGranted = e.detail?.analyticsConsent === true;
+    if (!jarbrisConsentGranted) {
+      queue = []; // Hard drop: clear pending analytics events immediately
+      if (flushTimeout) {
+        clearTimeout(flushTimeout);
+        flushTimeout = null;
+      }
+    }
+  });
+
   // State
   let ingestToken = localStorage.getItem(TOKEN_KEY);
   let queue = [];
@@ -64,7 +88,7 @@
         localStorage.setItem(TOKEN_KEY + '_exp', expireTime);
         return true;
       }
-    } catch (e) {
+    } catch (_) {
       // Failed silently to avoid console spam
     }
     return false;
@@ -146,7 +170,7 @@
           body: JSON.stringify(payload)
         });
       }
-    } catch (err) {
+    } catch (_) {
       // In case of network error, re-queue if not unload
       if (!useBeacon) queue.push(...currentBatch);
     }
@@ -154,6 +178,12 @@
 
   // --- Core API ---
   const track = (eventType, properties = {}) => {
+    // Phase 3 Gate 1 (Primary): Jarbris opt-in consent must be explicitly granted.
+    // Default is false — no tracking without explicit user action.
+    if (!jarbrisConsentGranted) return;
+
+    // Gate 2 (Secondary): Shopify Customer Privacy API compliance.
+    // Both gates must pass — the more restrictive one wins.
     if (!hasConsent()) return;
     
     queue.push({
@@ -232,7 +262,7 @@
              variantId: body.id?.toString(),
              eventData: { quantity: body.quantity || 1 }
           });
-        } catch(e) {}
+        } catch { /* fetch body parse failed — skip cart tracking */ }
       }
       return originalFetch.apply(this, args);
     };
