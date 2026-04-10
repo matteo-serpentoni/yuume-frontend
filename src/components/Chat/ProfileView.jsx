@@ -59,8 +59,8 @@ const ProfileView = ({
     e.preventDefault();
 
     // Validazione
-    if (!name.trim() || !email.trim()) {
-      setMessage({ type: 'error', text: 'Nome ed email obbligatori.' });
+    if (!email.trim()) {
+      setMessage({ type: 'error', text: 'Email obbligatoria.' });
       setTimeout(() => setMessage(null), 3000);
       return;
     }
@@ -87,9 +87,14 @@ const ProfileView = ({
       storage.setProfile(serverProfile);
 
       // Update local state from server response
-      if (serverProfile.name) setName(serverProfile.name);
+      if (serverProfile.name !== undefined) setName(serverProfile.name);
       if (serverProfile.email) setEmail(serverProfile.email);
       setIsIdentified(!!serverProfile.isIdentified);
+
+      if (result.consent && typeof result.consent.analytics === 'boolean') {
+        setAnalyticsConsent(result.consent.analytics);
+        broadcastConsentChange(result.consent.analytics);
+      }
 
       // Propagate to useChat for welcome message updates
       onProfileUpdate?.(serverProfile);
@@ -227,17 +232,6 @@ const ProfileView = ({
         </div>
       ) : (
         <form onSubmit={handleSave} className="profile-form">
-          <div className="profile-field">
-            <label className="profile-label">Nome Completo</label>
-            <input
-              type="text"
-              className="profile-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Mario Rossi"
-            />
-          </div>
-
           <div className="profile-field email">
             <label className="profile-label">Email</label>
             <input
@@ -246,6 +240,17 @@ const ProfileView = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="mario@email.com"
+            />
+          </div>
+
+          <div className="profile-field">
+            <label className="profile-label">Nome Completo (Opzionale)</label>
+            <input
+              type="text"
+              className="profile-input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Mario Rossi"
             />
           </div>
 
