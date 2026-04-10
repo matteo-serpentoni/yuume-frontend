@@ -277,6 +277,7 @@ const AddToCartButton = memo(
         button.removeEventListener('pointerdown', handlePointerDown);
         button.removeEventListener('click', handleClick);
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [variantId, quantity, onSuccess, onError]);
 
     return (

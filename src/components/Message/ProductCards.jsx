@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 // eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { motion } from 'framer-motion';
 import AddToCartButton from './AddToCartButton';
@@ -101,7 +101,13 @@ const ProductCard = memo(
   ({ product, index, onOpen, onImageClick, shopDomain, onProductAction }) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
-    const normalizedProduct = normalizeStorefrontProduct(product);
+    // 2c: Memoize normalization — normalizeStorefrontProduct is a non-trivial transform
+    // and ProductCard re-renders when the parent carousel re-renders (scroll events).
+    const normalizedProduct = useMemo(
+      () => normalizeStorefrontProduct(product),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [product.id || product.productId],
+    );
 
     const {
       primaryImage: image,
@@ -191,7 +197,7 @@ const ProductCard = memo(
               }}
             >
               {image ? (
-                <img src={image.url || image} alt={product.name} />
+                <img src={image.url || image} alt={product.name} loading="lazy" />
               ) : (
                 <div className="yuume-product-placeholder">
                   <Icons.Image />

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, memo } from 'react';
+import { useRef, useEffect, useCallback, memo, useState } from 'react';
 // eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { AnimatePresence, motion } from 'framer-motion';
 import './MessageList.css';
@@ -43,6 +43,10 @@ const MessageList = memo(
     const lastMessageIdRef = useRef(null);
     const prevThinkingRef = useRef(isThinking);
     const prevLoadingRef = useRef(loading);
+    // 2a: Track IDs present at first render — these are hydrated from boot/localStorage
+    // and should NOT animate in (they were already "seen" before reload).
+    // Only truly new messages arriving after mount get the entrance animation.
+    const [hydratedIds] = useState(() => new Set(chatBlocks.map((b) => String(b.id))));
 
     const scrollToBottom = (behavior = 'auto') => {
       if (messagesAreaRef.current) {
@@ -356,21 +360,26 @@ const MessageList = memo(
         aria-atomic="false"
       >
         <AnimatePresence initial={false}>
-          {chatBlocks.map((msg, index) => (
-            <motion.div
-              key={msg.id}
-              ref={index === chatBlocks.length - 1 ? lastMessageRef : null}
-              className="yuume-message-wrapper"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                opacity: { duration: 0.25 },
-                y: { duration: 0.3, ease: 'easeOut' },
-              }}
-            >
-              <ErrorBoundary fallback={<MessageFallback />}>{renderMessage(msg)}</ErrorBoundary>
-            </motion.div>
-          ))}
+          {chatBlocks.map((msg, index) => {
+            // 2a: Skip entrance animation for messages that were already present on mount
+            // (hydrated from localStorage or boot API). Only animate genuinely new messages.
+            const isHydrated = hydratedIds.has(String(msg.id));
+            return (
+              <motion.div
+                key={msg.id}
+                ref={index === chatBlocks.length - 1 ? lastMessageRef : null}
+                className="yuume-message-wrapper"
+                initial={isHydrated ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  opacity: { duration: 0.25 },
+                  y: { duration: 0.3, ease: 'easeOut' },
+                }}
+              >
+                <ErrorBoundary fallback={<MessageFallback />}>{renderMessage(msg)}</ErrorBoundary>
+              </motion.div>
+            );
+          })}
 
           {isThinking && !isFormLoading && (
             <motion.div

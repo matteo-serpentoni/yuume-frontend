@@ -161,6 +161,7 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
     });
     setFormData(newInitial);
     setErrorVisible(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [msgId, activeConfig.formId, activeConfig.currentStep, currentResultsStr]);
 
   const handleBack = () => {
@@ -261,7 +262,7 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
                 </div>
                 {opt.image && (
                   <div className="yuume-dynamic-option-image">
-                    <img src={opt.image} alt={opt.title || opt.label} />
+                    <img src={opt.image} alt={opt.title || opt.label} loading="lazy" />
                   </div>
                 )}
                 <div className="yuume-dynamic-option-content">

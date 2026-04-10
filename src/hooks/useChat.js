@@ -12,6 +12,25 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 // SCALE-LIMIT: keep this list tiny and in sync with the backend. Product + Legal sign-off required to add entries.
 const CONSENT_EXEMPT_EVENTS = new Set(['jarbris_session_started', 'privacy_consent_updated']);
 
+const buildWelcomeMessage = (profileOverride = null) => {
+  let welcomeText = 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?';
+  const profile = profileOverride || storage.getProfile();
+  if (profile?.name) {
+    const firstName = profile.name.trim().split(' ')[0];
+    if (firstName) {
+      welcomeText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
+    }
+  }
+
+  return {
+    id: 'welcome', // B25: Stable constant ID prevents duplication
+    sender: 'assistant',
+    text: welcomeText,
+    timestamp: new Date().toISOString(),
+    disableFeedback: true,
+  };
+};
+
 export const useChat = (devShopDomain, customer, options = {}) => {
   const { disabled = false } = options;
 
@@ -37,24 +56,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       }
 
       // Personalized Welcome: Check if we have a saved name from Yuume Profile
-      let welcomeText = 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?';
-      const cachedProfile = storage.getProfile();
-      if (cachedProfile?.name) {
-        const firstName = cachedProfile.name.trim().split(' ')[0];
-        welcomeText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
-      }
-
-      return [
-        {
-          id: Date.now(),
-          sender: 'assistant',
-          text: welcomeText,
-          timestamp: new Date().toISOString(),
-          disableFeedback: true, // Disable feedback for welcome message
-        },
-      ];
+      return [buildWelcomeMessage()];
     } catch {
-      return [];
+      return [buildWelcomeMessage()];
     }
   });
 
@@ -111,13 +115,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   // -------------------------------------
 
   const clearChat = useCallback(() => {
-    const welcomeMsg = {
-      id: Date.now(),
-      sender: 'assistant',
-      text: 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?',
-      timestamp: new Date().toISOString(),
-      disableFeedback: true,
-    };
+    const welcomeMsg = buildWelcomeMessage();
 
     // B22: Delegate session creation to parent — it manages sessionId lifecycle
     storage.clearSession();
@@ -182,9 +180,30 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     }
   }, [devShopDomain, shopDomain]);
 
+  // B25: Debounce localStorage writes to avoid main-thread blocking on every message append.
+  // A 500ms delay collapses rapid consecutive updates (e.g. user msg + AI msg) into one write.
+  // Flush immediately on visibilitychange so the cache is always fresh when the user navigates away.
+  const debouncedSaveRef = useRef(null);
   useEffect(() => {
     if (disabled) return;
-    storage.setJSON('messages', messages);
+
+    clearTimeout(debouncedSaveRef.current);
+    debouncedSaveRef.current = setTimeout(() => {
+      storage.setJSON('messages', messages);
+    }, 500);
+
+    const flushOnHide = () => {
+      if (document.visibilityState === 'hidden') {
+        clearTimeout(debouncedSaveRef.current);
+        storage.setJSON('messages', messages);
+      }
+    };
+    document.addEventListener('visibilitychange', flushOnHide);
+
+    return () => {
+      clearTimeout(debouncedSaveRef.current);
+      document.removeEventListener('visibilitychange', flushOnHide);
+    };
   }, [messages, disabled]);
 
   // Persist session status
@@ -226,6 +245,11 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         setIdentityReady(true);
       }
 
+      if (event.data?.type === 'YUUME:devResetSession') {
+        clearChat();
+        setTimeout(() => window.location.reload(), 100);
+      }
+
       // 2. Cart Updates (initial or after add-to-cart)
       if (
         event.data?.type === 'YUUME:cartUpdate' ||
@@ -249,7 +273,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     window.parent?.postMessage({ type: 'YUUME:getCart' }, '*');
 
     return () => window.removeEventListener('message', handleMessage);
-  }, [disabled]);
+  }, [disabled, clearChat]);
 
   // Sync bootConsent when the user toggles the privacy preference in ProfileView.
   // broadcastConsentChange dispatches 'jarbris:analytics-consent-changed' so we
@@ -312,45 +336,41 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           setMessages((prev) => {
             const serverMessages = bootData.messages;
 
-            // 1. Create a map of server messages for fast lookup
-            const serverMsgMap = new Map();
+            // 1. Build lookup maps from server messages.
+            // Index by both id and clientMessageId to catch all ID formats.
+            const serverIds = new Set();
             serverMessages.forEach((msg) => {
-              if (msg.id) {
-                serverMsgMap.set(msg.id.toString(), msg);
-              }
-              if (msg.clientMessageId) {
-                serverMsgMap.set(msg.clientMessageId.toString(), msg);
-              }
+              if (msg.id) serverIds.add(String(msg.id));
+              if (msg.clientMessageId) serverIds.add(String(msg.clientMessageId));
             });
 
-            // 2. Identify local messages that SHOULD be preserved:
-            // - Technical errors (title: "Errore" or "Sessione scaduta")
-            // - Initial welcome message (disableFeedback: true)
-            // - Any message not yet present on server (by ID and clientMessageId)
+            // 2. Keep only local messages that the server does NOT have.
+            // Frontend-only messages to preserve:
+            //   - The welcome singleton (id: 'welcome') — never in DB, always client-side
+            //   - Error/expired messages shown to the user locally
+            // All others that exist on the server are dropped — server is source of truth.
             const localToKeep = prev.filter((localMsg) => {
-              const localIdStr = localMsg.id?.toString();
+              const localIdStr = String(localMsg.id || '');
 
-              // If it's already on the server, don't keep the local copy (server is source of truth)
-              const existsOnServer = localIdStr && serverMsgMap.has(localIdStr);
+              // Welcome singleton: always keep, will be deduped by ID if somehow duplicated
+              if (localIdStr === 'welcome') return true;
 
-              if (existsOnServer) return false;
+              // Local-only error messages
+              if (localMsg.title === 'Errore' || localMsg.title === 'Sessione scaduta') return true;
 
-              // Keep if it's a specific frontend-only message
-              const isError =
-                localMsg.title === 'Errore' || localMsg.title === 'Sessione scaduta';
-              const isWelcome = localMsg.disableFeedback === true;
-
-              return isError || isWelcome || !existsOnServer;
+              // Drop anything the server already has
+              return !serverIds.has(localIdStr);
             });
 
-            // 3. Merge and sort
+            // 3. Merge: local-only messages first, then server messages (server wins for overlaps)
             const merged = [...localToKeep, ...serverMessages].sort((a, b) => {
               const timeA = new Date(a.timestamp || 0).getTime();
               const timeB = new Date(b.timestamp || 0).getTime();
               return timeA - timeB;
             });
 
-            // 4. Final deduplication by ID just in case
+            // 4. Final deduplication by ID — handles any edge case where the same id appears twice.
+            // This is the safety net that prevents BUG-1/BUG-2 even if IDs somehow align.
             const final = [];
             const seenIds = new Set();
             merged.forEach((m) => {
@@ -358,6 +378,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
               if (idStr && !seenIds.has(idStr)) {
                 final.push(m);
                 seenIds.add(idStr);
+              } else if (!idStr) {
+                // Messages without an id are always included (edge case for very old records)
+                final.push(m);
               }
             });
 
@@ -544,30 +567,15 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         );
 
         if (response.message) {
-          // Note: If backend emits socket event for AI response too, we might get duplicate.
-          // But our socket listener checks for duplicates by ID.
-          // However, AI response ID is generated on backend or frontend?
-          // Frontend generates ID for optimistic UI, backend generates for socket.
-          // We should rely on socket for AI response if possible, OR handle deduplication carefully.
-          // For now, let's keep adding it here for immediate feedback, and socket will be ignored if duplicate ID (unlikely if ID generation differs).
-          // Actually, backend socket emission uses Date.now() + 1, which might clash or not.
-          // Safer to NOT add here if we expect socket? Or add here and ensure socket ID matches?
-          // Let's add here. If socket comes with different ID, we might show double.
-          // FIX: Backend `handleChat` emits `message:received` for AI response.
-          // So we should probably NOT add it here manually if we trust socket.
-          // BUT, `sendMessage` returns the response immediately.
-          // Let's add it here for speed, and hope socket doesn't duplicate.
-          // Ideally, `sendMessage` response should contain the ID used in socket emission.
-
+          // B25 Approach B: the server returns the same deterministic messageId (`ai_${sessionId}_${ts}`)
+          // that it also broadcasts via socket. We add the message here for zero-latency feedback.
+          // If the socket event arrives later with the same id, addAssistantMessage silently deduplicates it.
           addAssistantMessage(response.message);
 
           // Update status from response
           if (response.status) {
             setSessionStatus(response.status);
           }
-        } else {
-          // If no message but success (e.g. human handoff specific response?), handle it
-          // But usually we expect a message or empty message
         }
       } catch (error) {
         if (error.status === 410 || error.message?.includes('session_expired')) {

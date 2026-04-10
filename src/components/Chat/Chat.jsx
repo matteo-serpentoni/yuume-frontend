@@ -119,9 +119,15 @@ const Chat = ({
     inputRef,
   });
 
-  // Group messages to handle "transforming" components (like OrderLookupForm)
+  // Group messages to handle "transforming" components (like OrderLookupForm).
+  // 2e: Keyed on (length + last id) instead of the full messages array reference —
+  // prevents recomputation on unrelated state changes that don't touch the message list.
+  const lastMessageId = messages[messages.length - 1]?.id;
   const chatBlocks = useMemo(() => {
     const blocks = [];
+    // 2d: Use a separate Set instead of mutating the filtered array objects.
+    // filtered[j].isResultSource = true was a silent mutation of React state — illegal.
+    const sourceIndices = new Set();
     const filtered = messages.filter((msg) => !msg.hidden);
 
     for (let i = 0; i < filtered.length; i++) {
@@ -186,7 +192,7 @@ const Chat = ({
             ) {
               lastResultIndex = j;
               finalResults = nextMsg;
-              filtered[j].isResultSource = true;
+              sourceIndices.add(j); // Mark as consumed — no mutation of the message object
               // Continue looking to pick the LATEST result in the chain
               continue;
             }
@@ -219,8 +225,9 @@ const Chat = ({
 
       blocks.push(msg);
     }
-    return blocks.filter((b) => !b.isResultSource);
-  }, [messages]);
+    return blocks.filter((_, idx) => !sourceIndices.has(idx));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, lastMessageId]);
 
   return (
     <div className="chat-inner" style={{ '--chat-header-color': chatColors.header }}>

@@ -438,17 +438,9 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
             <label style={{ fontSize: '11px', color: '#8b92a7' }}>Session Control</label>
             <button
               onClick={() => {
-                // B22: preserve profile (not session data) and dev_shop_domain.
-                // Mirrors storage.clearSession() semantics.
-                const preserve = new Set(['yuume_dev_shop_domain', 'yuume_profile', 'yuume_orb_enlarged']);
-                Object.keys(localStorage).forEach((key) => {
-                  if (key.startsWith('yuume_') && !preserve.has(key)) {
-                    localStorage.removeItem(key);
-                  }
-                });
-                // Signal mock to rotate jarbris_session_id (mirrors prod clearChat flow)
-                window.postMessage({ type: 'YUUME:requestNewSession' }, '*');
-                setTimeout(() => window.location.reload(), 80);
+                // Signal useChat.js to organically clear session through the unified flow
+                // This prevents debounce-flush bugs during reload
+                window.postMessage({ type: 'YUUME:devResetSession' }, '*');
               }}
               style={{
                 padding: '8px',

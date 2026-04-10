@@ -28,7 +28,7 @@ const CategoryCard = memo(({ category, index, onCategoryClick }) => {
       {/* Category Image / Icon */}
       <div className="yuume-category-card-image-container">
         {image ? (
-          <img src={image} alt={title} className="yuume-category-card-image" />
+          <img src={image} alt={title} className="yuume-category-card-image" loading="lazy" />
         ) : (
           <span className="yuume-category-placeholder">📁</span>
         )}
