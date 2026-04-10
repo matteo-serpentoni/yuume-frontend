@@ -98,6 +98,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   const [isThinking, setIsThinking] = useState(false);
   const [thinkingIntent, setThinkingIntent] = useState(null);
   const socketRef = useRef(null);
+  // Stores a message sent when session was completed, to be auto-sent after session renewal.
+  const pendingAfterResetRef = useRef(null); // { text, options, fromSessionId }
 
   const [shopDomain, setShopDomain] = useState(() => {
     if (disabled) return 'preview-shop.myshopify.com';
@@ -248,6 +250,18 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
     return () => window.removeEventListener('message', handleMessage);
   }, [disabled]);
+
+  // Sync bootConsent when the user toggles the privacy preference in ProfileView.
+  // broadcastConsentChange dispatches 'jarbris:analytics-consent-changed' so we
+  // update bootConsent here; ProfileView will receive the fresh value on next mount.
+  useEffect(() => {
+    const handleConsentChange = (e) => {
+      setBootConsent((prev) => ({ ...(prev || {}), analytics: e.detail.analyticsConsent }));
+      setAnalyticsConsent(e.detail.analyticsConsent);
+    };
+    window.addEventListener('jarbris:analytics-consent-changed', handleConsentChange);
+    return () => window.removeEventListener('jarbris:analytics-consent-changed', handleConsentChange);
+  }, []);
 
   // B22: Unified Boot — replaces getSessionStatus + getProfile + getConsent
   useEffect(() => {
@@ -485,14 +499,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
       // AUTO-START NEW SESSION IF COMPLETED
       if (sessionStatus === 'completed' || sessionStatus === 'abandoned') {
-        // B22: Request new session from parent
-        storage.clearSession();
-        setSessionStatus('active');
-        setMessages([]);
-        setAssignedTo(null);
-        setInitialSuggestions([]);
-        window.parent?.postMessage({ type: 'YUUME:requestNewSession' }, '*');
-        // Wait for parent to provide new sessionId via postMessage
+        // B22: queue the pending message so it auto-sends after the new sessionId arrives.
+        // clearChat() resets state + welcome message + sends YUUME:requestNewSession.
+        pendingAfterResetRef.current = { text, options, fromSessionId: sessionId };
+        clearChat();
         return;
       }
 
@@ -617,8 +627,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       shopifyCustomer, // Fix stale closure: add dependency
       sessionStatus,
       setSessionStatus,
-      setMessages,
-      setAssignedTo,
       clearChat,
       trackWidgetEvent,
     ],
@@ -700,6 +708,15 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   );
 
   /**
+   * Propagates a profile save from ProfileView back into useChat state.
+   * Called via the onProfileUpdate prop so bootProfile stays fresh
+   * and ProfileView displays the correct values on subsequent mounts.
+   */
+  const handleProfileUpdate = useCallback((newProfile) => {
+    setBootProfile(newProfile);
+  }, []);
+
+  /**
    * Resets cart state after checkout completion.
    * Called by useCheckout when payment succeeds.
    */
@@ -707,6 +724,17 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     setCartCount(0);
     setCheckoutUrl(null);
   }, []);
+
+  // Drain pending message after session renewal.
+  // Fires when sendChatMessage recreates (sessionId changed after YUUME:identity).
+  // The fromSessionId guard prevents premature send while still on the old session.
+  useEffect(() => {
+    const pending = pendingAfterResetRef.current;
+    if (!pending) return;
+    if (sessionId === pending.fromSessionId) return;
+    pendingAfterResetRef.current = null;
+    sendChatMessage(pending.text, pending.options);
+  }, [sessionId, sendChatMessage]);
 
   return {
     messages,
@@ -727,6 +755,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     handleSuggestionClick, // Centralized suggestion handler
     clearChat,
     resetCart,
+    handleProfileUpdate,   // Propagate ProfileView saves back into bootProfile state
     sendFeedback,
     isThinking,
     thinkingIntent,

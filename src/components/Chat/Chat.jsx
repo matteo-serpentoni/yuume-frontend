@@ -234,10 +234,7 @@ const Chat = ({
           visitorId={liveChat.visitorId}
           profile={liveChat.bootProfile}
           consent={liveChat.bootConsent}
-          onProfileUpdate={() => {
-            // B22: ProfileView propagates profile updates upstream
-            // This is handled inside useChat via the bootProfile state
-          }}
+          onProfileUpdate={(newProfile) => liveChat.handleProfileUpdate(newProfile)}
           colors={chatColors}
         />
       ) : (
