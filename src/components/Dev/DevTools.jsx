@@ -128,7 +128,9 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
       }
     };
     fetchData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally mount-only — onSiteChange is called once to auto-select first site
+
 
   // Update Orb config when theme or site changes
   useEffect(() => {
@@ -436,12 +438,17 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
             <label style={{ fontSize: '11px', color: '#8b92a7' }}>Session Control</label>
             <button
               onClick={() => {
+                // B22: preserve profile (not session data) and dev_shop_domain.
+                // Mirrors storage.clearSession() semantics.
+                const preserve = new Set(['yuume_dev_shop_domain', 'yuume_profile', 'yuume_orb_enlarged']);
                 Object.keys(localStorage).forEach((key) => {
-                  if (key.startsWith('yuume_') && key !== 'yuume_dev_shop_domain') {
+                  if (key.startsWith('yuume_') && !preserve.has(key)) {
                     localStorage.removeItem(key);
                   }
                 });
-                window.location.reload();
+                // Signal mock to rotate jarbris_session_id (mirrors prod clearChat flow)
+                window.postMessage({ type: 'YUUME:requestNewSession' }, '*');
+                setTimeout(() => window.location.reload(), 80);
               }}
               style={{
                 padding: '8px',

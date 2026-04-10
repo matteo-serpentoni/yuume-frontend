@@ -7,8 +7,7 @@ const ORB_STATE_KEY = 'yuume_orb_enlarged';
 
 function App() {
   const [enlarged, setEnlarged] = useState(() => {
-    const saved = localStorage.getItem(ORB_STATE_KEY);
-    return saved === 'true';
+    try { return localStorage.getItem(ORB_STATE_KEY) === 'true'; } catch { return false; }
   });
   const [cartBubbleVisible, setCartBubbleVisible] = useState(false);
 
@@ -42,7 +41,7 @@ function App() {
   }, [enlarged, cartBubbleVisible]);
 
   useEffect(() => {
-    localStorage.setItem(ORB_STATE_KEY, enlarged.toString());
+    try { localStorage.setItem(ORB_STATE_KEY, enlarged.toString()); } catch { /* ITP/blocked */ }
   }, [enlarged]);
 
   useEffect(() => {
@@ -54,8 +53,8 @@ function App() {
 
   // --- DEV-ONLY PREVIEW LOGIC ---
   const [devPreview, setDevPreview] = useState({
-    show: localStorage.getItem('yuume_dev_show_storefront') === 'true',
-    theme: localStorage.getItem('yuume_dev_storefront_theme') || 'light',
+    show: (() => { try { return localStorage.getItem('yuume_dev_show_storefront') === 'true'; } catch { return false; } })(),
+    theme: (() => { try { return localStorage.getItem('yuume_dev_storefront_theme') || 'light'; } catch { return 'light'; } })(),
   });
 
   useEffect(() => {
@@ -63,8 +62,8 @@ function App() {
 
     const handleDevUpdate = () => {
       setDevPreview({
-        show: localStorage.getItem('yuume_dev_show_storefront') === 'true',
-        theme: localStorage.getItem('yuume_dev_storefront_theme') || 'light',
+        show: (() => { try { return localStorage.getItem('yuume_dev_show_storefront') === 'true'; } catch { return false; } })(),
+        theme: (() => { try { return localStorage.getItem('yuume_dev_storefront_theme') || 'light'; } catch { return 'light'; } })(),
       });
     };
 

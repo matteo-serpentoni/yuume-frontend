@@ -49,16 +49,25 @@ export const sendMessage = async (
   }
 };
 
-export const getProfile = async (sessionId, shopDomain) => {
+/**
+ * B22: Unified boot endpoint — replaces getProfile (GET), getSessionStatus, getConsent (GET).
+ * Returns session state, profile, consent, messages, and suggestions in one call.
+ *
+ * @param {string} sessionId - Current session ID (from parent)
+ * @param {string} shopDomain - Shop domain
+ * @param {string} visitorId - Persistent visitor ID (from parent)
+ * @returns {Promise<object|null>}
+ */
+export const bootSession = async (sessionId, shopDomain, visitorId) => {
   try {
     const headers = { 'Content-Type': 'application/json', 'X-Widget-Token': getWidgetToken() };
+    const params = new URLSearchParams();
+    if (shopDomain) params.set('shopDomain', shopDomain);
+    if (sessionId) params.set('sessionId', sessionId);
+    if (visitorId) params.set('visitorId', visitorId);
 
-    const response = await fetch(
-      `${API_BASE_URL}/api/chat/profile?sessionId=${sessionId}&shopDomain=${shopDomain}`,
-      { headers },
-    );
-
-    if (!response.ok) throw new Error('Failed to fetch profile');
+    const response = await fetch(`${API_BASE_URL}/api/chat/boot?${params}`, { headers });
+    if (!response.ok) return null;
     return await response.json();
   } catch {
     return null;
@@ -76,22 +85,6 @@ export const updateProfile = async (sessionId, shopDomain, data) => {
 
   if (!response.ok) throw new Error('Failed to update profile');
   return await response.json();
-};
-
-export const getSessionStatus = async (sessionId, shopDomain) => {
-  try {
-    const headers = { 'Content-Type': 'application/json', 'X-Widget-Token': getWidgetToken() };
-    const domainQuery = shopDomain ? `?shopDomain=${shopDomain}` : '';
-
-    const response = await fetch(`${API_BASE_URL}/api/chat/session/${sessionId}${domainQuery}`, {
-      headers,
-    });
-
-    if (!response.ok) return null;
-    return await response.json();
-  } catch {
-    return null;
-  }
 };
 
 /**

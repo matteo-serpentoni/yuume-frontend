@@ -1,75 +1,47 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
-import { sendMessage, ChatApiError, getSessionStatus, submitFeedback } from '../services/chatApi';
+import { sendMessage, ChatApiError, bootSession, submitFeedback } from '../services/chatApi';
 import { reportError } from '../services/errorApi';
 import { predictIntent } from '../utils/messageHelpers';
+import { broadcastConsentChange } from '../utils/consentBridge';
+import storage from '../utils/storage';
 
-const STORAGE_KEYS = {
-  SESSION_ID: 'yuume_session_id',
-  MESSAGES: 'yuume_messages',
-  SHOP_DOMAIN: 'yuume_dev_shop_domain', // Unified with DevTools and useOrb
-  SESSION_TIME: 'yuume_session_time',
-  SESSION_STATUS: 'yuume_session_status',
-};
-
-const SESSION_TIMEOUT = 30 * 60 * 1000;
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 // Technical events that bypass analytics consent — mirrors backend privacyUtils.TECHNICAL_EVENTS_WHITELIST.
 // SCALE-LIMIT: keep this list tiny and in sync with the backend. Product + Legal sign-off required to add entries.
 const CONSENT_EXEMPT_EVENTS = new Set(['jarbris_session_started', 'privacy_consent_updated']);
 
-const generateSessionId = () => {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-};
-
 export const useChat = (devShopDomain, customer, options = {}) => {
   const { disabled = false } = options;
 
+  // B22: sessionId is received from parent via postMessage.
+  // Boot-time: try cached value for instant render, parent will confirm/override.
   const [sessionId, setSessionId] = useState(() => {
     if (disabled) return 'preview-session';
-    let id = localStorage.getItem(STORAGE_KEYS.SESSION_ID);
-    const savedTime = localStorage.getItem(STORAGE_KEYS.SESSION_TIME);
-
-    if (id && savedTime) {
-      const elapsed = Date.now() - parseInt(savedTime);
-
-      if (elapsed >= SESSION_TIMEOUT) {
-        // Clear only session-specific Yuume keys — preserve yuume_profile (user-submitted data, security.md §3)
-        Object.values(STORAGE_KEYS).forEach((k) => localStorage.removeItem(k));
-        id = null;
-      }
-    }
-
-    if (!id) {
-      id = generateSessionId();
-      localStorage.setItem(STORAGE_KEYS.SESSION_ID, id);
-      localStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
-    }
-
-    return id;
+    return storage.get('session_id') || null;
   });
+
+  // B22: Identity readiness gate — true when parent has sent visitorId + sessionId
+  const [identityReady, setIdentityReady] = useState(disabled);
+  const [visitorId, setVisitorId] = useState(null);
+  // Track boot data for ProfileView props
+  const [bootProfile, setBootProfile] = useState(() => storage.getProfile());
+  const [bootConsent, setBootConsent] = useState(null);
 
   const [messages, setMessages] = useState(() => {
     try {
-      const saved = !disabled ? localStorage.getItem(STORAGE_KEYS.MESSAGES) : null;
+      const saved = !disabled ? storage.getJSON('messages') : null;
       if (saved) {
-        return JSON.parse(saved);
+        return saved;
       }
 
       // Personalized Welcome: Check if we have a saved name from Yuume Profile
       let welcomeText = 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?';
-      try {
-        const savedProfile = localStorage.getItem('yuume_profile');
-        if (savedProfile) {
-          const profile = JSON.parse(savedProfile);
-          if (profile.name) {
-            const firstName = profile.name.trim().split(' ')[0];
-            welcomeText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
-          }
-        }
-      } catch {
-        // Fallback to default if storage fails
+      const cachedProfile = storage.getProfile();
+      if (cachedProfile?.name) {
+        const firstName = cachedProfile.name.trim().split(' ')[0];
+        welcomeText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
       }
 
       return [
@@ -89,7 +61,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   // Session Status State
   const [sessionStatus, setSessionStatus] = useState(() => {
     if (disabled) return 'active';
-    return localStorage.getItem(STORAGE_KEYS.SESSION_STATUS) || 'active';
+    return storage.get('session_status') || 'active';
   });
 
   // Connection Status logic
@@ -129,7 +101,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   const [shopDomain, setShopDomain] = useState(() => {
     if (disabled) return 'preview-shop.myshopify.com';
-    return devShopDomain || localStorage.getItem(STORAGE_KEYS.SHOP_DOMAIN) || null;
+    return devShopDomain || storage.get('dev_shop_domain') || null;
   });
 
   // -------------------------------------
@@ -145,26 +117,19 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       disableFeedback: true,
     };
 
-    const newSessionId = generateSessionId();
+    // B22: Delegate session creation to parent — it manages sessionId lifecycle
+    storage.clearSession();
+    storage.setJSON('messages', [welcomeMsg]);
 
-    // Surgical clear: only session-specific yuume keys.
-    // yuume_profile is intentionally preserved — it contains user-submitted name/email (security.md §3).
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('yuume_') && key !== STORAGE_KEYS.SHOP_DOMAIN && key !== 'yuume_profile') {
-        localStorage.removeItem(key);
-      }
-    });
-
-    localStorage.setItem(STORAGE_KEYS.SESSION_ID, newSessionId);
-    localStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
-    localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([welcomeMsg]));
-    localStorage.setItem(STORAGE_KEYS.SESSION_STATUS, 'active');
-
-    setSessionId(newSessionId);
     setMessages([welcomeMsg]);
     setSessionStatus('active');
     setAssignedTo(null);
     setInitialSuggestions([]);
+    setBootProfile(null);
+    setBootConsent(null);
+
+    // Request new session from parent (embed.js)
+    window.parent?.postMessage({ type: 'YUUME:requestNewSession' }, '*');
   }, []);
 
   const addUserMessage = useCallback((text, id = Date.now(), hidden = false) => {
@@ -217,47 +182,34 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   useEffect(() => {
     if (disabled) return;
-    try {
-      localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
-    } catch {
-      // Storage full or restricted — non-critical
-    }
+    storage.setJSON('messages', messages);
   }, [messages, disabled]);
 
   // Persist session status
   useEffect(() => {
     if (disabled) return;
-    localStorage.setItem(STORAGE_KEYS.SESSION_STATUS, sessionStatus);
+    storage.set('session_status', sessionStatus);
   }, [sessionStatus, disabled]);
 
-  useEffect(() => {
-    if (disabled) return;
-    const interval = setInterval(() => {
-      const savedTime = localStorage.getItem(STORAGE_KEYS.SESSION_TIME);
-      if (savedTime) {
-        const elapsed = Date.now() - parseInt(savedTime);
-
-        if (elapsed >= SESSION_TIMEOUT) {
-          clearChat(); // Use clearChat instead of reload
-        }
-      }
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, [clearChat, disabled]);
+  // B22: Timeout check REMOVED — session timeout is now managed by parent (embed.js getOrCreateSessionId).
 
   // Listen for Identity and Cart from Parent (Shopify Storefront)
   useEffect(() => {
     if (disabled) return;
 
     const handleMessage = (event) => {
-      // 1. Identity & ShopDomain
+      // 1. Identity & ShopDomain — parent is source of truth for visitorId + sessionId
       if (event.data?.type === 'YUUME:identity' || event.data?.type === 'YUUME:shopDomain') {
-        const customer = event.data.customer || event.data.shopifyCustomer;
-        const consent = event.data.analyticsConsent;
+        // B22: Receive persistent identity from parent (1st-party localStorage)
+        if (event.data.visitorId) setVisitorId(event.data.visitorId);
+        if (event.data.sessionId) {
+          setSessionId(event.data.sessionId);
+          storage.set('session_id', event.data.sessionId); // Cache for fast boot on next load
+        }
 
-        if (typeof consent === 'boolean') {
-          setAnalyticsConsent(consent);
+        const customer = event.data.customer || event.data.shopifyCustomer;
+        if (typeof event.data.analyticsConsent === 'boolean') {
+          setAnalyticsConsent(event.data.analyticsConsent);
         }
 
         if (customer) {
@@ -267,6 +219,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           // LOGOUT SYNC: Clear identity if parent sends null/undefined
           setShopifyCustomer(null);
         }
+
+        // Mark identity as ready — triggers boot API call
+        setIdentityReady(true);
       }
 
       // 2. Cart Updates (initial or after add-to-cart)
@@ -294,97 +249,110 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     return () => window.removeEventListener('message', handleMessage);
   }, [disabled]);
 
-  // WebSocket Connection
+  // B22: Unified Boot — replaces getSessionStatus + getProfile + getConsent
   useEffect(() => {
-    if (disabled || !sessionId) return;
+    if (disabled || !identityReady || !sessionId) return;
 
-    // Initial status fetch (sync status, assignment and history)
-    getSessionStatus(sessionId, shopDomain)
-      .then((statusData) => {
-        if (statusData) {
-          if (statusData.status) setSessionStatus(statusData.status);
-          if (statusData.assignedTo) setAssignedTo(statusData.assignedTo);
-          if (statusData.initialSuggestions) setInitialSuggestions(statusData.initialSuggestions);
+    bootSession(sessionId, shopDomain, visitorId)
+      .then((bootData) => {
+        if (!bootData) return;
 
-          // Sync profile from backend — only when the Customer has actual data (name or email).
-          // Guard: do NOT overwrite a user-saved profile with an anonymous Customer (no PII).
-          if (statusData.customer && (statusData.customer.name || statusData.customer.email)) {
-            localStorage.setItem('yuume_profile', JSON.stringify(statusData.customer));
+        // Session resume: server found an active session for this visitor
+        if (bootData.resolvedSessionId && bootData.resolvedSessionId !== sessionId) {
+          setSessionId(bootData.resolvedSessionId);
+          storage.set('session_id', bootData.resolvedSessionId);
+        }
 
-            setMessages((prev) => {
-              // Only personalize if we just have the default welcome message
-              if (prev.length === 1 && prev[0].disableFeedback && statusData.customer.name) {
-                const firstName = statusData.customer.name.trim().split(' ')[0];
-                const personalizedText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
-                if (prev[0].text !== personalizedText) {
-                  return [{ ...prev[0], text: personalizedText }];
-                }
+        if (bootData.status) setSessionStatus(bootData.status);
+        if (bootData.assignedTo) setAssignedTo(bootData.assignedTo);
+        if (bootData.initialSuggestions) setInitialSuggestions(bootData.initialSuggestions);
+
+        // Profile from server (source of truth for cross-device auto-populate)
+        if (bootData.profile?.name || bootData.profile?.email) {
+          storage.setProfile(bootData.profile);
+          setBootProfile(bootData.profile);
+        }
+
+        // Welcome personalization
+        if (bootData.profile?.name) {
+          setMessages((prev) => {
+            if (prev.length === 1 && prev[0].disableFeedback) {
+              const firstName = bootData.profile.name.trim().split(' ')[0];
+              const personalizedText = `Ciao ${firstName}! 👋 Come posso aiutarti oggi?`;
+              if (prev[0].text !== personalizedText) {
+                return [{ ...prev[0], text: personalizedText }];
               }
-              return prev;
+            }
+            return prev;
+          });
+        }
+
+        // Consent sync
+        if (bootData.consent) {
+          setBootConsent(bootData.consent);
+          broadcastConsentChange(bootData.consent.analytics === true);
+        }
+
+        // Sync message history if available
+        if (bootData.messages && bootData.messages.length > 0) {
+          setMessages((prev) => {
+            const serverMessages = bootData.messages;
+
+            // 1. Create a map of server messages for fast lookup
+            const serverMsgMap = new Map();
+            serverMessages.forEach((msg) => {
+              if (msg.id) {
+                serverMsgMap.set(msg.id.toString(), msg);
+              }
+              if (msg.clientMessageId) {
+                serverMsgMap.set(msg.clientMessageId.toString(), msg);
+              }
             });
-          }
 
-          // Sync message history if available
-          if (statusData.messages && statusData.messages.length > 0) {
-            setMessages((prev) => {
-              const serverMessages = statusData.messages;
+            // 2. Identify local messages that SHOULD be preserved:
+            // - Technical errors (title: "Errore" or "Sessione scaduta")
+            // - Initial welcome message (disableFeedback: true)
+            // - Any message not yet present on server (by ID and clientMessageId)
+            const localToKeep = prev.filter((localMsg) => {
+              const localIdStr = localMsg.id?.toString();
 
-              // 1. Create a map of server messages for fast lookup
-              const serverMsgMap = new Map();
-              serverMessages.forEach((msg) => {
-                if (msg.id) {
-                  serverMsgMap.set(msg.id.toString(), msg);
-                }
-                if (msg.clientMessageId) {
-                  serverMsgMap.set(msg.clientMessageId.toString(), msg);
-                }
-              });
+              // If it's already on the server, don't keep the local copy (server is source of truth)
+              const existsOnServer = localIdStr && serverMsgMap.has(localIdStr);
 
-              // 2. Identify local messages that SHOULD be preserved:
-              // - Technical errors (title: "Errore" or "Sessione scaduta")
-              // - Initial welcome message (disableFeedback: true)
-              // - Any message not yet present on server (by ID and clientMessageId)
-              const localToKeep = prev.filter((localMsg) => {
-                const localIdStr = localMsg.id?.toString();
+              if (existsOnServer) return false;
 
-                // If it's already on the server, don't keep the local copy (server is source of truth)
-                const existsOnServer = localIdStr && serverMsgMap.has(localIdStr);
+              // Keep if it's a specific frontend-only message
+              const isError =
+                localMsg.title === 'Errore' || localMsg.title === 'Sessione scaduta';
+              const isWelcome = localMsg.disableFeedback === true;
 
-                if (existsOnServer) return false;
-
-                // Keep if it's a specific frontend-only message
-                const isError =
-                  localMsg.title === 'Errore' || localMsg.title === 'Sessione scaduta';
-                const isWelcome = localMsg.disableFeedback === true;
-
-                return isError || isWelcome || !existsOnServer;
-              });
-
-              // 3. Merge and sort
-              const merged = [...localToKeep, ...serverMessages].sort((a, b) => {
-                const timeA = new Date(a.timestamp || 0).getTime();
-                const timeB = new Date(b.timestamp || 0).getTime();
-                return timeA - timeB;
-              });
-
-              // 4. Final deduplication by ID just in case
-              const final = [];
-              const seenIds = new Set();
-              merged.forEach((m) => {
-                const idStr = String(m.id || '');
-                if (idStr && !seenIds.has(idStr)) {
-                  final.push(m);
-                  seenIds.add(idStr);
-                }
-              });
-
-              return final;
+              return isError || isWelcome || !existsOnServer;
             });
-          }
+
+            // 3. Merge and sort
+            const merged = [...localToKeep, ...serverMessages].sort((a, b) => {
+              const timeA = new Date(a.timestamp || 0).getTime();
+              const timeB = new Date(b.timestamp || 0).getTime();
+              return timeA - timeB;
+            });
+
+            // 4. Final deduplication by ID just in case
+            const final = [];
+            const seenIds = new Set();
+            merged.forEach((m) => {
+              const idStr = String(m.id || '');
+              if (idStr && !seenIds.has(idStr)) {
+                final.push(m);
+                seenIds.add(idStr);
+              }
+            });
+
+            return final;
+          });
         }
       })
       .catch(() => {
-        // Silently fail if session doesn't exist yet
+        // Silently fail if boot doesn't exist yet (backward compat during rollout)
       });
 
     // Connect Socket with Reconnection Logic
@@ -467,21 +435,22 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     return () => {
       socket.disconnect();
     };
-  }, [sessionId, disabled, shopDomain]);
+  }, [identityReady, sessionId, visitorId, disabled, shopDomain]);
 
   // Widget Event Emitter
   const trackWidgetEvent = useCallback((eventType, properties = {}) => {
     const isTechnical = CONSENT_EXEMPT_EVENTS.has(eventType);
     if (!isTechnical && (!analyticsConsent || disabled)) return;
     if (disabled) return; // Even technical events are suppressed in preview/disabled mode
+    // B23: suppress events until identity is ready — prevents null sessionId/anonId 500s
+    if (!identityReady) return;
 
-    // Determine fallback anonId (storefront normally manages it, but widget can piggyback sessionId)
     const payload = {
       siteId: shopDomain || 'unknown', // Proxy used by middleware
       sessionId,
       source: 'widget',
       identity: { 
-        anonId: sessionId, // Use session ID as fallback anonId
+        anonId: visitorId || sessionId, // B22: visitorId is persistent, sessionId is fallback
         shopifyCustomerId: shopifyCustomer?.id?.toString() || undefined 
       },
       events: [{ eventType, ...properties }]
@@ -495,7 +464,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       },
       body: JSON.stringify(payload),
     }).catch(() => {});
-  }, [analyticsConsent, disabled, shopDomain, sessionId, shopifyCustomer]);
+  }, [analyticsConsent, disabled, identityReady, shopDomain, sessionId, visitorId, shopifyCustomer]);
 
   const sendChatMessage = useCallback(
     async (text, options = {}) => {
@@ -516,27 +485,19 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
       // AUTO-START NEW SESSION IF COMPLETED
       if (sessionStatus === 'completed' || sessionStatus === 'abandoned') {
-        // 1. Generate new ID
-        const newId = generateSessionId();
-        currentSessionId = newId; // Use new ID for this request
-
-        // 2. Update Storage
-        localStorage.setItem(STORAGE_KEYS.SESSION_ID, newId);
-        localStorage.setItem(STORAGE_KEYS.SESSION_STATUS, 'active');
-        localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify([]));
-
-        // 3. Update State (Soft Reset)
-        setSessionId(newId);
+        // B22: Request new session from parent
+        storage.clearSession();
         setSessionStatus('active');
-        setMessages([]); // Clear previous messages
+        setMessages([]);
         setAssignedTo(null);
         setInitialSuggestions([]);
+        window.parent?.postMessage({ type: 'YUUME:requestNewSession' }, '*');
+        // Wait for parent to provide new sessionId via postMessage
+        return;
       }
 
       // Clear initial suggestions on any explicit message
       setInitialSuggestions([]);
-
-      localStorage.setItem(STORAGE_KEYS.SESSION_TIME, Date.now().toString());
 
       setLoading(true);
 
@@ -566,6 +527,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           {
             customer,
             shopifyCustomer, // Pass certified identity
+            anonId: visitorId,  // B22: persistent cross-session identity
             ...options,
           },
           userMsgId,
@@ -648,6 +610,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       loading,
       shopDomain,
       devShopDomain, // Added prop dependency
+      visitorId, // B22: needed for anonId in meta
       addUserMessage,
       addAssistantMessage,
       customer,
@@ -663,7 +626,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   // Track session start when chat is genuinely opened and connected.
   // Fires for both 'new' and 'active' sessions — 'new' is the initial state from localStorage
-  // before the getSessionStatus API response resolves.
+  // before the boot API response resolves.
   useEffect(() => {
     const isLiveSession = sessionStatus !== 'completed' && sessionStatus !== 'abandoned';
     if (connectionStatus === 'online' && isLiveSession && messages.length <= 1) {
@@ -756,6 +719,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     sessionStatus,
     assignedTo, // Return assignedTo
     shopifyCustomer, // Return certified identity
+    visitorId, // B22: For ProfileView and consent API calls
+    bootProfile, // B22: Profile from boot for ProfileView props
+    bootConsent, // B22: Consent from boot for ProfileView props
     initialSuggestions, // Return initial suggestions
     sendMessage: sendChatMessage,
     handleSuggestionClick, // Centralized suggestion handler

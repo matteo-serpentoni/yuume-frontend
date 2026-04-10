@@ -43,27 +43,75 @@
   const WIDGET_URL = config[env].widgetUrl;
   const WIDGET_ORIGIN = new URL(WIDGET_URL).origin;
 
-  // Genera session ID univoco
-  const SESSION_ID = generateSessionId();
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // IDENTITY & SESSION MANAGEMENT (Parent-side — source of truth)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  var SESSION_KEY = 'jarbris_session_id';
+  var SESSION_TIME_KEY = 'jarbris_session_time';
+  var SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
+  function getVisitorId() {
+    try {
+      // Migration: rename legacy keys to unified name
+      var legacy = localStorage.getItem('yuume_visitor_id');
+      if (legacy) {
+        localStorage.setItem('jarbris_visitor_id', legacy);
+        localStorage.removeItem('yuume_visitor_id');
+        return legacy;
+      }
+      var legacyAnon = localStorage.getItem('jarbris_anon_id');
+      if (legacyAnon) {
+        localStorage.setItem('jarbris_visitor_id', legacyAnon);
+        localStorage.removeItem('jarbris_anon_id');
+        return legacyAnon;
+      }
+      var id = localStorage.getItem('jarbris_visitor_id');
+      if (!id) {
+        id = 'visitor_' + Math.random().toString(36).substr(2, 9) + Date.now();
+        localStorage.setItem('jarbris_visitor_id', id);
+      }
+      return id;
+    } catch (e) {
+      // localStorage blocked (extreme privacy settings) — ephemeral in-memory only
+      return 'visitor_' + Math.random().toString(36).substr(2, 9) + Date.now();
+    }
+  }
+
+  function getOrCreateSessionId() {
+    try {
+      var existing = localStorage.getItem(SESSION_KEY);
+      var savedTime = localStorage.getItem(SESSION_TIME_KEY);
+      if (existing && savedTime) {
+        var elapsed = Date.now() - parseInt(savedTime, 10);
+        if (elapsed < SESSION_TIMEOUT) {
+          localStorage.setItem(SESSION_TIME_KEY, Date.now().toString());
+          return existing;
+        }
+      }
+      var id = 'sess_' + Math.random().toString(36).substr(2, 9) + Date.now();
+      localStorage.setItem(SESSION_KEY, id);
+      localStorage.setItem(SESSION_TIME_KEY, Date.now().toString());
+      return id;
+    } catch (e) {
+      // localStorage blocked — generate ephemeral session per pageview
+      return 'sess_' + Math.random().toString(36).substr(2, 9) + Date.now();
+    }
+  }
+
+  function touchSessionTime() {
+    try {
+      localStorage.setItem(SESSION_TIME_KEY, Date.now().toString());
+    } catch (e) {
+      // Silent — localStorage may be blocked
+    }
+  }
+
+  // Persistent cross-session visitor ID (1st-party localStorage)
+  var VISITOR_ID = getVisitorId();
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // UTILITY FUNCTIONS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function generateSessionId() {
-    return 'sess_' + Math.random().toString(36).substr(2, 9) + Date.now();
-  }
-
-  function getVisitorId() {
-    // Prova a leggere da localStorage (persiste tra sessioni)
-    let visitorId = localStorage.getItem('yuume_visitor_id');
-
-    if (!visitorId) {
-      visitorId = 'visitor_' + Math.random().toString(36).substr(2, 9) + Date.now();
-      localStorage.setItem('yuume_visitor_id', visitorId);
-    }
-
-    return visitorId;
-  }
 
   function getShopifyIdentity() {
     try {
@@ -111,14 +159,15 @@
   // TRACKING FUNCTIONS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   function sendHeartbeat() {
+    touchSessionTime(); // Keep session alive while storefront is active
     fetch(API_URL + '/api/tracking/heartbeat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Widget-Token': tokenParam },
       body: JSON.stringify({
         siteId: SITE_ID,
-        sessionId: SESSION_ID,
+        sessionId: getOrCreateSessionId(),
         currentPage: window.location.pathname,
-        visitorId: getVisitorId(),
+        visitorId: VISITOR_ID,
       }),
     }).catch(() => {});
   }
@@ -127,7 +176,7 @@
     fetch(API_URL + '/api/tracking/chat-start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: SESSION_ID }),
+      body: JSON.stringify({ sessionId: getOrCreateSessionId() }),
     }).catch(() => {});
   }
 
@@ -135,14 +184,14 @@
     fetch(API_URL + '/api/tracking/chat-end', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: SESSION_ID }),
+      body: JSON.stringify({ sessionId: getOrCreateSessionId() }),
     }).catch(() => {});
   }
 
   function notifyLeave() {
     // Usa sendBeacon per affidabilità (funziona anche durante beforeunload)
     const url = API_URL + '/api/tracking/leave';
-    const data = JSON.stringify({ sessionId: SESSION_ID });
+    const data = JSON.stringify({ sessionId: getOrCreateSessionId() });
 
     if (navigator.sendBeacon) {
       navigator.sendBeacon(url, data);
@@ -186,17 +235,17 @@
   iframe.style.height = '250px';
   iframe.setAttribute('scrolling', 'no');
 
-  // Invia shopDomain al widget quando l'iframe è caricato
+  // Send identity + session to widget when iframe is loaded
   iframe.onload = function () {
-    const identity = getShopifyIdentity();
-    const consent = hasAnalyticsConsent();
     iframe.contentWindow.postMessage(
       {
         type: 'YUUME:shopDomain',
         shopDomain: SHOP_DOMAIN,
         widgetToken: tokenParam,
-        shopifyCustomer: identity, // Pass identity on load
-        analyticsConsent: consent,
+        visitorId: VISITOR_ID,
+        sessionId: getOrCreateSessionId(),
+        shopifyCustomer: getShopifyIdentity(),
+        analyticsConsent: hasAnalyticsConsent(),
       },
       WIDGET_ORIGIN,
     );
@@ -290,13 +339,35 @@
     // IDENTITY REQUEST (from widget Ready)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === 'YUUME:ready') {
-      const identity = getShopifyIdentity();
-      const consent = hasAnalyticsConsent();
       iframe.contentWindow.postMessage(
         {
           type: 'YUUME:identity',
-          customer: identity,
-          analyticsConsent: consent,
+          visitorId: VISITOR_ID,
+          sessionId: getOrCreateSessionId(),
+          customer: getShopifyIdentity(),
+          analyticsConsent: hasAnalyticsConsent(),
+        },
+        WIDGET_ORIGIN,
+      );
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // NEW SESSION REQUEST (from widget clearChat)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (event.data.type === 'YUUME:requestNewSession') {
+      try {
+        localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem(SESSION_TIME_KEY);
+      } catch (e) {
+        // Silent — localStorage may be blocked
+      }
+      iframe.contentWindow.postMessage(
+        {
+          type: 'YUUME:identity',
+          visitorId: VISITOR_ID,
+          sessionId: getOrCreateSessionId(),
+          customer: getShopifyIdentity(),
+          analyticsConsent: hasAnalyticsConsent(),
         },
         WIDGET_ORIGIN,
       );
@@ -512,6 +583,7 @@
     // RESIZE
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === 'YUUME:resize') {
+      touchSessionTime(); // Keep session alive while widget is active
       const { enlarged, width, height } = event.data;
 
       if (enlarged) {

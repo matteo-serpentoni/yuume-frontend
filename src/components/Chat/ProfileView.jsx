@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getProfile, updateProfile } from '../../services/chatApi';
-import { getPrivacyPreferences, updatePrivacyPreferences } from '../../services/privacyApi';
+import { updateProfile } from '../../services/chatApi';
+import { updatePrivacyPreferences } from '../../services/privacyApi';
 import {
   getBootConsent,
   broadcastConsentChange,
   rollbackConsent,
-  getAnonId,
 } from '../../utils/consentBridge';
+import storage from '../../utils/storage';
 import { LockIcon } from '../UI/Icons';
 import { validateEmail } from '../../utils/validators';
 import './ProfileView.css';
@@ -15,58 +15,38 @@ const ProfileView = ({
   onBack,
   sessionId,
   shopDomain,
+  visitorId,             // B22: from parent via useChat
+  profile: initialProfile,   // B22: from boot response via useChat
+  consent: initialConsent,   // B22: from boot response via useChat
+  onProfileUpdate,           // B22: callback to propagate changes to useChat
   colors = {
     header: '#667eea',
     sendButton: '#667eea',
     inputFocus: '#4CC2E9',
   },
 }) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [name, setName] = useState(initialProfile?.name || '');
+  const [email, setEmail] = useState(initialProfile?.email || '');
+  const [loading] = useState(false); // B22: no fetch needed, data arrives via props
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
-  const [isIdentified, setIsIdentified] = useState(false);
+  const [isIdentified, setIsIdentified] = useState(!!initialProfile?.isIdentified);
   const [showConfirm, setShowConfirm] = useState(false);
-  // Phase 3: Privacy consent state — boot from localStorage for instant UI, sync from backend
-  const [analyticsConsent, setAnalyticsConsent] = useState(getBootConsent);
+  // Phase 3: Privacy consent state — boot from props, fallback to localStorage
+  const [analyticsConsent, setAnalyticsConsent] = useState(
+    initialConsent?.analytics ?? getBootConsent(),
+  );
   const [privacySaving, setPrivacySaving] = useState(false);
   const [privacyError, setPrivacyError] = useState(null);
   // Ref to cancel the error-dismissal timer if the component unmounts (state.md §3)
   const privacyErrorTimerRef = useRef(null);
 
+  // B22: Sync state if props change (e.g., after boot response arrives later)
   useEffect(() => {
-    const loadProfile = async () => {
-      setLoading(true);
-      const data = await getProfile(sessionId, shopDomain);
-      if (data) {
-        setName(data.name || '');
-        setEmail(data.email || '');
-        setIsIdentified(!!data.isIdentified);
-      }
-      setLoading(false);
-    };
-
-    loadProfile();
-  }, [sessionId, shopDomain]);
-
-  // Phase 3: Sync analytics consent from backend (backend is source of truth)
-  useEffect(() => {
-    let cancelled = false;
-    const syncConsent = async () => {
-      const anonId = getAnonId();
-      const serverConsent = await getPrivacyPreferences(sessionId, shopDomain, anonId);
-      if (!cancelled && serverConsent !== null) {
-        const serverValue = serverConsent.analytics === true;
-        setAnalyticsConsent(serverValue);
-        broadcastConsentChange(serverValue);
-      }
-    };
-
-    syncConsent();
-    // Cleanup: prevent state update after unmount if the fetch resolves late
-    return () => { cancelled = true; };
-  }, [sessionId, shopDomain]);
+    if (initialProfile?.name && !name) setName(initialProfile.name);
+    if (initialProfile?.email && !email) setEmail(initialProfile.email);
+    if (initialProfile?.isIdentified && !isIdentified) setIsIdentified(true);
+  }, [initialProfile]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cleanup the error-dismissal timer on unmount (state.md §3: timer cleanup)
   useEffect(() => {
@@ -95,17 +75,26 @@ const ProfileView = ({
     setMessage(null);
 
     try {
-      await updateProfile(sessionId, shopDomain, {
+      const result = await updateProfile(sessionId, shopDomain, {
         name,
         email,
+        visitorId, // B22: ensures PersonIdentifier creation
       });
 
-      // ✅ Sync to localStorage for personalized welcome in next sessions
-      localStorage.setItem('yuume_profile', JSON.stringify({ name, email, isIdentified: true }));
+      // B22: Use server response (source of truth) — on cross-device,
+      // the server returns the existing Customer's data
+      const serverProfile = result.customer || { name, email, isIdentified: true };
+      storage.setProfile(serverProfile);
 
-      setSaving(true); // Re-setting to trigger loading state if needed elsewhere
+      // Update local state from server response
+      if (serverProfile.name) setName(serverProfile.name);
+      if (serverProfile.email) setEmail(serverProfile.email);
+      setIsIdentified(!!serverProfile.isIdentified);
+
+      // Propagate to useChat for welcome message updates
+      onProfileUpdate?.(serverProfile);
+
       setSaving(false);
-      setIsIdentified(true);
       setMessage({ type: 'success', text: 'Profilo salvato!' });
       setTimeout(() => {
         onBack();
@@ -123,11 +112,12 @@ const ProfileView = ({
     setShowConfirm(false);
     setSaving(true);
     try {
-      await updateProfile(sessionId, shopDomain, { reset: true });
-      localStorage.removeItem('yuume_profile');
+      await updateProfile(sessionId, shopDomain, { reset: true, visitorId });
+      storage.removeProfile();
       setName('');
       setEmail('');
       setIsIdentified(false);
+      onProfileUpdate?.(null);
       setSaving(false);
       setMessage({ type: 'success', text: 'Dati rimossi.' });
       setTimeout(() => {
@@ -155,9 +145,8 @@ const ProfileView = ({
     broadcastConsentChange(newValue);
 
     try {
-      const anonId = getAnonId();
-      // 3. Persist to backend (source of truth)
-      await updatePrivacyPreferences(sessionId, shopDomain, anonId, { analytics: newValue });
+      // B22: Pass visitorId instead of getAnonId()
+      await updatePrivacyPreferences(sessionId, shopDomain, visitorId, { analytics: newValue });
       // 4. Backend confirmed — broadcast is already done, nothing more needed
     } catch {
       // 5. Backend KO — rollback UI and localStorage

@@ -25,7 +25,7 @@
 
   // Session Management
   const SESSION_KEY = 'jarbris_sess_id';
-  const ANON_KEY = 'jarbris_anon_id';
+  const ANON_KEY = 'jarbris_visitor_id'; // Unified with embed.js for cross-system identity stitching
   const TOKEN_KEY = `jarbris_ingest_${SITE_ID}`;
   // Phase 3: Jarbris analytics consent key (set by widget consentBridge.js)
   const JARBRIS_CONSENT_KEY = 'jarbris_analytics_consent';
@@ -40,9 +40,16 @@
   };
 
   const getAnonId = () => {
+    // Migration: rename legacy key to unified name
+    var legacy = localStorage.getItem('jarbris_anon_id');
+    if (legacy) {
+      localStorage.setItem(ANON_KEY, legacy);
+      localStorage.removeItem('jarbris_anon_id');
+      return legacy;
+    }
     let aid = localStorage.getItem(ANON_KEY);
     if (!aid) {
-      aid = 'anon_' + Math.random().toString(36).substring(2, 15);
+      aid = 'visitor_' + Math.random().toString(36).substr(2, 9) + Date.now();
       localStorage.setItem(ANON_KEY, aid);
     }
     return aid;

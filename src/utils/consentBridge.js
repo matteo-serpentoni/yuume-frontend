@@ -92,16 +92,10 @@ export function rollbackConsent(previousValue) {
 }
 
 /**
- * Read the anonymous visitor ID set by the storefront tracker.
- * Used by the widget to pass anonId to consent API calls without
- * accessing localStorage directly in components.
+ * @deprecated getAnonId removed in B22 refactor.
+ * The visitor ID now comes from the parent frame via postMessage (visitorId),
+ * not from the iframe's own localStorage. This eliminates the cross-origin
+ * isolation issue where Safari ITP would block 3rd-party localStorage.
  *
- * @returns {string|null}
+ * Components that need the visitor ID should receive it via props from useChat.
  */
-export function getAnonId() {
-  try {
-    return localStorage.getItem('jarbris_anon_id') || null;
-  } catch {
-    return null;
-  }
-}
