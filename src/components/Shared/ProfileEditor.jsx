@@ -5,6 +5,7 @@ import { getBootConsent, broadcastConsentChange, rollbackConsent } from '../../u
 import storage from '../../utils/storage';
 import { LockIcon } from '../UI/Icons';
 import { validateEmail } from '../../utils/validators';
+import ConfirmDialog from '../UI/ConfirmDialog';
 import './ProfileEditor.css';
 
 const ProfileEditor = ({
@@ -33,6 +34,7 @@ const ProfileEditor = ({
   );
   const [privacySaving, setPrivacySaving] = useState(false);
   const [privacyError, setPrivacyError] = useState(null);
+  const [showPrivacyConfirm, setShowPrivacyConfirm] = useState(false);
   const privacyErrorTimerRef = useRef(null);
 
   useEffect(() => {
@@ -105,6 +107,11 @@ const ProfileEditor = ({
     setShowConfirm(false);
     setSaving(true);
     try {
+      // If privacy is active, toggle it off alongside the reset
+      if (analyticsConsent) {
+        executePrivacyToggle(false);
+      }
+
       await updateProfile(sessionId, shopDomain, { reset: true, visitorId });
       storage.removeProfile();
       setName('');
@@ -122,11 +129,8 @@ const ProfileEditor = ({
     }
   };
 
-  const handlePrivacyToggle = async () => {
-    if (privacySaving) return;
-
+  const executePrivacyToggle = async (newValue) => {
     const previousValue = analyticsConsent;
-    const newValue = !analyticsConsent;
 
     setAnalyticsConsent(newValue);
     setPrivacyError(null);
@@ -139,51 +143,34 @@ const ProfileEditor = ({
       setAnalyticsConsent(previousValue);
       rollbackConsent(previousValue);
       setPrivacyError('Non è stato possibile aggiornare la preferenza. Riprova.');
+      
       if (privacyErrorTimerRef.current) clearTimeout(privacyErrorTimerRef.current);
-      privacyErrorTimerRef.current = setTimeout(() => setPrivacyError(null), 4000);
+      privacyErrorTimerRef.current = setTimeout(() => {
+        setPrivacyError(null);
+      }, 3000);
     } finally {
       setPrivacySaving(false);
     }
   };
 
-  if (showConfirm) {
-    return (
-      <div
-        className="profile-confirm-container"
-        style={{ '--profile-header-color': colors.header }}
-      >
-        <div className="profile-confirm-icon-wrapper">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-          </svg>
-        </div>
-        <h4 className="profile-confirm-title">Sei sicuro?</h4>
-        <p className="profile-confirm-text">
-          Rimuoveremo i tuoi dati. Non potrai più gestire le preferenze fino a nuova
-          identificazione.
-        </p>
-        <div className="profile-confirm-actions">
-          <button onClick={() => setShowConfirm(false)} className="profile-btn-cancel">
-            Annulla
-          </button>
-          <button onClick={handleReset} className="profile-btn-confirm">
-            Conferma
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const handlePrivacyToggleClick = () => {
+    if (privacySaving) return;
+
+    if (analyticsConsent === true) {
+      setShowPrivacyConfirm(true);
+    } else {
+      executePrivacyToggle(true);
+    }
+  };
+
+  const confirmPrivacyRevocation = () => {
+    setShowPrivacyConfirm(false);
+    executePrivacyToggle(false);
+  };
+
 
   return (
+    <>
     <form
       onSubmit={handleSave}
       className={`profile-editor-form profile-editor-${mode}`}
@@ -258,9 +245,9 @@ const ProfileEditor = ({
             type="button"
             role="switch"
             aria-checked={analyticsConsent}
-            aria-label="Attiva raccolta dati"
+            aria-label="Attiva/disattiva raccolta dati"
             disabled={privacySaving}
-            onClick={handlePrivacyToggle}
+            onClick={handlePrivacyToggleClick}
             className={`profile-editor-privacy-toggle ${analyticsConsent ? 'on' : ''} ${privacySaving ? 'saving' : ''}`}
           >
             <span className="profile-editor-privacy-thumb" />
@@ -274,6 +261,26 @@ const ProfileEditor = ({
         )}
       </div>
     </form>
+    <ConfirmDialog 
+      isOpen={showPrivacyConfirm}
+      title="Sei sicuro?"
+      message="Disattivando questa opzione, Jarbris non potrà più offrirti consigli personalizzati."
+      confirmText="Disattiva"
+      cancelText="Annulla"
+      onConfirm={confirmPrivacyRevocation}
+      onCancel={() => setShowPrivacyConfirm(false)}
+    />
+
+    <ConfirmDialog 
+      isOpen={showConfirm}
+      title="Cancellare i dati?"
+      message="Rimuoveremo i tuoi dati. Non potrai più gestire le preferenze fino a nuova identificazione."
+      confirmText="Elimina Profilo"
+      cancelText="Annulla"
+      onConfirm={handleReset}
+      onCancel={() => setShowConfirm(false)}
+    />
+    </>
   );
 };
 
