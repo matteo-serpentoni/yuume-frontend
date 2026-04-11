@@ -254,6 +254,11 @@ const Chat = ({
               isThinking={isThinking}
               thinkingIntent={thinkingIntent}
               shopDomain={shopDomain}
+              sessionId={sessionId}
+              visitorId={liveChat.visitorId}
+              bootProfile={liveChat.bootProfile}
+              bootConsent={liveChat.bootConsent}
+              handleProfileUpdate={liveChat.handleProfileUpdate}
               activeProduct={activeProduct}
               setActiveProduct={setActiveProduct}
               activeOrder={activeOrder}
@@ -268,7 +273,7 @@ const Chat = ({
                   sendMessage('_SYS_EVENT_', {
                     hidden: true,
                     systemAction: 'ADD_TO_CART_MANUAL',
-                    payload: { productId: payloadData.id }
+                    payload: { productId: payloadData.id },
                   });
                 }
               }}
@@ -419,7 +424,7 @@ const Chat = ({
                 sendMessage('_SYS_EVENT_', {
                   hidden: true,
                   systemAction: 'ADD_TO_CART_MANUAL',
-                  payload: { productId: payloadData.id }
+                  payload: { productId: payloadData.id },
                 });
               }
             }}

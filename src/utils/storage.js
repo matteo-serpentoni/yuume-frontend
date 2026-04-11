@@ -128,4 +128,14 @@ function removeProfile() {
   remove('profile');
 }
 
-export default { get, set, remove, getJSON, setJSON, clearSession, getProfile, setProfile, removeProfile };
+export default {
+  get,
+  set,
+  remove,
+  getJSON,
+  setJSON,
+  clearSession,
+  getProfile,
+  setProfile,
+  removeProfile,
+};

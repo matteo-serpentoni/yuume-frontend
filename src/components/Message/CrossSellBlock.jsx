@@ -31,10 +31,7 @@ const CrossSellCard = memo(({ product, shopDomain, index, onOpen }) => {
   const onSale = compareAtPrice > price;
 
   return (
-    <div
-      className="yuume-xs-card"
-      style={{ animationDelay: `${index * 70}ms` }}
-    >
+    <div className="yuume-xs-card" style={{ animationDelay: `${index * 70}ms` }}>
       <a
         href={url}
         className="yuume-xs-image-wrapper"

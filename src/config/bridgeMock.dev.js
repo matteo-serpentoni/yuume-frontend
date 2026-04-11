@@ -34,7 +34,11 @@ if (import.meta.env.DEV) {
   };
 
   const touchSessionTime = () => {
-    try { localStorage.setItem(DEV_SESSION_TIME_KEY, Date.now().toString()); } catch { /* silent */ }
+    try {
+      localStorage.setItem(DEV_SESSION_TIME_KEY, Date.now().toString());
+    } catch {
+      /* silent */
+    }
   };
 
   // Check if current session has timed out (mirrors embed.js getOrCreateSessionId logic)
@@ -53,7 +57,11 @@ if (import.meta.env.DEV) {
   let devSessionId;
   if (isSessionExpired()) {
     devSessionId = 'dev-' + Math.random().toString(36).slice(2, 10);
-    try { localStorage.setItem(DEV_SESSION_KEY, devSessionId); } catch { /* silent */ }
+    try {
+      localStorage.setItem(DEV_SESSION_KEY, devSessionId);
+    } catch {
+      /* silent */
+    }
     console.log('[DEV MOCK] Session expired — new sessionId:', devSessionId);
   } else {
     devSessionId = getOrCreate(DEV_SESSION_KEY);
@@ -70,10 +78,7 @@ if (import.meta.env.DEV) {
       { type: 'YUUME:shopDomain', shopDomain: devShopDomain, visitorId: devVisitorId, sessionId },
       '*',
     );
-    window.postMessage(
-      { type: 'YUUME:identity', visitorId: devVisitorId, sessionId },
-      '*',
-    );
+    window.postMessage({ type: 'YUUME:identity', visitorId: devVisitorId, sessionId }, '*');
   };
 
   // Handle YUUME:requestNewSession (clearChat delegates to parent in B22)
@@ -134,6 +139,11 @@ if (import.meta.env.DEV) {
     }
   });
 
-  console.log('[DEV MOCK] Identity mock active — visitorId:', devVisitorId, '| sessionId:', devSessionId);
+  console.log(
+    '[DEV MOCK] Identity mock active — visitorId:',
+    devVisitorId,
+    '| sessionId:',
+    devSessionId,
+  );
   console.log('[DEV MOCK] Shopify cart bridge mock active');
 }

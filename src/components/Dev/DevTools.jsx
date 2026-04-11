@@ -131,7 +131,6 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally mount-only — onSiteChange is called once to auto-select first site
 
-
   // Update Orb config when theme or site changes
   useEffect(() => {
     const updateThemesForSelectedSite = async () => {

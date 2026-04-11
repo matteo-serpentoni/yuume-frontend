@@ -72,7 +72,8 @@ export function useCheckout({ onCartReset, onAddMessage } = {}) {
     if (onAddMessage) {
       onAddMessage({
         type: 'text',
-        message: '**Pagamento completato con successo.**\nVuoi continuare a guardare altri prodotti?',
+        message:
+          '**Pagamento completato con successo.**\nVuoi continuare a guardare altri prodotti?',
         format: 'markdown',
         disableFeedback: true,
       });

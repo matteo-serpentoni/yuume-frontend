@@ -284,12 +284,13 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       setAnalyticsConsent(e.detail.analyticsConsent);
     };
     window.addEventListener('jarbris:analytics-consent-changed', handleConsentChange);
-    return () => window.removeEventListener('jarbris:analytics-consent-changed', handleConsentChange);
+    return () =>
+      window.removeEventListener('jarbris:analytics-consent-changed', handleConsentChange);
   }, []);
 
   // B22: Unified Boot — replaces getSessionStatus + getProfile + getConsent
   useEffect(() => {
-    if (disabled || !identityReady || !sessionId) return;
+    if (disabled || !identityReady || !sessionId || !shopDomain) return;
 
     bootSession(sessionId, shopDomain, visitorId)
       .then((bootData) => {
@@ -475,33 +476,36 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   }, [identityReady, sessionId, visitorId, disabled, shopDomain]);
 
   // Widget Event Emitter
-  const trackWidgetEvent = useCallback((eventType, properties = {}) => {
-    const isTechnical = CONSENT_EXEMPT_EVENTS.has(eventType);
-    if (!isTechnical && (!analyticsConsent || disabled)) return;
-    if (disabled) return; // Even technical events are suppressed in preview/disabled mode
-    // B23: suppress events until identity is ready — prevents null sessionId/anonId 500s
-    if (!identityReady) return;
+  const trackWidgetEvent = useCallback(
+    (eventType, properties = {}) => {
+      const isTechnical = CONSENT_EXEMPT_EVENTS.has(eventType);
+      if (!isTechnical && (!analyticsConsent || disabled)) return;
+      if (disabled) return; // Even technical events are suppressed in preview/disabled mode
+      // B23: suppress events until identity is ready — prevents null sessionId/anonId 500s
+      if (!identityReady) return;
 
-    const payload = {
-      siteId: shopDomain || 'unknown', // Proxy used by middleware
-      sessionId,
-      source: 'widget',
-      identity: { 
-        anonId: visitorId || sessionId, // B22: visitorId is persistent, sessionId is fallback
-        shopifyCustomerId: shopifyCustomer?.id?.toString() || undefined 
-      },
-      events: [{ eventType, ...properties }]
-    };
+      const payload = {
+        siteId: shopDomain || 'unknown', // Proxy used by middleware
+        sessionId,
+        source: 'widget',
+        identity: {
+          anonId: visitorId || sessionId, // B22: visitorId is persistent, sessionId is fallback
+          shopifyCustomerId: shopifyCustomer?.id?.toString() || undefined,
+        },
+        events: [{ eventType, ...properties }],
+      };
 
-    fetch(`${API_URL}/api/events`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Widget-Token': new URLSearchParams(window.location.search).get('widgetToken') || '',
-      },
-      body: JSON.stringify(payload),
-    }).catch(() => {});
-  }, [analyticsConsent, disabled, identityReady, shopDomain, sessionId, visitorId, shopifyCustomer]);
+      fetch(`${API_URL}/api/events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Widget-Token': new URLSearchParams(window.location.search).get('widgetToken') || '',
+        },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    },
+    [analyticsConsent, disabled, identityReady, shopDomain, sessionId, visitorId, shopifyCustomer],
+  );
 
   const sendChatMessage = useCallback(
     async (text, options = {}) => {
@@ -560,7 +564,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
           {
             customer,
             shopifyCustomer, // Pass certified identity
-            anonId: visitorId,  // B22: persistent cross-session identity
+            anonId: visitorId, // B22: persistent cross-session identity
             ...options,
           },
           userMsgId,
@@ -617,7 +621,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       } finally {
         setLoading(false);
       }
-      
+
       // Telemetry
       if (!options.suggestionAction) {
         trackWidgetEvent('jarbris_message_sent', { query: text, eventData: { isChip: false } });
@@ -763,7 +767,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     handleSuggestionClick, // Centralized suggestion handler
     clearChat,
     resetCart,
-    handleProfileUpdate,   // Propagate ProfileView saves back into bootProfile state
+    handleProfileUpdate, // Propagate ProfileView saves back into bootProfile state
     sendFeedback,
     isThinking,
     thinkingIntent,

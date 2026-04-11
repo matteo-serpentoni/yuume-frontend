@@ -304,7 +304,7 @@ const ProductCard = memo(
                 )}
                 {isAvailable && (product.variants[0] || product.variantId) && (
                   <div className="yuume-add-to-cart-wrapper">
-                                      <AddToCartButton
+                    <AddToCartButton
                       variantId={product.variants[0]?.id || product.variantId}
                       shopDomain={shopDomain}
                       quantity={1}
@@ -439,7 +439,9 @@ export const ProductDrawer = memo(({ product, onClose, shopDomain, onProductActi
           quantity={1}
           onAnimationComplete={() =>
             onProductAction &&
-            onProductAction('add_to_cart', { id: currentVariant?.productId || product.productId || product.id })
+            onProductAction('add_to_cart', {
+              id: currentVariant?.productId || product.productId || product.id,
+            })
           }
         />
       ) : (

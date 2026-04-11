@@ -15,6 +15,7 @@ import ErrorBoundary from '../UI/ErrorBoundary';
 import MessageFallback from './MessageFallback';
 import MessageBubble from './MessageBubble';
 import HumanThinking from './HumanThinking';
+import ProfileCardMessage from '../Message/ProfileCardMessage';
 
 /**
  * MessageList
@@ -28,6 +29,11 @@ const MessageList = memo(
     isThinking,
     thinkingIntent,
     shopDomain,
+    sessionId,
+    visitorId,
+    bootProfile,
+    bootConsent,
+    handleProfileUpdate,
     activeProduct,
     setActiveProduct,
     activeOrder,
@@ -194,7 +200,11 @@ const MessageList = memo(
               errorMessage={msg.errorMessage}
             />
             {msg.crossSell && (
-              <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} onOpen={setActiveProduct} />
+              <CrossSellBlock
+                data={msg.crossSell}
+                shopDomain={shopDomain}
+                onOpen={setActiveProduct}
+              />
             )}
           </>
         );
@@ -202,9 +212,9 @@ const MessageList = memo(
 
       // 5.7 Cross Sell Block (Standalone V2/V1 recommendations rendering)
       if (msg.type?.toLowerCase() === 'cross_sell_block') {
-        return (
-          msg.crossSell ? <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} onOpen={setActiveProduct} /> : null
-        );
+        return msg.crossSell ? (
+          <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} onOpen={setActiveProduct} />
+        ) : null;
       }
 
       // 6. Return Submitted (Final Step)
@@ -255,6 +265,24 @@ const MessageList = memo(
         );
       }
 
+      // 8. Profile Card
+      if (msg.type?.toLowerCase() === 'profile_card') {
+        const isLastMessage = msg.id === chatBlocks[chatBlocks.length - 1]?.id;
+        return (
+          <ProfileCardMessage
+            message={msg}
+            chatColors={chatColors}
+            isLastMessage={isLastMessage}
+            sessionId={sessionId}
+            shopDomain={shopDomain}
+            visitorId={visitorId}
+            bootProfile={bootProfile}
+            bootConsent={bootConsent}
+            handleProfileUpdate={handleProfileUpdate}
+          />
+        );
+      }
+
       return (
         <>
           <TextMessage message={msg} />
@@ -292,6 +320,8 @@ const MessageList = memo(
         type = 'promo_cards';
       } else if (msg.type?.toLowerCase() === 'cross_sell_block') {
         type = 'cross_sell_block';
+      } else if (msg.type?.toLowerCase() === 'profile_card') {
+        type = 'profile_card';
       }
 
       const isStandalone = [
@@ -301,6 +331,7 @@ const MessageList = memo(
         'form_request',
         'promo_cards',
         'cross_sell_block',
+        'profile_card',
       ].includes(type?.toLowerCase());
 
       return (

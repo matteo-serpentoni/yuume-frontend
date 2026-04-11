@@ -43,7 +43,9 @@
   font-weight: 500;
   color: #64748b;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .yuume-checkout-back-btn:hover {
@@ -76,7 +78,9 @@
 }
 
 @keyframes yuume-checkout-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .yuume-checkout-loading-text {
@@ -220,7 +224,9 @@
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
 }
 
 .yuume-checkout-error-btn:hover {

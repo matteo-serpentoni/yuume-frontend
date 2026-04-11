@@ -45,4 +45,3 @@ const Suggestions = memo(({ suggestions, onSuggestionClick }) => {
 });
 
 export default Suggestions;
-

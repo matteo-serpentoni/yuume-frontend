@@ -7,7 +7,11 @@ const ORB_STATE_KEY = 'yuume_orb_enlarged';
 
 function App() {
   const [enlarged, setEnlarged] = useState(() => {
-    try { return localStorage.getItem(ORB_STATE_KEY) === 'true'; } catch { return false; }
+    try {
+      return localStorage.getItem(ORB_STATE_KEY) === 'true';
+    } catch {
+      return false;
+    }
   });
   const [cartBubbleVisible, setCartBubbleVisible] = useState(false);
 
@@ -41,7 +45,11 @@ function App() {
   }, [enlarged, cartBubbleVisible]);
 
   useEffect(() => {
-    try { localStorage.setItem(ORB_STATE_KEY, enlarged.toString()); } catch { /* ITP/blocked */ }
+    try {
+      localStorage.setItem(ORB_STATE_KEY, enlarged.toString());
+    } catch {
+      /* ITP/blocked */
+    }
   }, [enlarged]);
 
   useEffect(() => {
@@ -53,8 +61,20 @@ function App() {
 
   // --- DEV-ONLY PREVIEW LOGIC ---
   const [devPreview, setDevPreview] = useState({
-    show: (() => { try { return localStorage.getItem('yuume_dev_show_storefront') === 'true'; } catch { return false; } })(),
-    theme: (() => { try { return localStorage.getItem('yuume_dev_storefront_theme') || 'light'; } catch { return 'light'; } })(),
+    show: (() => {
+      try {
+        return localStorage.getItem('yuume_dev_show_storefront') === 'true';
+      } catch {
+        return false;
+      }
+    })(),
+    theme: (() => {
+      try {
+        return localStorage.getItem('yuume_dev_storefront_theme') || 'light';
+      } catch {
+        return 'light';
+      }
+    })(),
   });
 
   useEffect(() => {
@@ -62,8 +82,20 @@ function App() {
 
     const handleDevUpdate = () => {
       setDevPreview({
-        show: (() => { try { return localStorage.getItem('yuume_dev_show_storefront') === 'true'; } catch { return false; } })(),
-        theme: (() => { try { return localStorage.getItem('yuume_dev_storefront_theme') || 'light'; } catch { return 'light'; } })(),
+        show: (() => {
+          try {
+            return localStorage.getItem('yuume_dev_show_storefront') === 'true';
+          } catch {
+            return false;
+          }
+        })(),
+        theme: (() => {
+          try {
+            return localStorage.getItem('yuume_dev_storefront_theme') || 'light';
+          } catch {
+            return 'light';
+          }
+        })(),
       });
     };
 
@@ -106,7 +138,11 @@ function App() {
                   <MockStorefront theme={devPreview.theme} />
                 </React.Suspense>
               )}
-              <Orb enlarged={enlarged} setEnlarged={setEnlarged} onBubbleVisibilityChange={setCartBubbleVisible} />
+              <Orb
+                enlarged={enlarged}
+                setEnlarged={setEnlarged}
+                onBubbleVisibilityChange={setCartBubbleVisible}
+              />
             </div>
           }
         />
