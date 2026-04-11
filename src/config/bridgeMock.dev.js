@@ -146,4 +146,23 @@ if (import.meta.env.DEV) {
     devSessionId,
   );
   console.log('[DEV MOCK] Shopify cart bridge mock active');
+
+  // Dev helper: simulate passive session expiry (B27 test).
+  // Call window.__yuume_devRotateSession() from the browser console to trigger
+  // the exact same flow that embed.js produces after a 30-min timeout:
+  // a new sessionId is generated and sent via YUUME:identity, with the server
+  // having no history for it.
+  window.__yuume_devRotateSession = () => {
+    const newId = 'dev-rotated-' + Math.random().toString(36).slice(2, 10);
+    try {
+      localStorage.setItem(DEV_SESSION_KEY, newId);
+      localStorage.setItem(DEV_SESSION_TIME_KEY, Date.now().toString());
+    } catch {
+      /* silent */
+    }
+    window.postMessage({ type: 'YUUME:identity', visitorId: devVisitorId, sessionId: newId }, '*');
+    console.log('[DEV MOCK] Session rotated — new sessionId:', newId);
+    console.log('[DEV MOCK] Expected: widget clears to welcome message only.');
+  };
+  console.log('[DEV MOCK] Session rotation helper ready — call window.__yuume_devRotateSession() to test B27');
 }

@@ -224,8 +224,22 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         // B22: Receive persistent identity from parent (1st-party localStorage)
         if (event.data.visitorId) setVisitorId(event.data.visitorId);
         if (event.data.sessionId) {
-          setSessionId(event.data.sessionId);
-          storage.set('session_id', event.data.sessionId); // Cache for fast boot on next load
+          const storedSessionId = storage.get('session_id');
+          const incomingSessionId = event.data.sessionId;
+
+          // B27: Detect passive session rotation (e.g. 30-min timeout).
+          // If the parent sends a sessionId different from the cached one, the old session
+          // has expired. Clear local message history NOW — before updating sessionId state —
+          // so the subsequent bootSession() call starts from a clean slate and ghost
+          // messages from the previous session are never shown.
+          if (incomingSessionId && storedSessionId && incomingSessionId !== storedSessionId) {
+            storage.clearSession();
+            setMessages([buildWelcomeMessage()]);
+            setSessionStatus('active');
+          }
+
+          setSessionId(incomingSessionId);
+          storage.set('session_id', incomingSessionId);
         }
 
         const customer = event.data.customer || event.data.shopifyCustomer;
