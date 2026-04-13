@@ -47,6 +47,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   // Track boot data for ProfileView props
   const [bootProfile, setBootProfile] = useState(() => storage.getProfile());
   const [bootConsent, setBootConsent] = useState(null);
+  const [requiresReConsent, setRequiresReConsent] = useState(false);
 
   const [messages, setMessages] = useState(() => {
     try {
@@ -344,6 +345,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         if (bootData.consent) {
           setBootConsent(bootData.consent);
           broadcastConsentChange(bootData.consent.analytics === true);
+        }
+
+        if (bootData.requiresReConsent) {
+          setRequiresReConsent(true);
         }
 
         // Sync message history if available
@@ -740,6 +745,9 @@ export const useChat = (devShopDomain, customer, options = {}) => {
    */
   const handleProfileUpdate = useCallback((newProfile) => {
     setBootProfile(newProfile);
+    // User saved their profile → backend updated privacyPolicyVersion to current version.
+    // Clear the re-consent banner so it doesn't persist after the user has acknowledged.
+    setRequiresReConsent(false);
   }, []);
 
   /**
@@ -776,6 +784,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     visitorId, // B22: For ProfileView and consent API calls
     bootProfile, // B22: Profile from boot for ProfileView props
     bootConsent, // B22: Consent from boot for ProfileView props
+    requiresReConsent, // G3: GDPR Privacy Policy bump
     initialSuggestions, // Return initial suggestions
     sendMessage: sendChatMessage,
     handleSuggestionClick, // Centralized suggestion handler

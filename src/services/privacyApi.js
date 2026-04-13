@@ -49,3 +49,72 @@ export async function updatePrivacyPreferences(sessionId, shopDomain, anonId, { 
   const data = await response.json();
   return data.consent;
 }
+
+/**
+ * Request data export under Art 15 GDPR.
+ * Triggers a JSON blob download on success.
+ *
+ * @param {string} sessionId
+ * @param {string} shopDomain
+ * @param {string|null} anonId
+ * @returns {Promise<void>}
+ */
+export async function exportMyData(sessionId, shopDomain, anonId) {
+  const query = new URLSearchParams({
+    sessionId,
+    shopDomain,
+    ...(anonId && { visitorId: anonId })
+  });
+
+  const response = await fetch(`${API_BASE_URL}/api/privacy/export?${query}`, {
+    method: 'GET',
+    headers: {
+      'X-Widget-Token': getWidgetToken(),
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 403 || response.status === 409) {
+      throw new Error(`identity_verification_required`);
+    }
+    throw new Error(`Export failed with status ${response.status}`);
+  }
+
+  const data = await response.blob();
+  const url = window.URL.createObjectURL(data);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `privacy-export-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+/**
+ * Request data erasure under Art 17 GDPR.
+ *
+ * @param {string} sessionId
+ * @param {string} shopDomain
+ * @param {string|null} anonId
+ * @returns {Promise<void>}
+ */
+export async function deleteMyData(sessionId, shopDomain, anonId) {
+  const response = await fetch(`${API_BASE_URL}/api/privacy/me`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Widget-Token': getWidgetToken(),
+    },
+    body: JSON.stringify({
+      sessionId,
+      shopDomain,
+      visitorId: anonId || null,
+    }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 403 || response.status === 409) {
+      throw new Error(`identity_verification_required`);
+    }
+    throw new Error(`Erasure failed with status ${response.status}`);
+  }
+}

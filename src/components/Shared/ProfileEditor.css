@@ -1,7 +1,7 @@
 .profile-editor-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .profile-editor-field {
@@ -9,7 +9,7 @@
 }
 
 .profile-editor-field.email {
-  margin-bottom: 5px;
+  margin-bottom: 2px;
 }
 
 .profile-editor-label {
@@ -25,7 +25,7 @@
 .profile-editor-input {
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 14px;
+  padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.03);
@@ -53,7 +53,7 @@
 
 .profile-editor-btn-save {
   flex: 2;
-  padding: 12px 10px;
+  padding: 10px 10px;
   border-radius: 12px;
   border: none;
   color: #fff;
@@ -120,8 +120,8 @@
 
 /* Privacy Section */
 .profile-editor-privacy {
-  margin-top: 14px;
-  padding-top: 14px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
 
@@ -129,7 +129,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   color: rgba(255, 255, 255, 0.35);
   font-size: 10px;
   font-weight: 700;
@@ -229,4 +229,41 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.profile-editor-btn-save {
+  width: 100%;
+  flex: none;
+}
+
+.profile-editor-gdpr-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.profile-editor-btn-export {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.profile-editor-btn-export:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.profile-editor-btn-delete {
+  flex: 1;
+  padding: 10px;
+  font-size: 12px;
+  white-space: nowrap;
 }

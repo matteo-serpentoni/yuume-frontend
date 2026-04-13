@@ -69,6 +69,7 @@ const Chat = ({
   const resetCart = isPreview ? () => {} : liveChat.resetCart;
   const showCheckoutSuggestion = cartCount > 0;
   const socketRef = isPreview ? { current: null } : liveChat.socketRef;
+  const requiresReConsent = isPreview ? false : liveChat.requiresReConsent;
 
   // Checkout: add confirmation message to chat on completion
   const addSystemMessage = useCallback(
@@ -241,6 +242,7 @@ const Chat = ({
           visitorId={liveChat.visitorId}
           profile={liveChat.bootProfile}
           consent={liveChat.bootConsent}
+          requiresReConsent={requiresReConsent}
           onProfileUpdate={(newProfile) => liveChat.handleProfileUpdate(newProfile)}
           colors={chatColors}
         />
@@ -258,6 +260,7 @@ const Chat = ({
               visitorId={liveChat.visitorId}
               bootProfile={liveChat.bootProfile}
               bootConsent={liveChat.bootConsent}
+              requiresReConsent={requiresReConsent}
               handleProfileUpdate={liveChat.handleProfileUpdate}
               activeProduct={activeProduct}
               setActiveProduct={setActiveProduct}

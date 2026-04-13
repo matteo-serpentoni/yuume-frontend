@@ -7,7 +7,7 @@
 .profile-header {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
   margin-top: 4px;
 }
 
@@ -47,4 +47,11 @@
   color: rgba(255, 255, 255, 0.5);
   text-align: center;
   padding-top: 20px;
+}
+
+.profile-reconsent-inline-alert {
+  display: block;
+  color: rgba(255, 165, 0, 1);
+  font-weight: 600;
+  margin-bottom: 6px;
 }

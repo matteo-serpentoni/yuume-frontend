@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { updateProfile } from '../../services/chatApi';
-import { updatePrivacyPreferences } from '../../services/privacyApi';
+import { updatePrivacyPreferences, exportMyData, deleteMyData } from '../../services/privacyApi';
 import { getBootConsent, broadcastConsentChange, rollbackConsent } from '../../utils/consentBridge';
 import storage from '../../utils/storage';
 import { LockIcon } from '../UI/Icons';
@@ -35,6 +35,7 @@ const ProfileEditor = ({
   const [privacySaving, setPrivacySaving] = useState(false);
   const [privacyError, setPrivacyError] = useState(null);
   const [showPrivacyConfirm, setShowPrivacyConfirm] = useState(false);
+  const [showExportConfirm, setShowExportConfirm] = useState(false);
   const privacyErrorTimerRef = useRef(null);
 
   useEffect(() => {
@@ -106,26 +107,52 @@ const ProfileEditor = ({
   const handleReset = async () => {
     setShowConfirm(false);
     setSaving(true);
+    setMessage({ type: 'success', text: 'Eliminazione in corso...' });
+    
     try {
-      // If privacy is active, toggle it off alongside the reset
-      if (analyticsConsent) {
-        executePrivacyToggle(false);
-      }
-
-      await updateProfile(sessionId, shopDomain, { reset: true, visitorId });
-      storage.removeProfile();
+      await deleteMyData(sessionId, shopDomain, visitorId);
+      storage.removeProfile(); // Clear local storage containing profile/identity
+      
       setName('');
       setEmail('');
       setIsIdentified(false);
       onProfileUpdate?.(null);
-      setSaving(false);
-      setMessage({ type: 'success', text: 'Dati rimossi.' });
+      
+      setMessage({ type: 'success', text: 'Dati eliminati.' });
+      
+      // Force an immediate reload to ensure ghost state is wiped and a clean boot is triggered
       setTimeout(() => {
-        setMessage(null);
-      }, 2000);
-    } catch {
+         window.location.reload();
+      }, 1000);
+      
+    } catch (err) {
       setSaving(false);
-      setMessage({ type: 'error', text: 'Errore durante il reset.' });
+      if (err.message.includes('identity_verification_required')) {
+          setMessage({ type: 'error', text: 'Identità non verificabile.' });
+      } else {
+          setMessage({ type: 'error', text: 'Errore durante il reset.' });
+      }
+      setTimeout(() => setMessage(null), 3500);
+    }
+  };
+
+  const handleExport = async () => {
+    setShowExportConfirm(false);
+    setSaving(true);
+    setMessage({ type: 'success', text: 'Download avviato...' });
+    
+    try {
+      await exportMyData(sessionId, shopDomain, visitorId);
+      setMessage({ type: 'success', text: 'Dati esportati.' });
+    } catch (err) {
+      if (err.message.includes('identity_verification_required')) {
+          setMessage({ type: 'error', text: 'Identità non verificata. Impossibile scaricare.' });
+      } else {
+          setMessage({ type: 'error', text: 'Errore durante l\'export.' });
+      }
+    } finally {
+      setSaving(false);
+      setTimeout(() => setMessage(null), 4000);
     }
   };
 
@@ -214,18 +241,28 @@ const ProfileEditor = ({
                 ? 'Aggiorna Profilo'
                 : 'Salva Profilo'}
         </button>
+      </div>
 
-        {isIdentified && !message && mode === 'drawer' && (
+      {isIdentified && !message && mode === 'drawer' && (
+        <div className="profile-editor-gdpr-actions">
+          <button
+            type="button"
+            onClick={() => setShowExportConfirm(true)}
+            disabled={saving}
+            className="profile-editor-btn-export"
+          >
+            Scarica i miei dati
+          </button>
           <button
             type="button"
             onClick={() => setShowConfirm(true)}
             disabled={saving}
             className="profile-editor-btn-delete"
           >
-            Elimina
+            Elimina Profilo
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="profile-editor-privacy">
         <div className="profile-editor-privacy-header">
@@ -272,10 +309,20 @@ const ProfileEditor = ({
     />
 
     <ConfirmDialog 
+      isOpen={showExportConfirm}
+      title="Scarica dati"
+      message="Il file JSON con tutti i tuoi dati associati alla tua identità verrà preparato e scaricato."
+      confirmText="Avvia Download"
+      cancelText="Annulla"
+      onConfirm={handleExport}
+      onCancel={() => setShowExportConfirm(false)}
+    />
+
+    <ConfirmDialog 
       isOpen={showConfirm}
-      title="Cancellare i dati?"
-      message="Rimuoveremo i tuoi dati. Non potrai più gestire le preferenze fino a nuova identificazione."
-      confirmText="Elimina Profilo"
+      title="Eliminazione irreversibile"
+      message="Questa operazione eliminerà permanentemente tutti i tuoi dati e ti sgancerà dal servizio."
+      confirmText="Sì, elimina tutto"
       cancelText="Annulla"
       onConfirm={handleReset}
       onCancel={() => setShowConfirm(false)}

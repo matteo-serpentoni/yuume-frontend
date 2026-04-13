@@ -11,6 +11,7 @@ const ProfileView = ({
   profile,
   consent,
   onProfileUpdate,
+  requiresReConsent,
   colors = {
     header: '#667eea',
     sendButton: '#667eea',
@@ -35,6 +36,11 @@ const ProfileView = ({
       </div>
 
       <p className="profile-description">
+        {requiresReConsent && (
+            <span className="profile-reconsent-inline-alert">
+              ⚠️ Abbiamo aggiornato la Privacy Policy.
+            </span>
+        )}
         {isIdentified
           ? 'I tuoi dati sono salvati. Puoi modificarli o rimuoverli in qualsiasi momento.'
           : "Inserisci i tuoi dati per ricevere un'assistenza migliore e offerte personalizzate."}
