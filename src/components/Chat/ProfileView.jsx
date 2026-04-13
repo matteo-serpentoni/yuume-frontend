@@ -37,9 +37,9 @@ const ProfileView = ({
 
       <p className="profile-description">
         {requiresReConsent && (
-            <span className="profile-reconsent-inline-alert">
-              ⚠️ Abbiamo aggiornato la Privacy Policy.
-            </span>
+          <span className="profile-reconsent-inline-alert">
+            ⚠️ Abbiamo aggiornato la Privacy Policy.
+          </span>
         )}
         {isIdentified
           ? 'I tuoi dati sono salvati. Puoi modificarli o rimuoverli in qualsiasi momento.'

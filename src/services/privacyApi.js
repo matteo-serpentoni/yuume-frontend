@@ -63,7 +63,7 @@ export async function exportMyData(sessionId, shopDomain, anonId) {
   const query = new URLSearchParams({
     sessionId,
     shopDomain,
-    ...(anonId && { visitorId: anonId })
+    ...(anonId && { visitorId: anonId }),
   });
 
   const response = await fetch(`${API_BASE_URL}/api/privacy/export?${query}`, {

@@ -164,5 +164,7 @@ if (import.meta.env.DEV) {
     console.log('[DEV MOCK] Session rotated — new sessionId:', newId);
     console.log('[DEV MOCK] Expected: widget clears to welcome message only.');
   };
-  console.log('[DEV MOCK] Session rotation helper ready — call window.__yuume_devRotateSession() to test B27');
+  console.log(
+    '[DEV MOCK] Session rotation helper ready — call window.__yuume_devRotateSession() to test B27',
+  );
 }

@@ -1,9 +1,9 @@
 /**
  * jarbris-tracker.js
- * 
+ *
  * Lightweight, zero-dependency tracking script for Shopify storefronts.
  * Budget: strictly < 5KB.
- * 
+ *
  * Capabilities:
  * - Queueing and batching telemetry events (5s flush or 25 item max)
  * - sendBeacon offload on beforeunload
@@ -17,7 +17,7 @@
   const CONFIG = window.JarbrisConfig || {};
   const SITE_ID = CONFIG.siteId;
   const API_BASE = CONFIG.apiBase || 'https://api.yuume.ai';
-  
+
   if (!SITE_ID) {
     console.warn('[Jarbris] Missing siteId in configuration');
     return;
@@ -29,7 +29,7 @@
   const TOKEN_KEY = `jarbris_ingest_${SITE_ID}`;
   // Phase 3: Jarbris analytics consent key (set by widget consentBridge.js)
   const JARBRIS_CONSENT_KEY = 'jarbris_analytics_consent';
-  
+
   const getSessionId = () => {
     let sid = sessionStorage.getItem(SESSION_KEY);
     if (!sid) {
@@ -62,7 +62,11 @@
   let jarbrisConsentGranted = (() => {
     if (window.JARBRIS_PRIVACY?.analyticsConsent === true) return true;
     if (window.JARBRIS_PRIVACY?.analyticsConsent === false) return false;
-    try { return localStorage.getItem(JARBRIS_CONSENT_KEY) === 'true'; } catch { return false; }
+    try {
+      return localStorage.getItem(JARBRIS_CONSENT_KEY) === 'true';
+    } catch {
+      return false;
+    }
   })();
 
   // Phase 3: React instantly to consent changes from the widget
@@ -116,7 +120,7 @@
     if (shopifyPrivacy && typeof shopifyPrivacy.analyticsProcessingAllowed === 'function') {
       return shopifyPrivacy.analyticsProcessingAllowed() === true;
     }
-    // Fallback if API not ready or non-Shopify: assume implicit false if strict GDPR is enabled, 
+    // Fallback if API not ready or non-Shopify: assume implicit false if strict GDPR is enabled,
     // but typically Shopify loads this immediately. If missing, we track conservatively based on config.
     return CONFIG.defaultConsent === true;
   };
@@ -133,7 +137,7 @@
     if (!hasToken) return;
 
     const currentBatch = queue.splice(0, 25);
-    
+
     // Attempt fallback to Shopify customer if available in global object
     let customerRef = null;
     if (window.meta && window.meta.page && window.meta.page.customerId) {
@@ -145,11 +149,11 @@
       sessionId: getSessionId(),
       source: 'storefront',
       identity: { anonId: getAnonId(), shopifyCustomerId: customerRef },
-      events: currentBatch
+      events: currentBatch,
     };
 
     const url = `${API_BASE}/api/events`;
-    
+
     if (useBeacon && navigator.sendBeacon) {
       const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
       navigator.sendBeacon(url, blob);
@@ -158,23 +162,23 @@
 
     try {
       if (useBeacon) {
-         fetch(url, {
+        fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Ingest-Token': ingestToken
+            'X-Ingest-Token': ingestToken,
           },
           body: JSON.stringify(payload),
-          keepalive: true
+          keepalive: true,
         });
       } else {
-         fetch(url, {
+        fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Ingest-Token': ingestToken
+            'X-Ingest-Token': ingestToken,
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
         });
       }
     } catch (_) {
@@ -192,10 +196,10 @@
     // Gate 2 (Secondary): Shopify Customer Privacy API compliance.
     // Both gates must pass — the more restrictive one wins.
     if (!hasConsent()) return;
-    
+
     queue.push({
       eventType,
-      ...properties
+      ...properties,
     });
 
     if (queue.length >= 25) {
@@ -215,19 +219,22 @@
       url: window.location.href,
       path: window.location.pathname,
     };
-    
+
     // Shopify meta parsing for pageType
     if (window.meta && window.meta.page) {
       properties.pageType = window.meta.page.pageType;
-      
+
       // Hoist product details if on product page
       if (properties.pageType === 'product') {
         const productInfo = window.meta.product || {};
         properties.productId = productInfo.id ? productInfo.id.toString() : null;
-        properties.variantId = productInfo.variants && productInfo.variants[0] ? productInfo.variants[0].id.toString() : null;
+        properties.variantId =
+          productInfo.variants && productInfo.variants[0]
+            ? productInfo.variants[0].id.toString()
+            : null;
       }
     }
-    
+
     track('page_viewed', properties);
   };
 
@@ -243,33 +250,35 @@
         const formData = new FormData(e.target);
         track('add_to_cart', {
           variantId: formData.get('id') || null,
-          eventData: { quantity: formData.get('quantity') || 1 }
+          eventData: { quantity: formData.get('quantity') || 1 },
         });
       }
     });
-    
+
     // Search form interception
     document.addEventListener('submit', (e) => {
       if (e.target && e.target.action && e.target.action.includes('/search')) {
         const formData = new FormData(e.target);
         track('search_submitted', {
-          query: formData.get('q') || ''
+          query: formData.get('q') || '',
         });
       }
     });
 
     // Handle AJAX Add to Cart (overriding fetch/XHR is risky, better to use Shopify Web Pixels but we do minimal fetch wrap for V1)
     const originalFetch = window.fetch;
-    window.fetch = async function() {
+    window.fetch = async function () {
       const args = arguments;
       if (typeof args[0] === 'string' && args[0].includes('/cart/add.js')) {
         try {
           const body = args[1]?.body ? JSON.parse(args[1].body) : {};
           track('add_to_cart', {
-             variantId: body.id?.toString(),
-             eventData: { quantity: body.quantity || 1 }
+            variantId: body.id?.toString(),
+            eventData: { quantity: body.quantity || 1 },
           });
-        } catch { /* fetch body parse failed — skip cart tracking */ }
+        } catch {
+          /* fetch body parse failed — skip cart tracking */
+        }
       }
       return originalFetch.apply(this, args);
     };
@@ -279,5 +288,4 @@
   window.JarbrisTracker = { track };
   collectPageView();
   setupListeners();
-
 })();

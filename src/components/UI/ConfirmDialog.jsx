@@ -70,20 +70,12 @@ const ConfirmDialog = ({
               {title}
             </h4>
             <p className="yuume-confirm-message">{message}</p>
-            
+
             <div className="yuume-confirm-actions">
-              <button 
-                type="button" 
-                className="yuume-confirm-btn cancel" 
-                onClick={onCancel}
-              >
+              <button type="button" className="yuume-confirm-btn cancel" onClick={onCancel}>
                 {cancelText}
               </button>
-              <button 
-                type="button" 
-                className="yuume-confirm-btn confirm" 
-                onClick={onConfirm}
-              >
+              <button type="button" className="yuume-confirm-btn confirm" onClick={onConfirm}>
                 {confirmText}
               </button>
             </div>

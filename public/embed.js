@@ -152,7 +152,7 @@
     }
     // Fallback: If strict GDPR is enforced on a site, this API will be present.
     // If it's missing, it typically means the merchant hasn't enabled the strict cookie banner.
-    return true; 
+    return true;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -537,7 +537,9 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if (event.data.type === 'YUUME:getCheckoutUrl') {
       fetch('/cart.js', { credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          return r.json();
+        })
         .then(function (cart) {
           var checkoutUrl = null;
           if (cart && cart.items && cart.items.length > 0) {
@@ -547,18 +549,24 @@
               checkoutUrl = '/cart/' + cart.token;
             }
           }
-          iframe.contentWindow.postMessage({
-            type: 'YUUME:checkoutUrlResponse',
-            checkoutUrl: checkoutUrl,
-            itemCount: cart ? cart.item_count : 0,
-          }, WIDGET_ORIGIN);
+          iframe.contentWindow.postMessage(
+            {
+              type: 'YUUME:checkoutUrlResponse',
+              checkoutUrl: checkoutUrl,
+              itemCount: cart ? cart.item_count : 0,
+            },
+            WIDGET_ORIGIN,
+          );
         })
         .catch(function () {
-          iframe.contentWindow.postMessage({
-            type: 'YUUME:checkoutUrlResponse',
-            checkoutUrl: null,
-            error: 'cart_fetch_failed',
-          }, WIDGET_ORIGIN);
+          iframe.contentWindow.postMessage(
+            {
+              type: 'YUUME:checkoutUrlResponse',
+              checkoutUrl: null,
+              error: 'cart_fetch_failed',
+            },
+            WIDGET_ORIGIN,
+          );
         });
     }
 
