@@ -681,9 +681,21 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   // Extracts label/value and structured action from chip object.
   // - label: translated display text shown in the user bubble
   // - value: raw query/payload sent to the API for routing and search
+  //
+  // B28: System chips (ADD_TO_CART, OPEN_VARIANT_DRAWER) with _SYS_ prefix
+  // are intercepted client-side — they never reach the backend.
   const handleSuggestionClick = useCallback(
-    (suggestion) => {
+    (suggestion, onSystemChipAction) => {
       const queryText = suggestion.value || suggestion.label;
+
+      // B28: Intercept client-only system chip actions
+      if (queryText?.startsWith('_SYS_ADD_TO_CART_:') || queryText?.startsWith('_SYS_OPEN_DRAWER_:')) {
+        if (onSystemChipAction) {
+          onSystemChipAction(suggestion.action, suggestion.payload || {});
+        }
+        return;
+      }
+
       const displayText = suggestion.label || suggestion.value;
       const options = {};
       if (suggestion.action) options.suggestionAction = suggestion.action;

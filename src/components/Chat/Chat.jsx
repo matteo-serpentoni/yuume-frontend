@@ -11,7 +11,7 @@ import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
 import { ProductDrawer } from '../Message/ProductCards';
 import { OrderDetailCard } from '../Message/OrderCards';
-import { normalizeOrderNumber } from '../../utils/shopifyUtils';
+import { normalizeOrderNumber, extractShopifyId } from '../../utils/shopifyUtils';
 import Drawer from '../UI/Drawer';
 import ProfileView from './ProfileView';
 import StarRating from './StarRating';
@@ -99,7 +99,55 @@ const Chat = ({
 
   const sendMessage = isPreview ? () => {} : liveChat.sendMessage;
   const sendFeedback = isPreview ? () => {} : liveChat.sendFeedback;
-  const handleSuggestionClick = isPreview ? () => {} : liveChat.handleSuggestionClick;
+
+  // Shared handler for ATC events: notifies backend to trigger cross-sell.
+  // Called by the chip action, card button, and drawer button — single source of truth.
+  const handleProductCartAction = useCallback(
+    (productId) => {
+      if (isPreview) return;
+      setHasActedOnProduct(true);
+      if (productId) {
+        liveChat.sendMessage('_SYS_EVENT_', {
+          hidden: true,
+          systemAction: 'ADD_TO_CART_MANUAL',
+          payload: { productId },
+        });
+      }
+    },
+    [isPreview, liveChat, setHasActedOnProduct],
+  );
+
+  // B28: Handler for system chip actions (ADD_TO_CART, OPEN_VARIANT_DRAWER).
+  // These are intercepted client-side — they never reach the backend as chat messages.
+  const handleSystemChipAction = useCallback(
+    (action, payload) => {
+      if (action === 'ADD_TO_CART') {
+        if (payload.variantId) {
+          window.parent?.postMessage(
+            { type: 'YUUME:addToCart', variantId: payload.variantId, quantity: payload.quantity || 1 },
+            '*',
+          );
+          // Notify backend (same as card button) so cross-sell is triggered.
+          handleProductCartAction(payload.productId);
+        }
+      } else if (action === 'OPEN_VARIANT_DRAWER') {
+        const allProducts = liveChat.messages
+          .flatMap((m) => m.products || m.cards || [])
+          .filter(Boolean);
+        const target = allProducts.find(
+          (p) => extractShopifyId(p.productId || p.id) === extractShopifyId(payload.productId),
+        );
+        if (target) {
+          setActiveProduct(target);
+        }
+      }
+    },
+    [liveChat.messages, handleProductCartAction],
+  );
+
+  const handleSuggestionClick = isPreview
+    ? () => {}
+    : (suggestion) => liveChat.handleSuggestionClick(suggestion, handleSystemChipAction);
 
   // Capture DOM refs for idle nudge after mount
   useEffect(() => {
@@ -271,14 +319,7 @@ const Chat = ({
               sendFeedback={sendFeedback}
               onImageClick={setActiveGallery}
               onProductAction={(action, payloadData) => {
-                setHasActedOnProduct(true);
-                if (action === 'add_to_cart' && payloadData?.id) {
-                  sendMessage('_SYS_EVENT_', {
-                    hidden: true,
-                    systemAction: 'ADD_TO_CART_MANUAL',
-                    payload: { productId: payloadData.id },
-                  });
-                }
+                if (action === 'add_to_cart') handleProductCartAction(payloadData?.id);
               }}
             />
 
@@ -422,14 +463,7 @@ const Chat = ({
             onClose={() => setActiveProduct(null)}
             shopDomain={shopDomain}
             onProductAction={(action, payloadData) => {
-              setHasActedOnProduct(true);
-              if (action === 'add_to_cart' && payloadData?.id) {
-                sendMessage('_SYS_EVENT_', {
-                  hidden: true,
-                  systemAction: 'ADD_TO_CART_MANUAL',
-                  payload: { productId: payloadData.id },
-                });
-              }
+              if (action === 'add_to_cart') handleProductCartAction(payloadData?.id);
             }}
           />
         )}

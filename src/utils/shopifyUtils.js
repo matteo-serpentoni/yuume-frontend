@@ -182,3 +182,14 @@ export const formatPromoExpiry = (dateString) => {
 
   return `Valido fino al ${date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}`;
 };
+/**
+ * Extract the numeric portion from a Shopify GID or plain ID string.
+ * Equivalent to: id.split('/').pop()
+ *
+ * @param {string|number} id - Shopify GID (e.g. "gid://shopify/Product/123") or plain numeric ID
+ * @returns {string} The trailing numeric ID, or empty string if falsy.
+ */
+export const extractShopifyId = (id) => {
+  if (!id) return '';
+  return String(id).split('/').pop();
+};
