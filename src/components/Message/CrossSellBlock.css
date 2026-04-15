@@ -211,28 +211,33 @@
   display: block;
   text-align: center;
   font-size: 10px;
-  font-weight: 600;
-  padding: 5px 8px;
-  border-radius: 6px;
+  font-weight: 700;
+  padding: 6px 8px;
+  border-radius: 8px;
   cursor: pointer;
   text-decoration: none;
   transition:
-    opacity 0.15s ease,
-    background 0.15s ease;
+    opacity 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
   border: 1px solid;
   letter-spacing: 0.02em;
   margin-top: auto;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
 }
 
 .yuume-xs-cta--view {
-  border-color: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
 }
 
 .yuume-xs-cta--view:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
 }
 
 .yuume-xs-atc-wrapper {

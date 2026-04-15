@@ -22,6 +22,7 @@ import CheckoutView from './CheckoutView';
 const Chat = ({
   onTyping,
   onMinimize,
+  isMobile = false,
   chatColors = {
     header: '#667eea',
     sendButton: '#667eea',
@@ -462,6 +463,7 @@ const Chat = ({
             product={activeProduct}
             onClose={() => setActiveProduct(null)}
             shopDomain={shopDomain}
+            isMobile={isMobile}
             onProductAction={(action, payloadData) => {
               if (action === 'add_to_cart') handleProductCartAction(payloadData?.id);
             }}

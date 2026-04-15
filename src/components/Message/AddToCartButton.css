@@ -217,9 +217,32 @@
 
 .add-to-cart.yuume-add-to-cart-btn:before {
   border-radius: 14px;
-  background: #0f172a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #10b981, #059669); /* High contrast emerald to match price */
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.add-to-cart.yuume-add-to-cart-btn:disabled,
+.add-to-cart.yuume-add-to-cart-btn.disabled {
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.add-to-cart.yuume-add-to-cart-btn:disabled:not(.active):hover,
+.add-to-cart.yuume-add-to-cart-btn.disabled:not(.active):hover {
+  --background: transparent; /* Prevent hover gradient on disabled */
+}
+
+.add-to-cart.yuume-add-to-cart-btn:disabled:before,
+.add-to-cart.yuume-add-to-cart-btn.disabled:before {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+}
+
+.add-to-cart.yuume-add-to-cart-btn:disabled span,
+.add-to-cart.yuume-add-to-cart-btn.disabled span {
+  color: rgba(255, 255, 255, 0.4) !important;
 }
 
 /* CONTAINER */

@@ -4,98 +4,23 @@ import { motion } from 'framer-motion';
 import AddToCartButton from './AddToCartButton';
 import SmartBadges from './SmartBadges';
 import MessageBubble from '../Chat/MessageBubble';
-import Drawer from '../UI/Drawer';
 import { formatPrice } from '../../utils/messageHelpers';
-import { normalizeStorefrontProduct, isDefaultVariant } from '../../utils/shopifyUtils';
+import { normalizeStorefrontProduct } from '../../utils/shopifyUtils';
 import './ProductCards.css';
 import TextMessage from './TextMessage';
-import { ChevronLeftIcon, ChevronRightIcon } from '../UI/Icons';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  ExternalLinkIcon,
+  InfoIcon,
+  ImagePlaceholderIcon,
+} from '../UI/Icons';
 
-const Icons = {
-  Info: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="16" x2="12" y2="12" />
-      <line x1="12" y1="8" x2="12.01" y2="8" />
-    </svg>
-  ),
-  Close: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  ),
-  Tag: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-      <line x1="7" y1="7" x2="7.01" y2="7" />
-    </svg>
-  ),
-  Package: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-      <line x1="12" y1="22.08" x2="12" y2="12" />
-    </svg>
-  ),
-  ExternalLink: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
-    </svg>
-  ),
-  Image: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="3" width="18" height="18" rx="2.5" />
-      <circle cx="8.5" cy="8.5" r="1.5" />
-      <path d="M21 15l-5-5-11 11" />
-      <path d="M17 21l-5-5-5 5" />
-    </svg>
-  ),
-};
+// Re-export ProductDrawer from ProductSheet for backward-compatible imports in Chat.jsx
+export { default as ProductDrawer } from './ProductSheet';
+
+
 
 const ProductCard = memo(
   ({ product, index, onOpen, onImageClick, shopDomain, onProductAction }) => {
@@ -200,7 +125,7 @@ const ProductCard = memo(
                 <img src={image.url || image} alt={product.name} loading="lazy" />
               ) : (
                 <div className="yuume-product-placeholder">
-                  <Icons.Image />
+                  <ImagePlaceholderIcon size={32} />
                 </div>
               )}
               {(discountCode || isAutomatic || discountPercentage > 0) && (
@@ -257,7 +182,7 @@ const ProductCard = memo(
               >
                 <h3 className="yuume-product-name">
                   {name}
-                  <Icons.ExternalLink />
+                  <ExternalLinkIcon size={12} />
                 </h3>
               </a>
               <div className="yuume-product-price-row">
@@ -304,16 +229,34 @@ const ProductCard = memo(
                 )}
                 {isAvailable && (product.variants[0] || product.variantId) && (
                   <div className="yuume-add-to-cart-wrapper">
-                    <AddToCartButton
-                      variantId={product.variants[0]?.id || product.variantId}
-                      shopDomain={shopDomain}
-                      quantity={1}
-                      compact={true}
-                      onAnimationComplete={() =>
-                        onProductAction &&
-                        onProductAction('add_to_cart', { id: product.productId || product.id })
-                      }
-                    />
+                    {hasVariants ? (
+                      // Product has variants: ATC opens the sheet to let user pick options first
+                      <div className="yuume-add-to-cart-container compact">
+                        <button
+                          className="add-to-cart yuume-add-to-cart-btn"
+                          aria-label={`Aggiungi al carrello ${product.name}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            onOpen(product);
+                          }}
+                        >
+                          <span>Add to cart</span>
+                        </button>
+                      </div>
+                    ) : (
+                      // No variants: add directly to cart
+                      <AddToCartButton
+                        variantId={product.variants[0]?.id || product.variantId}
+                        shopDomain={shopDomain}
+                        quantity={1}
+                        compact={true}
+                        onAnimationComplete={() =>
+                          onProductAction &&
+                          onProductAction('add_to_cart', { id: product.productId || product.id })
+                        }
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -371,12 +314,12 @@ const ProductCard = memo(
                 onClick={(e) => e.stopPropagation()}
               >
                 View in Store
-                <Icons.ExternalLink />
+                <ExternalLinkIcon size={12} />
               </a>
             </div>
 
             <button className="yuume-back-return-overlay-btn" onClick={toggleFlip}>
-              <Icons.Close />
+              <CloseIcon size={16} />
             </button>
           </div>
         </motion.div>
@@ -385,128 +328,6 @@ const ProductCard = memo(
   },
 );
 
-export const ProductDrawer = memo(({ product, onClose, shopDomain, onProductAction }) => {
-  React.useEffect(() => {
-    return () => {};
-  }, [product.name]);
-  // Normalize product data using unified utility
-  const normalized = normalizeStorefrontProduct(product);
-  const {
-    isAvailable,
-    name,
-    price: initialPrice,
-    compareAtPrice: initialCompareAtPrice,
-    currency,
-    variants,
-  } = normalized;
-
-  const [selectedOptions, setSelectedOptions] = React.useState(() => {
-    const initial = {};
-    if (variants.length > 0 && variants[0].selectedOptions) {
-      variants[0].selectedOptions.forEach((opt) => {
-        initial[opt.name] = opt.value;
-      });
-    }
-    return initial;
-  });
-
-  const [currentVariant, setCurrentVariant] = React.useState(normalized.variants[0] || null);
-
-  React.useEffect(() => {
-    const found = normalized.variants.find(
-      (v) =>
-        v.selectedOptions &&
-        v.selectedOptions.every((opt) => selectedOptions[opt.name] === opt.value),
-    );
-    if (found) setCurrentVariant(found);
-  }, [selectedOptions, normalized.variants]);
-
-  const handleOptionChange = (name, value) => {
-    setSelectedOptions((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const isAvailableResult = currentVariant ? currentVariant.available : isAvailable;
-
-  const currentPrice = currentVariant?.price || initialPrice;
-  const currentCompareAtPrice = currentVariant?.compareAtPrice || initialCompareAtPrice;
-
-  const footer = (
-    <>
-      {isAvailableResult && (currentVariant || normalized.variants[0]) ? (
-        <AddToCartButton
-          variantId={currentVariant?.id || normalized.variants[0].id}
-          shopDomain={shopDomain}
-          quantity={1}
-          onAnimationComplete={() =>
-            onProductAction &&
-            onProductAction('add_to_cart', {
-              id: currentVariant?.productId || product.productId || product.id,
-            })
-          }
-        />
-      ) : (
-        <button className="yuume-add-to-cart-btn disabled" disabled>
-          Prodotto Esaurito
-        </button>
-      )}
-    </>
-  );
-
-  return (
-    <Drawer isOpen={!!product} onClose={onClose} footer={footer} title={name}>
-      <div className="yuume-drawer-price-section">
-        <div className="yuume-price-stack">
-          {currentCompareAtPrice > currentPrice && (
-            <span className="yuume-original-price">
-              {formatPrice(currentCompareAtPrice, currency)}
-            </span>
-          )}
-          <span className="yuume-current-price">{formatPrice(currentPrice, currency)}</span>
-        </div>
-      </div>
-      {product.options.filter((opt) => !isDefaultVariant(opt)).length > 0 && (
-        <div className="yuume-drawer-variants">
-          {product.options
-            .filter((opt) => !isDefaultVariant(opt))
-            .map((opt) => (
-              <div key={opt.name} className="yuume-variant-group">
-                <span className="yuume-variant-label">{opt.name}</span>
-                <div className="yuume-variant-options">
-                  {opt.values.length <= 4 ? (
-                    <div className="yuume-pills-container">
-                      {opt.values.map((val) => (
-                        <button
-                          key={val}
-                          className={`yuume-pill ${
-                            selectedOptions[opt.name] === val ? 'active' : ''
-                          }`}
-                          onClick={() => handleOptionChange(opt.name, val)}
-                        >
-                          {val}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <select
-                      className="yuume-variant-select"
-                      value={selectedOptions[opt.name] || ''}
-                      onChange={(e) => handleOptionChange(opt.name, e.target.value)}
-                    >
-                      {opt.values.map((val) => (
-                        <option key={val} value={val}>
-                          {val}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-              </div>
-            ))}
-        </div>
-      )}
-    </Drawer>
-  );
-});
 
 const ProductCards = memo(
   ({ message, shopDomain, onOpen, onImageClick, chatColors, sendFeedback, onProductAction }) => {

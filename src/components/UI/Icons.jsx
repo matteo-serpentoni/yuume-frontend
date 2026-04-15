@@ -276,3 +276,63 @@ export const BackArrowIcon = ({ size = 18 } = {}) => (
     <path d="M19 12H5M12 19l-7-7 7-7" />
   </svg>
 );
+
+/** X / close — modal and card back dismiss */
+export const CloseIcon = ({ size = 16 } = {}) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    stroke="currentColor"
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+/** Info circle — product detail toggle */
+export const InfoIcon = ({ size = 16 } = {}) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    stroke="currentColor"
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+);
+
+/** Image placeholder — product card with no image */
+export const ImagePlaceholderIcon = ({ size = 32 } = {}) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    stroke="currentColor"
+    strokeWidth={1.2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="3" y="3" width="18" height="18" rx="2.5" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <path d="M21 15l-5-5-11 11" />
+    <path d="M17 21l-5-5-5 5" />
+  </svg>
+);

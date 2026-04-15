@@ -521,6 +521,7 @@ const Orb = memo(
                   chatColors={chatColors}
                   devShopDomain={shopDomain}
                   onTyping={setIsTyping}
+                  isMobile={isMobileView}
                   onMinimize={() => {
                     setEnlarged(false);
                   }}
