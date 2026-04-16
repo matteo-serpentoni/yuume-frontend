@@ -23,7 +23,7 @@ const ChatHeader = ({ connectionStatus = 'online' }) => {
   return (
     <div className="chat-mobile-header">
       <div className="header-content">
-        <h3>Yuume</h3>
+        <h3>Jarbris</h3>
         <div className="online-status">
           <span className={`status-dot ${config.class}`}></span>
           <span className="status-text">{config.text}</span>

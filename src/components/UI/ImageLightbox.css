@@ -1,4 +1,4 @@
-.yuume-lightbox-root {
+.jarbris-lightbox-root {
   position: absolute;
   inset: 0;
   z-index: 2000;
@@ -10,7 +10,7 @@
   pointer-events: auto;
 }
 
-.yuume-lightbox-backdrop {
+.jarbris-lightbox-backdrop {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
@@ -21,7 +21,7 @@
 }
 
 /* DESKTOP CIRCULAR OVERRIDE */
-.orb-container:not(.mobile-device) .yuume-lightbox-root {
+.orb-container:not(.mobile-device) .jarbris-lightbox-root {
   border-radius: 50%;
   aspect-ratio: 1 / 1;
   width: 76%;
@@ -33,7 +33,7 @@
   overflow: hidden;
 }
 
-.yuume-lightbox-content-group {
+.jarbris-lightbox-content-group {
   position: relative;
   width: 100%;
   height: 100%;
@@ -44,7 +44,7 @@
   pointer-events: none;
 }
 
-.yuume-lightbox-container {
+.jarbris-lightbox-container {
   position: relative;
   width: 100%;
   height: 100%;
@@ -53,7 +53,7 @@
   justify-content: center;
 }
 
-.yuume-lightbox-image-wrapper {
+.jarbris-lightbox-image-wrapper {
   position: absolute;
   top: 45%;
   left: 50%;
@@ -67,11 +67,11 @@
   cursor: grab;
 }
 
-.yuume-lightbox-image-wrapper:active {
+.jarbris-lightbox-image-wrapper:active {
   cursor: grabbing;
 }
 
-.yuume-lightbox-img {
+.jarbris-lightbox-img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
@@ -80,7 +80,7 @@
   user-select: none;
 }
 
-.yuume-lightbox-nav {
+.jarbris-lightbox-nav {
   position: absolute;
   top: 45%;
   transform: translateY(-50%);
@@ -103,20 +103,20 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
-.yuume-lightbox-nav:hover {
+.jarbris-lightbox-nav:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: translateY(-50%) scale(1.1);
 }
 
-.yuume-lightbox-nav.prev {
+.jarbris-lightbox-nav.prev {
   left: 45px;
 }
 
-.yuume-lightbox-nav.next {
+.jarbris-lightbox-nav.next {
   right: 45px;
 }
 
-.yuume-lightbox-thumbnails-wrapper {
+.jarbris-lightbox-thumbnails-wrapper {
   position: absolute;
   bottom: 85px;
   width: 100%;
@@ -126,7 +126,7 @@
   z-index: 110;
 }
 
-.yuume-lightbox-thumbnails {
+.jarbris-lightbox-thumbnails {
   display: flex;
   gap: 8px;
   padding: 6px;
@@ -141,11 +141,11 @@
   scroll-behavior: smooth;
 }
 
-.yuume-lightbox-thumbnails::-webkit-scrollbar {
+.jarbris-lightbox-thumbnails::-webkit-scrollbar {
   display: none;
 }
 
-.yuume-lightbox-thumbnail {
+.jarbris-lightbox-thumbnail {
   width: 38px;
   height: 38px;
   flex-shrink: 0;
@@ -160,19 +160,19 @@
   opacity: 0.6;
 }
 
-.yuume-lightbox-thumbnail.active {
+.jarbris-lightbox-thumbnail.active {
   opacity: 1;
   border-color: white;
   transform: scale(1.1);
 }
 
-.yuume-lightbox-thumbnail img {
+.jarbris-lightbox-thumbnail img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.yuume-lightbox-close {
+.jarbris-lightbox-close {
   position: absolute;
   top: 15px;
   left: 50%;
@@ -196,7 +196,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.yuume-lightbox-close:hover {
+.jarbris-lightbox-close:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: translateX(-50%) rotate(90deg) scale(1.1);
 }
@@ -204,11 +204,11 @@
 /* MOBILE VIEW ADAPTATIONS */
 @media (max-width: 768px) {
   /* Increased breakpoint to cover tablets */
-  .yuume-lightbox-nav {
+  .jarbris-lightbox-nav {
     display: none !important; /* Strictly hide on mobile/tablet */
   }
 
-  .yuume-lightbox-root {
+  .jarbris-lightbox-root {
     overflow: hidden !important;
     width: 100% !important;
     height: 100% !important;
@@ -217,7 +217,7 @@
     border-radius: 0;
   }
 
-  .yuume-lightbox-image-wrapper {
+  .jarbris-lightbox-image-wrapper {
     height: 60%;
     top: 40%;
     width: 100%;
@@ -226,51 +226,51 @@
     touch-action: pan-y pinch-zoom; /* Allow native zoom and vertical pan, let JS handle or block horizontal */
   }
 
-  .yuume-lightbox-thumbnails-wrapper {
+  .jarbris-lightbox-thumbnails-wrapper {
     bottom: 30px;
     left: 20px;
     right: 20px;
     width: auto; /* Allow left/right to define width and margins */
   }
 
-  .yuume-lightbox-thumbnails {
+  .jarbris-lightbox-thumbnails {
     max-width: 100%;
     background: rgba(255, 255, 255, 0.12);
     box-sizing: border-box;
   }
 
-  .yuume-lightbox-thumbnail {
+  .jarbris-lightbox-thumbnail {
     width: 44px;
     height: 44px;
   }
 
-  .yuume-lightbox-close {
+  .jarbris-lightbox-close {
     top: 20px;
     left: auto;
     right: 20px;
     transform: none;
   }
 
-  .yuume-lightbox-close:hover {
+  .jarbris-lightbox-close:hover {
     transform: rotate(90deg) scale(1.1);
   }
 }
 
 /* Mobile GPU optimization: reduce backdrop-filter blur */
-.mobile-device .yuume-lightbox-backdrop {
+.mobile-device .jarbris-lightbox-backdrop {
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 
-.mobile-device .yuume-lightbox-nav {
+.mobile-device .jarbris-lightbox-nav {
   backdrop-filter: blur(8px);
 }
 
-.mobile-device .yuume-lightbox-thumbnails {
+.mobile-device .jarbris-lightbox-thumbnails {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
-.mobile-device .yuume-lightbox-close {
+.mobile-device .jarbris-lightbox-close {
   backdrop-filter: blur(8px);
 }

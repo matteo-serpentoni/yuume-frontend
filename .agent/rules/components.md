@@ -1,6 +1,6 @@
 # Component Architecture Rules
 
-These rules define the React component patterns for yuume-widget.
+These rules define the React component patterns for jarbris-widget.
 
 ## 1. Component Structure
 

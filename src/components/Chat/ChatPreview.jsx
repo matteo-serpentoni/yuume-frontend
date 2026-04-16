@@ -10,7 +10,7 @@ const MOCK_MESSAGES = [
   {
     id: 'preview-1',
     sender: 'assistant',
-    text: "Ciao! 👋 Sono l'assistente Yuume. Posso aiutarti a trovare prodotti o tracciare un ordine?",
+    text: "Ciao! 👋 Sono l'assistente Jarbris. Posso aiutarti a trovare prodotti o tracciare un ordine?",
     timestamp: new Date().toISOString(),
   },
   {

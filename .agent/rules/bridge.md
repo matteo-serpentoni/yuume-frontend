@@ -4,8 +4,8 @@ These rules ensure secure and reliable communication between the widget and the 
 
 ## 1. Message Format
 
-- **Prefixing**: ALL messages sent via 'postMessage' MUST use a unique prefix: 'YUUME:' (e.g., '{ type: "YUUME:resize", ... }').
-- **Payload Structure**: Use a consistent structure: '{ type: "YUUME:action", payload: { ... } }'.
+- **Prefixing**: ALL messages sent via 'postMessage' MUST use a unique prefix: 'JARBRIS:' (e.g., '{ type: "JARBRIS:resize", ... }').
+- **Payload Structure**: Use a consistent structure: '{ type: "JARBRIS:action", payload: { ... } }'.
 
 ## 2. Security
 
@@ -17,8 +17,8 @@ These rules ensure secure and reliable communication between the widget and the 
 
 ## 3. Standard Actions
 
-- **YUUME:resize**: Request the host to resize the iframe.
-- **YUUME:close**: Request the host to hide or remove the widget.
-- **YUUME:ready**: Notify the host that the widget is fully loaded.
-- **YUUME:addToCart**: Request the host to add a product to cart (for Shopify integration).
-- **YUUME:cartUpdate**: Sent from host to widget when the Shopify cart changes (polling + events).
+- **JARBRIS:resize**: Request the host to resize the iframe.
+- **JARBRIS:close**: Request the host to hide or remove the widget.
+- **JARBRIS:ready**: Notify the host that the widget is fully loaded.
+- **JARBRIS:addToCart**: Request the host to add a product to cart (for Shopify integration).
+- **JARBRIS:cartUpdate**: Sent from host to widget when the Shopify cart changes (polling + events).

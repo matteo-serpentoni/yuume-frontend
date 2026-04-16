@@ -13,14 +13,14 @@ const Suggestions = memo(({ suggestions, onSuggestionClick }) => {
   if (!suggestions || suggestions.length === 0) return null;
 
   return (
-    <div className="yuume-suggestions">
+    <div className="jarbris-suggestions">
       {suggestions.map((s, idx) => {
         const IconComponent = s.icon ? CHIP_ICON_MAP[s.icon] : null;
 
         return (
           <motion.button
             key={idx}
-            className={`yuume-suggestion-chip ${s.variant || ''}`}
+            className={`jarbris-suggestion-chip ${s.variant || ''}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{

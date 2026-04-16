@@ -70,7 +70,7 @@ const SmartBadges = memo(({ badges = [] }) => {
   if (!badges || badges.length === 0) return null;
 
   return (
-    <div className="yuume-smart-badges-bars">
+    <div className="jarbris-smart-badges-bars">
       {badges.map((badge, i) => {
         const statusClass = badge.status?.toLowerCase() || 'match';
         const Icon = BadgeIcons[badge.key] || BadgeIcons.generic;
@@ -82,7 +82,7 @@ const SmartBadges = memo(({ badges = [] }) => {
         return (
           <div
             key={i}
-            className={`yuume-smart-badge-bar ${statusClass} ${badge.key || ''}`}
+            className={`jarbris-smart-badge-bar ${statusClass} ${badge.key || ''}`}
             title={`${badge.label}: ${badge.value}`}
           >
             {isConstraint && statusIcon && (

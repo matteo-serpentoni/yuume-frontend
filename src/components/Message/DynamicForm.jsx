@@ -10,15 +10,15 @@ import './DynamicForm.css';
  */
 const LookupResult = ({ message, onRetry, loading }) => (
   <motion.div
-    className="yuume-order-lookup-results-text"
+    className="jarbris-order-lookup-results-text"
     initial={{ opacity: 0, scale: 0.95 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.2 }}
   >
-    <div className="yuume-order-lookup-icon">🔍</div>
-    <p className="yuume-order-lookup-message">{message}</p>
-    <button onClick={onRetry} className="yuume-order-lookup-retry-btn" disabled={loading}>
-      {loading ? <span className="yuume-loader-small" /> : 'Riprova'}
+    <div className="jarbris-order-lookup-icon">🔍</div>
+    <p className="jarbris-order-lookup-message">{message}</p>
+    <button onClick={onRetry} className="jarbris-order-lookup-retry-btn" disabled={loading}>
+      {loading ? <span className="jarbris-loader-small" /> : 'Riprova'}
     </button>
   </motion.div>
 );
@@ -234,17 +234,17 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
   const renderField = (field) => {
     if (field.type === 'list_select') {
       return (
-        <div key={field.id} className="yuume-dynamic-list-container">
-          {field.label && <div className="yuume-dynamic-info-text">{field.label}</div>}
+        <div key={field.id} className="jarbris-dynamic-list-container">
+          {field.label && <div className="jarbris-dynamic-info-text">{field.label}</div>}
           <div
-            className="yuume-dynamic-list"
+            className="jarbris-dynamic-list"
             role="listbox"
             aria-label={field.label || "Seleziona un'opzione"}
           >
             {field.options?.map((opt) => (
               <div
                 key={opt.id}
-                className={`yuume-dynamic-list-option ${formData[field.id] === opt.id ? 'active' : ''} ${opt.disabled ? 'disabled' : ''}`}
+                className={`jarbris-dynamic-list-option ${formData[field.id] === opt.id ? 'active' : ''} ${opt.disabled ? 'disabled' : ''}`}
                 onClick={() => !opt.disabled && handleInputChange(field.id, opt.id)}
                 role="option"
                 aria-label={opt.title || opt.label}
@@ -257,19 +257,19 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
                   }
                 }}
               >
-                <div className="yuume-dynamic-radio">
-                  {formData[field.id] === opt.id && <div className="yuume-dynamic-radio-inner" />}
+                <div className="jarbris-dynamic-radio">
+                  {formData[field.id] === opt.id && <div className="jarbris-dynamic-radio-inner" />}
                 </div>
                 {opt.image && (
-                  <div className="yuume-dynamic-option-image">
+                  <div className="jarbris-dynamic-option-image">
                     <img src={opt.image} alt={opt.title || opt.label} loading="lazy" />
                   </div>
                 )}
-                <div className="yuume-dynamic-option-content">
-                  <div className="yuume-dynamic-option-title">
+                <div className="jarbris-dynamic-option-content">
+                  <div className="jarbris-dynamic-option-title">
                     {opt.title || opt.label}
                     {opt.returnStatus && (
-                      <span className={`yuume-return-status-badge status-${opt.returnStatus}`}>
+                      <span className={`jarbris-return-status-badge status-${opt.returnStatus}`}>
                         {opt.returnStatus === 'pending'
                           ? 'Richiesta pendente'
                           : opt.returnStatus === 'approved'
@@ -279,7 +279,7 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
                     )}
                   </div>
                   {(opt.quantity || opt.price) && (
-                    <div className="yuume-dynamic-option-meta">
+                    <div className="jarbris-dynamic-option-meta">
                       {opt.quantity && opt.quantity > 1 ? `${opt.quantity} pezzi • ` : ''}
                       {opt.price}
                     </div>
@@ -294,15 +294,15 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
 
     if (field.type === 'select') {
       return (
-        <div key={field.id} className="yuume-form-group">
+        <div key={field.id} className="jarbris-form-group">
           <label htmlFor={`field-${field.id}`}>{field.label}</label>
-          <div className="yuume-select-wrapper">
+          <div className="jarbris-select-wrapper">
             <select
               id={`field-${field.id}`}
               value={formData[field.id]}
               onChange={(e) => handleInputChange(field.id, e.target.value)}
               disabled={loading}
-              className="yuume-dynamic-select"
+              className="jarbris-dynamic-select"
             >
               <option value="" disabled>
                 Seleziona un'opzione...
@@ -313,14 +313,14 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
                 </option>
               ))}
             </select>
-            <div className="yuume-select-arrow" aria-hidden="true" />
+            <div className="jarbris-select-arrow" aria-hidden="true" />
           </div>
         </div>
       );
     }
 
     return (
-      <div key={field.id} className="yuume-form-group">
+      <div key={field.id} className="jarbris-form-group">
         <label htmlFor={`field-${field.id}`}>{field.label}</label>
         <input
           id={`field-${field.id}`}
@@ -338,24 +338,24 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
 
   return (
     <motion.div
-      className="yuume-dynamic-form"
+      className="jarbris-dynamic-form"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="yuume-dynamic-form-header">
-        <span className="yuume-dynamic-form-icon">{icon}</span>
-        <h3 className="yuume-dynamic-form-title">{title}</h3>
+      <div className="jarbris-dynamic-form-header">
+        <span className="jarbris-dynamic-form-icon">{icon}</span>
+        <h3 className="jarbris-dynamic-form-title">{title}</h3>
       </div>
 
       {steps > 1 && !children && !isErrorState && (
-        <div className="yuume-dynamic-progress-dots">
+        <div className="jarbris-dynamic-progress-dots">
           {Array.from({ length: steps }).map((_, i) => {
             const s = i + 1;
             return (
               <div
                 key={s}
-                className={`yuume-dynamic-step-dot ${
+                className={`jarbris-dynamic-step-dot ${
                   s === currentStep ? 'active' : s < currentStep ? 'completed' : 'future'
                 }`}
               />
@@ -364,7 +364,7 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="yuume-dynamic-form-body">
+      <form onSubmit={handleSubmit} className="jarbris-dynamic-form-body">
         <AnimatePresence mode="wait">
           {children ? (
             <motion.div
@@ -401,20 +401,20 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
-              className="yuume-dynamic-step-wrapper"
+              className="jarbris-dynamic-step-wrapper"
             >
-              <div className="yuume-dynamic-fields-container">
+              <div className="jarbris-dynamic-fields-container">
                 {fields.map(renderField)}
 
                 {allowNotes && (
-                  <div className="yuume-form-group-notes">
+                  <div className="jarbris-form-group-notes">
                     <label>
                       {formData.reasonId === 'other'
                         ? 'Dettagli obbligatori'
                         : 'Dettagli opzionali'}
                     </label>
                     <textarea
-                      className="yuume-dynamic-textarea"
+                      className="jarbris-dynamic-textarea"
                       placeholder={
                         formData.reasonId === 'other' ? 'Descrivi il motivo...' : notesPlaceholder
                       }
@@ -426,21 +426,21 @@ const DynamicForm = ({ message, onSubmit, loading, children }) => {
                 )}
               </div>
 
-              {errorVisible && <div className="yuume-dynamic-error-message">{errorVisible}</div>}
+              {errorVisible && <div className="jarbris-dynamic-error-message">{errorVisible}</div>}
 
-              <div className="yuume-dynamic-form-actions">
+              <div className="jarbris-dynamic-form-actions">
                 {history.length > 0 && (
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="yuume-dynamic-form-back-btn"
+                    className="jarbris-dynamic-form-back-btn"
                     disabled={loading}
                   >
                     Indietro
                   </button>
                 )}
-                <button type="submit" className="yuume-dynamic-form-submit" disabled={loading}>
-                  {loading ? <span className="yuume-loader-small" /> : submitLabel || 'Continua'}
+                <button type="submit" className="jarbris-dynamic-form-submit" disabled={loading}>
+                  {loading ? <span className="jarbris-loader-small" /> : submitLabel || 'Continua'}
                 </button>
               </div>
             </motion.div>

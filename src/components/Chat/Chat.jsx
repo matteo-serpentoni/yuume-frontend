@@ -143,7 +143,7 @@ const Chat = ({
         const numericVariantId = extractVariantId(resolvedVariantId);
         if (numericVariantId) {
           window.parent?.postMessage(
-            { type: 'YUUME:addToCart', variantId: numericVariantId, quantity: payload.quantity || 1 },
+            { type: 'JARBRIS:addToCart', variantId: numericVariantId, quantity: payload.quantity || 1 },
             '*',
           );
         }
@@ -450,7 +450,7 @@ const Chat = ({
         </>
       )}
 
-      <div id="yuume-drawer-portal" className="drawer-portal-container" />
+      <div id="jarbris-drawer-portal" className="drawer-portal-container" />
 
       {/* Close button - Hidden in profile view */}
       {view !== 'profile' && (

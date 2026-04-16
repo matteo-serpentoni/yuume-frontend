@@ -1,4 +1,4 @@
-.yuume-confirm-dialog-overlay {
+.jarbris-confirm-dialog-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -14,15 +14,15 @@
 }
 
 /* Ensure the overlay matches the rounded shape of the widget without clipping issues */
-.orb-container:not(.mobile-device) .yuume-confirm-dialog-overlay {
+.orb-container:not(.mobile-device) .jarbris-confirm-dialog-overlay {
   border-radius: 50%;
 }
 
-.orb-container.mobile-device .yuume-confirm-dialog-overlay {
+.orb-container.mobile-device .jarbris-confirm-dialog-overlay {
   border-radius: 24px;
 }
 
-.yuume-confirm-dialog {
+.jarbris-confirm-dialog {
   background: rgba(25, 25, 30, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -35,41 +35,41 @@
   gap: 12px;
 }
 
-[data-theme='light'] .yuume-confirm-dialog {
+[data-theme='light'] .jarbris-confirm-dialog {
   background: rgba(255, 255, 255, 0.95);
   border-color: rgba(0, 0, 0, 0.1);
 }
 
-.yuume-confirm-title {
+.jarbris-confirm-title {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #fff;
 }
 
-[data-theme='light'] .yuume-confirm-title {
+[data-theme='light'] .jarbris-confirm-title {
   color: #1a1a1a;
 }
 
-.yuume-confirm-message {
+.jarbris-confirm-message {
   margin: 0;
   font-size: 13px;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.7);
 }
 
-[data-theme='light'] .yuume-confirm-message {
+[data-theme='light'] .jarbris-confirm-message {
   color: rgba(0, 0, 0, 0.6);
 }
 
-.yuume-confirm-actions {
+.jarbris-confirm-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 8px;
 }
 
-.yuume-confirm-btn {
+.jarbris-confirm-btn {
   background: none;
   border: none;
   padding: 8px 16px;
@@ -80,26 +80,26 @@
   transition: all 0.2s ease;
 }
 
-.yuume-confirm-btn.cancel {
+.jarbris-confirm-btn.cancel {
   color: #fff;
   background: rgba(255, 255, 255, 0.1);
 }
-.yuume-confirm-btn.cancel:hover {
+.jarbris-confirm-btn.cancel:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
-[data-theme='light'] .yuume-confirm-btn.cancel {
+[data-theme='light'] .jarbris-confirm-btn.cancel {
   color: #1a1a1a;
   background: rgba(0, 0, 0, 0.05);
 }
-[data-theme='light'] .yuume-confirm-btn.cancel:hover {
+[data-theme='light'] .jarbris-confirm-btn.cancel:hover {
   background: rgba(0, 0, 0, 0.1);
 }
 
-.yuume-confirm-btn.confirm {
+.jarbris-confirm-btn.confirm {
   color: #ff4d4d;
   background: rgba(255, 77, 77, 0.1);
 }
-.yuume-confirm-btn.confirm:hover {
+.jarbris-confirm-btn.confirm:hover {
   background: rgba(255, 77, 77, 0.2);
 }

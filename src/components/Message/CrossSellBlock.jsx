@@ -31,49 +31,49 @@ const CrossSellCard = memo(({ product, shopDomain, index, onOpen }) => {
   const onSale = compareAtPrice > price;
 
   return (
-    <div className="yuume-xs-card" style={{ animationDelay: `${index * 70}ms` }}>
+    <div className="jarbris-xs-card" style={{ animationDelay: `${index * 70}ms` }}>
       <a
         href={url}
-        className="yuume-xs-image-wrapper"
+        className="jarbris-xs-image-wrapper"
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`View ${name}`}
       >
         {image ? (
-          <img src={image.url || image} alt={name} className="yuume-xs-image" loading="lazy" />
+          <img src={image.url || image} alt={name} className="jarbris-xs-image" loading="lazy" />
         ) : (
-          <div className="yuume-xs-image-placeholder" aria-hidden="true" />
+          <div className="jarbris-xs-image-placeholder" aria-hidden="true" />
         )}
         {onSale && discountPercentage > 0 && (
-          <span className="yuume-xs-promo-badge" aria-label={`${discountPercentage}% off`}>
+          <span className="jarbris-xs-promo-badge" aria-label={`${discountPercentage}% off`}>
             -{discountPercentage}%
           </span>
         )}
       </a>
 
-      <div className="yuume-xs-info">
+      <div className="jarbris-xs-info">
         <a
           href={url}
-          className="yuume-xs-name"
+          className="jarbris-xs-name"
           target="_blank"
           rel="noopener noreferrer"
           title={name}
         >
-          <span className="yuume-xs-name-text">{name}</span>
+          <span className="jarbris-xs-name-text">{name}</span>
           <ExternalLinkIcon size={12} />
         </a>
 
-        <div className="yuume-xs-price-row">
+        <div className="jarbris-xs-price-row">
           {onSale && (
-            <span className="yuume-xs-original-price">{formatPrice(compareAtPrice, currency)}</span>
+            <span className="jarbris-xs-original-price">{formatPrice(compareAtPrice, currency)}</span>
           )}
-          <span className="yuume-xs-price">{formatPrice(price, currency)}</span>
+          <span className="jarbris-xs-price">{formatPrice(price, currency)}</span>
         </div>
 
         {isAvailable ? (
           hasVariants ? (
             <button
-              className="yuume-xs-cta yuume-xs-cta--view"
+              className="jarbris-xs-cta jarbris-xs-cta--view"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -85,7 +85,7 @@ const CrossSellCard = memo(({ product, shopDomain, index, onOpen }) => {
             </button>
           ) : (
             variants[0]?.id && (
-              <div className="yuume-xs-atc-wrapper">
+              <div className="jarbris-xs-atc-wrapper">
                 <AddToCartButton
                   variantId={variants[0].id}
                   shopDomain={shopDomain}
@@ -96,7 +96,7 @@ const CrossSellCard = memo(({ product, shopDomain, index, onOpen }) => {
             )
           )
         ) : (
-          <span className="yuume-xs-unavailable">Sold out</span>
+          <span className="jarbris-xs-unavailable">Sold out</span>
         )}
       </div>
     </div>
@@ -136,7 +136,7 @@ const CrossSellBlock = memo(({ data, shopDomain, onOpen }) => {
   const scroll = (direction) => {
     if (scrollRef.current) {
       const container = scrollRef.current;
-      const cardWidth = container.querySelector('.yuume-xs-card')?.offsetWidth || 136;
+      const cardWidth = container.querySelector('.jarbris-xs-card')?.offsetWidth || 136;
       const gap = 8;
       const scrollAmount = direction === 'next' ? cardWidth + gap : -(cardWidth + gap);
 
@@ -150,16 +150,16 @@ const CrossSellBlock = memo(({ data, shopDomain, onOpen }) => {
   if (!data?.products?.length) return null;
 
   return (
-    <div className="yuume-cross-sell-block">
-      <div className="yuume-xs-header">
+    <div className="jarbris-cross-sell-block">
+      <div className="jarbris-xs-header">
         <SparkleIcon size={13} />
-        <span className="yuume-xs-title">{data.title}</span>
+        <span className="jarbris-xs-title">{data.title}</span>
       </div>
 
-      <div className="yuume-carousel-wrapper">
+      <div className="jarbris-carousel-wrapper">
         {showLeftArrow && (
           <button
-            className="yuume-carousel-nav-btn prev"
+            className="jarbris-carousel-nav-btn prev"
             onClick={() => scroll('prev')}
             aria-label="Prodotto precedente"
           >
@@ -167,7 +167,7 @@ const CrossSellBlock = memo(({ data, shopDomain, onOpen }) => {
           </button>
         )}
 
-        <div className="yuume-xs-grid" ref={scrollRef}>
+        <div className="jarbris-xs-grid" ref={scrollRef}>
           {data.products.slice(0, 3).map((product, index) => (
             <CrossSellCard
               key={product.id || product.productId || index}
@@ -181,7 +181,7 @@ const CrossSellBlock = memo(({ data, shopDomain, onOpen }) => {
 
         {showRightArrow && data.products.length > 1 && (
           <button
-            className="yuume-carousel-nav-btn next"
+            className="jarbris-carousel-nav-btn next"
             onClick={() => scroll('next')}
             aria-label="Prodotto successivo"
           >

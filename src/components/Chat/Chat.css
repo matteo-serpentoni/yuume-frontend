@@ -49,7 +49,7 @@
   margin-bottom: 8px;
 }
 
-.global-suggestions-container .yuume-suggestions {
+.global-suggestions-container .jarbris-suggestions {
   margin-top: 0;
   justify-content: flex-start;
 }
@@ -130,7 +130,7 @@
 }
 
 /* DRAWER ACTIVE SHADOW */
-.yuume-drawer-active .message-bubble {
+.jarbris-drawer-active .message-bubble {
   filter: brightness(0.4) saturate(0.8);
 }
 

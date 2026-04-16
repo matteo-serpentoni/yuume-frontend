@@ -1,4 +1,4 @@
-.yuume-drawer-backdrop {
+.jarbris-drawer-backdrop {
   position: absolute;
   top: 0;
   left: 0;
@@ -10,7 +10,7 @@
   pointer-events: auto;
 }
 
-.yuume-drawer-container {
+.jarbris-drawer-container {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -19,7 +19,7 @@
 }
 
 /* DESKTOP CLIPPING: Drawer emerges from the input line (bottom 54px) */
-.orb-container:not(.mobile-device) .yuume-drawer-container {
+.orb-container:not(.mobile-device) .jarbris-drawer-container {
   bottom: 54px; /* Matches the "bottom" of the card we want */
   top: 0;
   left: 0;
@@ -27,7 +27,7 @@
   overflow: hidden; /* This clips the entering/exiting drawer */
 }
 
-.yuume-drawer {
+.jarbris-drawer {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -49,7 +49,7 @@
 }
 
 /* DESKTOP REFINEMENT: Floating Rectangular Card */
-.orb-container:not(.mobile-device) .yuume-drawer {
+.orb-container:not(.mobile-device) .jarbris-drawer {
   width: calc(100% - (2 * var(--orb-h-padding-messages, 20px)));
   max-width: 610px; /* Safety cap */
   left: 0;
@@ -62,7 +62,7 @@
   max-height: 80%; /* Ensure it doesn't cover top part */
 }
 
-.yuume-drawer-header {
+.jarbris-drawer-header {
   padding: 8px 12px;
   display: flex;
   flex-direction: column;
@@ -72,13 +72,13 @@
   min-height: 24px;
 }
 
-.yuume-drawer-header.has-title {
+.jarbris-drawer-header.has-title {
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: 4px;
 }
 
-.yuume-drawer-handle {
+.jarbris-drawer-handle {
   width: 36px;
   height: 4px;
   background: rgba(255, 255, 255, 0.2);
@@ -86,7 +86,7 @@
   margin-bottom: 8px;
 }
 
-.yuume-drawer-title {
+.jarbris-drawer-title {
   font-size: 14px;
   font-weight: 700;
   color: #ffffff;
@@ -95,7 +95,7 @@
   letter-spacing: -0.01em;
 }
 
-.yuume-drawer-close {
+.jarbris-drawer-close {
   position: absolute;
   right: 12px;
   top: 10px;
@@ -116,23 +116,23 @@
     color 0.2s;
 }
 
-.yuume-drawer-close:hover {
+.jarbris-drawer-close:hover {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
 }
 
-.yuume-drawer-content {
+.jarbris-drawer-content {
   flex: 1;
   overflow-y: auto;
   padding: 4px 14px 8px;
   scrollbar-width: none;
 }
 
-.yuume-drawer-content::-webkit-scrollbar {
+.jarbris-drawer-content::-webkit-scrollbar {
   display: none;
 }
 
-.yuume-drawer-footer {
+.jarbris-drawer-footer {
   padding: 8px 16px 16px;
   background: transparent;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -143,7 +143,7 @@
 }
 
 /* Mobile GPU optimization: reduce backdrop-filter blur */
-.mobile-device .yuume-drawer {
+.mobile-device .jarbris-drawer {
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
 }

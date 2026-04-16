@@ -50,10 +50,10 @@ const ProfileCardMessage = ({
     'Vuoi che mi ricordi di te per la prossima volta? Posso salvare le tue preferenze, taglie e prodotti che ti interessano.';
 
   return (
-    <div className="yuume-profile-card-message">
-      <div className="yuume-profile-card-inner">
+    <div className="jarbris-profile-card-message">
+      <div className="jarbris-profile-card-inner">
         <div
-          className="yuume-profile-card-header"
+          className="jarbris-profile-card-header"
           onClick={toggleExpand}
           onKeyDown={handleKeyDown}
           role="button"
@@ -62,16 +62,16 @@ const ProfileCardMessage = ({
           aria-label={effectiveExpanded ? 'Comprimi dettagli profilo' : 'Espandi dettagli profilo'}
         >
           <div
-            className="yuume-profile-card-icon"
+            className="jarbris-profile-card-icon"
             style={{ color: chatColors?.header || '#4CC2E9' }}
           >
             <UserIcon size={18} />
           </div>
-          <div className="yuume-profile-card-text">
-            <h4 className="yuume-profile-card-title">{title}</h4>
-            <p className="yuume-profile-card-subtitle">{text}</p>
+          <div className="jarbris-profile-card-text">
+            <h4 className="jarbris-profile-card-title">{title}</h4>
+            <p className="jarbris-profile-card-subtitle">{text}</p>
           </div>
-          <div className={`yuume-profile-card-toggle ${effectiveExpanded ? 'open' : ''}`}>
+          <div className={`jarbris-profile-card-toggle ${effectiveExpanded ? 'open' : ''}`}>
             <ChevronDownIcon size={20} />
           </div>
         </div>
@@ -84,7 +84,7 @@ const ProfileCardMessage = ({
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <div className="yuume-profile-card-body">
+              <div className="jarbris-profile-card-body">
                 <ProfileEditor
                   sessionId={sessionId}
                   shopDomain={shopDomain}

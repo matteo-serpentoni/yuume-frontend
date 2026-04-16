@@ -7,8 +7,8 @@ const TextMessage = memo(({ message }) => {
 
   return (
     <>
-      {message.title && <div className="yuume-text-message-title">{message.title}</div>}
-      <FormattedText text={rawContent} className="yuume-text-message-content" tag="div" />
+      {message.title && <div className="jarbris-text-message-title">{message.title}</div>}
+      <FormattedText text={rawContent} className="jarbris-text-message-content" tag="div" />
     </>
   );
 });

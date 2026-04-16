@@ -59,7 +59,7 @@ const CartAction = memo(
       // Send add-to-cart via bridge
       window.parent.postMessage(
         {
-          type: 'YUUME:addToCart',
+          type: 'JARBRIS:addToCart',
           variantId: numericVariantId,
           quantity,
         },
@@ -69,7 +69,7 @@ const CartAction = memo(
       // Listen for response
       const handleResponse = (event) => {
         if (!BRIDGE_CONFIG.isValidOrigin(event.origin, null, event.data?.type)) return;
-        if (event.data.type !== 'YUUME:addToCartResponse') return;
+        if (event.data.type !== 'JARBRIS:addToCartResponse') return;
 
         window.removeEventListener('message', handleResponse);
 
@@ -106,25 +106,25 @@ const CartAction = memo(
 
     if (status === 'adding') {
       return (
-        <div className="yuume-cart-action yuume-cart-action--adding">
-          <div className="yuume-cart-action__spinner" />
-          <FormattedText text={pendingMessage} className="yuume-cart-action__text" />
+        <div className="jarbris-cart-action jarbris-cart-action--adding">
+          <div className="jarbris-cart-action__spinner" />
+          <FormattedText text={pendingMessage} className="jarbris-cart-action__text" />
         </div>
       );
     }
 
     if (status === 'success') {
       return (
-        <div className="yuume-cart-action yuume-cart-action--success">
-          <FormattedText text={successMessage} className="yuume-cart-action__text" />
+        <div className="jarbris-cart-action jarbris-cart-action--success">
+          <FormattedText text={successMessage} className="jarbris-cart-action__text" />
         </div>
       );
     }
 
     if (status === 'error') {
       return (
-        <div className="yuume-cart-action yuume-cart-action--error">
-          <FormattedText text={errorMessage} className="yuume-cart-action__text" />
+        <div className="jarbris-cart-action jarbris-cart-action--error">
+          <FormattedText text={errorMessage} className="jarbris-cart-action__text" />
         </div>
       );
     }

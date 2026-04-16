@@ -35,7 +35,7 @@ const PromoCards = memo(({ message, onSearch }) => {
   const scroll = (direction) => {
     if (scrollRef.current) {
       const container = scrollRef.current;
-      const cardWidth = container.querySelector('.yuume-promo-card')?.offsetWidth || 280;
+      const cardWidth = container.querySelector('.jarbris-promo-card')?.offsetWidth || 280;
       const gap = 12;
       const scrollAmount = direction === 'next' ? cardWidth + gap : -(cardWidth + gap);
 
@@ -51,11 +51,11 @@ const PromoCards = memo(({ message, onSearch }) => {
   }
 
   return (
-    <div className="yuume-promos-container carousel">
-      <div className="yuume-carousel-wrapper">
+    <div className="jarbris-promos-container carousel">
+      <div className="jarbris-carousel-wrapper">
         {showLeftArrow && (
           <button
-            className="yuume-carousel-nav-btn prev"
+            className="jarbris-carousel-nav-btn prev"
             onClick={() => scroll('prev')}
             aria-label="Promozione precedente"
           >
@@ -72,9 +72,9 @@ const PromoCards = memo(({ message, onSearch }) => {
           </button>
         )}
 
-        <div className="yuume-promos-list" ref={scrollRef}>
+        <div className="jarbris-promos-list" ref={scrollRef}>
           {promos.map((promo, index) => (
-            <div key={`${message.id}-promo-${index}`} className="yuume-promo-card-wrapper">
+            <div key={`${message.id}-promo-${index}`} className="jarbris-promo-card-wrapper">
               <PromoCard promo={promo} onSearch={onSearch} index={index} />
             </div>
           ))}
@@ -82,7 +82,7 @@ const PromoCards = memo(({ message, onSearch }) => {
 
         {showRightArrow && promos.length > 1 && (
           <button
-            className="yuume-carousel-nav-btn next"
+            className="jarbris-carousel-nav-btn next"
             onClick={() => scroll('next')}
             aria-label="Promozione successiva"
           >

@@ -3,7 +3,7 @@
  *
  * Centralized localStorage access with automatic error handling
  * for Safari ITP, Firefox ETP, and quota exceeded errors.
- * All keys are auto-prefixed with 'yuume_'.
+ * All keys are auto-prefixed with 'jarbris_'.
  *
  * security.md #3: Only strictly-necessary keys are permitted.
  * Permitted keys: session_id, messages, session_time, session_status, profile, shop_domain
@@ -11,7 +11,7 @@
  * @module utils/storage
  */
 
-const PREFIX = 'yuume_';
+const PREFIX = 'jarbris_';
 
 /**
  * Get a value from localStorage (auto-prefixed).
@@ -76,7 +76,7 @@ function setJSON(key, value) {
 }
 
 /**
- * Clear all yuume_ keys except the explicitly preserved ones.
+ * Clear all jarbris_ keys except the explicitly preserved ones.
  * 'profile' is preserved per security.md #3 (user-submitted data).
  * 'shop_domain' is preserved for dev tools consistency.
  */

@@ -1,6 +1,6 @@
 # Animation Rules (Framer Motion & WebGL)
 
-These rules define the animation patterns for yuume-widget.
+These rules define the animation patterns for jarbris-widget.
 
 ## 1. Framer Motion Usage
 

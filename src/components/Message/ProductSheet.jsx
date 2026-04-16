@@ -106,26 +106,26 @@ const ProductSheet = memo(({ product, onClose, shopDomain, onProductAction, isMo
   };
 
   const footer = (
-    <div className="yuume-sheet-footer-inner">
+    <div className="jarbris-sheet-footer-inner">
       {/* Validation error — shown when user attempts ATC without all options */}
       {validationError && (
-        <p className="yuume-sheet-validation-error" role="alert">
+        <p className="jarbris-sheet-validation-error" role="alert">
           {validationError}
         </p>
       )}
 
       {!isAvailable ? (
         // Product itself is marked unavailable
-        <div className="yuume-add-to-cart-container compact">
-          <button className="add-to-cart yuume-add-to-cart-btn disabled" disabled>
+        <div className="jarbris-add-to-cart-container compact">
+          <button className="add-to-cart jarbris-add-to-cart-btn disabled" disabled>
             <span>Prodotto Esaurito</span>
           </button>
         </div>
       ) : !allOptionsSelected ? (
         // Options not fully selected: intercepting click to show the error
-        <div className="yuume-add-to-cart-container compact">
+        <div className="jarbris-add-to-cart-container compact">
           <button
-            className="add-to-cart yuume-add-to-cart-btn disabled"
+            className="add-to-cart jarbris-add-to-cart-btn disabled"
             onClick={handleAtcClick}
             aria-disabled="true"
           >
@@ -134,15 +134,15 @@ const ProductSheet = memo(({ product, onClose, shopDomain, onProductAction, isMo
         </div>
       ) : !currentVariant ? (
         // All options selected, but this combination NEVER existed in Shopify (unlinked variants)
-        <div className="yuume-add-to-cart-container compact">
-          <button className="add-to-cart yuume-add-to-cart-btn disabled" disabled>
+        <div className="jarbris-add-to-cart-container compact">
+          <button className="add-to-cart jarbris-add-to-cart-btn disabled" disabled>
             <span>Non Disponibile</span>
           </button>
         </div>
       ) : !isVariantAvailable ? (
         // Specific variant combo exists but inventory is 0
-        <div className="yuume-add-to-cart-container compact">
-          <button className="add-to-cart yuume-add-to-cart-btn disabled" disabled>
+        <div className="jarbris-add-to-cart-container compact">
+          <button className="add-to-cart jarbris-add-to-cart-btn disabled" disabled>
             <span>Variante Esaurita</span>
           </button>
         </div>
@@ -169,39 +169,39 @@ const ProductSheet = memo(({ product, onClose, shopDomain, onProductAction, isMo
   // Shared body — same for both Drawer and Modal
   const body = (
     <>
-      <div className="yuume-drawer-price-section">
-        <div className="yuume-price-stack">
+      <div className="jarbris-drawer-price-section">
+        <div className="jarbris-price-stack">
           {currentCompareAtPrice > currentPrice && (
-            <span className="yuume-original-price">
+            <span className="jarbris-original-price">
               {formatPrice(currentCompareAtPrice, currency)}
             </span>
           )}
-          <span className="yuume-current-price">{formatPrice(currentPrice, currency)}</span>
+          <span className="jarbris-current-price">{formatPrice(currentPrice, currency)}</span>
         </div>
       </div>
 
       {requiredOptions.length > 0 && (
-        <div className="yuume-drawer-variants">
+        <div className="jarbris-drawer-variants">
           {requiredOptions.map((opt) => {
             const isMissing = validationError && !selectedOptions[opt.name];
             return (
               <div
                 key={opt.name}
-                className={`yuume-variant-group ${isMissing ? 'yuume-variant-group--error' : ''}`}
+                className={`jarbris-variant-group ${isMissing ? 'jarbris-variant-group--error' : ''}`}
               >
-                <span className="yuume-variant-label">
+                <span className="jarbris-variant-label">
                   {opt.name}
                   {isMissing && (
-                    <span className="yuume-variant-required-badge"> *</span>
+                    <span className="jarbris-variant-required-badge"> *</span>
                   )}
                 </span>
-                <div className="yuume-variant-options">
+                <div className="jarbris-variant-options">
                   {opt.values.length <= 4 ? (
-                    <div className="yuume-pills-container">
+                    <div className="jarbris-pills-container">
                       {opt.values.map((val) => (
                         <button
                           key={val}
-                          className={`yuume-pill ${
+                          className={`jarbris-pill ${
                             selectedOptions[opt.name] === val ? 'active' : ''
                           }`}
                           onClick={() => handleOptionChange(opt.name, val)}
@@ -212,7 +212,7 @@ const ProductSheet = memo(({ product, onClose, shopDomain, onProductAction, isMo
                     </div>
                   ) : (
                     <select
-                      className={`yuume-variant-select ${isMissing ? 'error' : ''}`}
+                      className={`jarbris-variant-select ${isMissing ? 'error' : ''}`}
                       value={selectedOptions[opt.name] || ''}
                       onChange={(e) => handleOptionChange(opt.name, e.target.value)}
                     >

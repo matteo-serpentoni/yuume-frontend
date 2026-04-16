@@ -1,4 +1,4 @@
-.yuume-products-container {
+.jarbris-products-container {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -6,7 +6,7 @@
   overflow: visible; /* Ensure shadows aren't clipped */
 }
 
-.yuume-products-header-message {
+.jarbris-products-header-message {
   font-size: 14px;
   color: white;
   font-weight: 500;
@@ -14,12 +14,12 @@
   padding: 0 4px;
 }
 
-.yuume-carousel-wrapper {
+.jarbris-carousel-wrapper {
   position: relative;
   width: 100%;
 }
 
-.yuume-carousel-nav-btn {
+.jarbris-carousel-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -44,37 +44,37 @@
 }
 
 /* Show buttons when the container is hovered (Desktop) */
-.yuume-carousel-wrapper:hover .yuume-carousel-nav-btn {
+.jarbris-carousel-wrapper:hover .jarbris-carousel-nav-btn {
   opacity: 1;
 }
 
-.yuume-carousel-nav-btn:hover {
+.jarbris-carousel-nav-btn:hover {
   background: #ffffff;
   transform: translateY(-50%) scale(1.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-.yuume-carousel-nav-btn.prev {
+.jarbris-carousel-nav-btn.prev {
   left: -12px;
 }
 
-.yuume-carousel-nav-btn.next {
+.jarbris-carousel-nav-btn.next {
   right: -12px;
 }
 
-.yuume-carousel-nav-btn svg {
+.jarbris-carousel-nav-btn svg {
   width: 16px;
   height: 16px;
 }
 
 /* Always show hints on mobile but might be too small, so keep hover logic primarily for desktop */
 @media (max-width: 768px) {
-  .yuume-carousel-nav-btn {
+  .jarbris-carousel-nav-btn {
     display: none; /* Swipe is better for mobile */
   }
 }
 
-.yuume-products-list {
+.jarbris-products-list {
   display: flex;
   flex-direction: row;
   gap: 12px;
@@ -87,17 +87,17 @@
   scrollbar-width: none; /* Firefox */
 }
 
-.yuume-products-list::-webkit-scrollbar {
+.jarbris-products-list::-webkit-scrollbar {
   display: none; /* Chrome/Safari */
 }
 
-.yuume-product-card-perspective {
+.jarbris-product-card-perspective {
   perspective: 1000px;
   flex: 0 0 270px; /* Wider for better text readability */
   scroll-snap-align: start;
 }
 
-.yuume-product-card-minimal {
+.jarbris-product-card-minimal {
   position: relative;
   width: 100%;
   padding: 0;
@@ -115,7 +115,7 @@
   grid-template-areas: 'stack';
 }
 
-.yuume-product-side {
+.jarbris-product-side {
   grid-area: stack; /* Both sides occupy same space */
   width: 100%;
   height: 100%;
@@ -138,7 +138,7 @@
 
 /* Back side MUST be absolute to not affect height if it's different, 
    but ideally we want them same height. For flip cards, we take the largest. */
-.yuume-card-back {
+.jarbris-card-back {
   position: absolute;
   top: 0;
   left: 0;
@@ -149,33 +149,33 @@
 }
 
 /* Interaction layers */
-.yuume-product-card-minimal:not(.is-flipped) .yuume-card-front {
+.jarbris-product-card-minimal:not(.is-flipped) .jarbris-card-front {
   z-index: 2;
   pointer-events: auto;
 }
-.yuume-product-card-minimal.is-flipped .yuume-card-front {
+.jarbris-product-card-minimal.is-flipped .jarbris-card-front {
   z-index: 1;
   pointer-events: none;
 }
-.yuume-product-card-minimal.is-flipped .yuume-card-back {
+.jarbris-product-card-minimal.is-flipped .jarbris-card-back {
   z-index: 2;
   pointer-events: auto;
 }
-.yuume-product-card-minimal:not(.is-flipped) .yuume-card-back {
+.jarbris-product-card-minimal:not(.is-flipped) .jarbris-card-back {
   z-index: 1;
   pointer-events: none;
 }
 
-.yuume-product-card-minimal.clickable {
+.jarbris-product-card-minimal.clickable {
   cursor: pointer;
 }
 
-.yuume-product-card-minimal.clickable:not(.is-flipped):hover {
+.jarbris-product-card-minimal.clickable:not(.is-flipped):hover {
   transform: translateY(-4px);
 }
 
 /* Hero Image Section */
-.yuume-product-card-minimal .yuume-product-image-container {
+.jarbris-product-card-minimal .jarbris-product-image-container {
   width: 100%;
   aspect-ratio: 1 / 0.45; /* Ultra-compact image */
   border-radius: 12px;
@@ -190,18 +190,18 @@
   transition: transform 0.4s ease;
 }
 
-.yuume-product-image-container:not(.no-image) {
+.jarbris-product-image-container:not(.no-image) {
   cursor: pointer;
 }
 
-.yuume-product-image-container.no-image {
+.jarbris-product-image-container.no-image {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
   border: 1px solid rgba(255, 255, 255, 0.08); /* Solid faint border */
   position: relative;
   overflow: hidden;
 }
 
-.yuume-product-image-container.no-image::after {
+.jarbris-product-image-container.no-image::after {
   content: '';
   position: absolute;
   top: 0;
@@ -214,10 +214,10 @@
     rgba(255, 255, 255, 0.03) 50%,
     transparent 100%
   );
-  animation: yuume-shimmer 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  animation: jarbris-shimmer 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes yuume-shimmer {
+@keyframes jarbris-shimmer {
   0% {
     left: -100%;
   }
@@ -229,11 +229,11 @@
   }
 }
 
-.yuume-product-card-minimal:hover .yuume-product-image-container:not(.no-image) {
+.jarbris-product-card-minimal:hover .jarbris-product-image-container:not(.no-image) {
   transform: scale(1.02);
 }
 
-.yuume-product-card-minimal .yuume-product-image-container img {
+.jarbris-product-card-minimal .jarbris-product-image-container img {
   width: 100%;
   height: 100%;
   object-fit: contain; /* Safe for products, no cropping */
@@ -241,7 +241,7 @@
   transition: transform 0.4s cubic-bezier(0.2, 0, 0.2, 1);
 }
 
-.yuume-image-zoom-overlay {
+.jarbris-image-zoom-overlay {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.2);
@@ -255,20 +255,20 @@
   color: white;
 }
 
-.yuume-product-image-container:hover .yuume-image-zoom-overlay {
+.jarbris-product-image-container:hover .jarbris-image-zoom-overlay {
   opacity: 1;
 }
 
-.yuume-image-zoom-overlay svg {
+.jarbris-image-zoom-overlay svg {
   transform: scale(0.8);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.yuume-product-image-container:hover .yuume-image-zoom-overlay svg {
+.jarbris-product-image-container:hover .jarbris-image-zoom-overlay svg {
   transform: scale(1.2);
 }
 
-.yuume-product-placeholder {
+.jarbris-product-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -277,14 +277,14 @@
   height: 100%;
 }
 
-.yuume-product-placeholder svg {
+.jarbris-product-placeholder svg {
   width: 60px;
   height: 60px;
   stroke-width: 0.8;
   opacity: 0.5;
 }
 
-.yuume-product-discount-badge {
+.jarbris-product-discount-badge {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -302,7 +302,7 @@
   pointer-events: none;
 }
 
-.yuume-product-info {
+.jarbris-product-info {
   display: flex;
   flex-direction: column;
   padding: 4px 8px 2px 8px;
@@ -310,7 +310,7 @@
   flex: 1; /* Take remaining space */
 }
 
-.yuume-product-card-minimal .yuume-product-name {
+.jarbris-product-card-minimal .jarbris-product-name {
   font-size: 13px;
   font-weight: 700;
   margin: 0;
@@ -325,18 +325,18 @@
   height: 30px; /* Tight fixed height for 2 lines */
 }
 
-.yuume-product-link-wrapper {
+.jarbris-product-link-wrapper {
   text-decoration: none;
   display: block;
 }
 
-.yuume-product-name {
+.jarbris-product-name {
   display: flex !important;
   align-items: flex-start;
   gap: 4px;
 }
 
-.yuume-product-name svg {
+.jarbris-product-name svg {
   width: 10px;
   height: 10px;
   flex-shrink: 0;
@@ -347,16 +347,16 @@
     transform 0.2s;
 }
 
-.yuume-product-link-wrapper:hover .yuume-product-name {
+.jarbris-product-link-wrapper:hover .jarbris-product-name {
   color: #10b981;
 }
 
-.yuume-product-link-wrapper:hover svg {
+.jarbris-product-link-wrapper:hover svg {
   opacity: 1;
   transform: translate(1px, -1px);
 }
 
-.yuume-product-price-row {
+.jarbris-product-price-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -364,20 +364,20 @@
   padding-bottom: 0px;
 }
 
-.yuume-price-stack {
+.jarbris-price-stack {
   display: flex;
   flex-direction: column;
   gap: 0px;
 }
 
-.yuume-product-card-minimal .yuume-original-price {
+.jarbris-product-card-minimal .jarbris-original-price {
   font-size: 9px;
   color: rgba(255, 255, 255, 0.5);
   text-decoration: line-through;
   font-weight: 600;
 }
 
-.yuume-product-card-minimal .yuume-current-price {
+.jarbris-product-card-minimal .jarbris-current-price {
   font-size: 14px;
   font-weight: 800;
   color: #10b981; /* Default to white, but green if discounted? Let's keep white for bento style or emerald for emphasis */
@@ -386,13 +386,13 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-.yuume-original-price + .yuume-current-price {
+.jarbris-original-price + .jarbris-current-price {
   color: #10b981; /* Highlight current price if there is an original price */
   text-shadow: none; /* Removed shadow from discounted price as requested */
 }
 
 /* Actions Section */
-.yuume-product-card-footer {
+.jarbris-product-card-footer {
   width: 100%;
   display: flex;
   gap: 6px;
@@ -401,11 +401,11 @@
   box-sizing: border-box;
 }
 
-.yuume-card-spacer {
+.jarbris-card-spacer {
   flex: 1;
 }
 
-.yuume-options-btn {
+.jarbris-options-btn {
   flex: 1;
   height: 30px !important;
   border-radius: 14px;
@@ -430,24 +430,24 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.yuume-options-btn:hover {
+.jarbris-options-btn:hover {
   background: #f8fafc;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
 }
 
-.yuume-product-card-footer .yuume-add-to-cart-wrapper {
+.jarbris-product-card-footer .jarbris-add-to-cart-wrapper {
   flex: 1.2;
   display: flex;
   width: 100%;
 }
 
-.yuume-card-spacer {
+.jarbris-card-spacer {
   flex: 1;
 }
 
 /* Details toggle in price row */
-.yuume-product-details-toggle {
+.jarbris-product-details-toggle {
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.4);
@@ -466,13 +466,13 @@
   border-bottom: 1px solid transparent;
 }
 
-.yuume-product-details-toggle:hover {
+.jarbris-product-details-toggle:hover {
   color: #10b981;
   border-bottom-color: rgba(16, 185, 129, 0.4);
 }
 
 /* Back Side Refined Layout */
-.yuume-back-content {
+.jarbris-back-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -484,7 +484,7 @@
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
-.yuume-back-header {
+.jarbris-back-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -492,7 +492,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.yuume-back-title {
+.jarbris-back-title {
   display: block;
   font-size: 13px;
   font-weight: 800;
@@ -501,7 +501,7 @@
   margin: 0;
 }
 
-.yuume-product-close-btn {
+.jarbris-product-close-btn {
   background: rgba(255, 255, 255, 0.05);
   border: none;
   color: rgba(255, 255, 255, 0.4);
@@ -514,30 +514,30 @@
   cursor: pointer;
 }
 
-.yuume-product-close-btn:hover {
+.jarbris-product-close-btn:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.1);
 }
 
-.yuume-product-close-btn svg {
+.jarbris-product-close-btn svg {
   width: 12px;
   height: 12px;
 }
 
-.yuume-product-details-list {
+.jarbris-product-details-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.yuume-product-description {
+.jarbris-product-description {
   font-size: 12px;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.82);
   margin: 0;
 }
 
-.yuume-detail-grid {
+.jarbris-detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
@@ -546,7 +546,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.yuume-detail-item .label {
+.jarbris-detail-item .label {
   display: block;
   font-size: 9px;
   font-weight: 700;
@@ -556,19 +556,19 @@
   margin-bottom: 2px;
 }
 
-.yuume-detail-item .value {
+.jarbris-detail-item .value {
   font-size: 12px;
   font-weight: 600;
   color: #ffffff;
 }
 
-.yuume-product-tags {
+.jarbris-product-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
 
-.yuume-tag-pill {
+.jarbris-tag-pill {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.6);
@@ -578,7 +578,7 @@
   font-weight: 600;
 }
 
-.yuume-view-in-store-btn {
+.jarbris-view-in-store-btn {
   margin-top: auto;
   width: 100%;
   height: 36px;
@@ -600,25 +600,25 @@
   backdrop-filter: blur(8px);
 }
 
-.yuume-view-in-store-btn:hover {
+.jarbris-view-in-store-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   border-color: #10b981;
   transform: translateY(-2px);
 }
 
-.yuume-view-in-store-btn svg {
+.jarbris-view-in-store-btn svg {
   width: 12px;
   height: 12px;
   opacity: 0.7;
 }
 
-.yuume-view-in-store-btn:hover svg {
+.jarbris-view-in-store-btn:hover svg {
   opacity: 1;
   transform: translate(1px, -1px);
 }
 
 /* Floating return button on back */
-.yuume-back-return-overlay-btn {
+.jarbris-back-return-overlay-btn {
   position: absolute;
   bottom: 12px;
   right: 12px;
@@ -638,12 +638,12 @@
     background 0.3s ease;
 }
 
-.yuume-back-return-overlay-btn:hover {
+.jarbris-back-return-overlay-btn:hover {
   transform: scale(1.1) rotate(90deg);
   background: #10b981;
 }
 
-.yuume-back-return-overlay-btn svg {
+.jarbris-back-return-overlay-btn svg {
   width: 14px;
   height: 14px;
 }
@@ -652,31 +652,31 @@
 
 /* --- DRAWER CONTENT (PRODUCT SPECIFIC) --- */
 
-.yuume-drawer-price-section {
+.jarbris-drawer-price-section {
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   margin-bottom: 12px;
 }
 
-.yuume-drawer-price-section .yuume-current-price {
+.jarbris-drawer-price-section .jarbris-current-price {
   font-size: 20px;
   font-weight: 800;
   color: #10b981;
 }
 
-.yuume-drawer-variants {
+.jarbris-drawer-variants {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.yuume-variant-group {
+.jarbris-variant-group {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
 
-.yuume-variant-label {
+.jarbris-variant-label {
   font-size: 10px;
   color: #64748b;
   font-weight: 700;
@@ -685,7 +685,7 @@
   margin-bottom: 2px;
 }
 
-.yuume-add-to-cart-btn {
+.jarbris-add-to-cart-btn {
   flex: 1;
   width: 100% !important;
   min-width: 0 !important;
@@ -695,7 +695,7 @@
 }
 
 /* Image Badges */
-.yuume-stock-status-badge-container {
+.jarbris-stock-status-badge-container {
   position: absolute;
   bottom: 8px;
   left: 8px;
@@ -707,7 +707,7 @@
   pointer-events: none;
 }
 
-.yuume-stock-status-badge {
+.jarbris-stock-status-badge {
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -723,7 +723,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.yuume-stock-urgency-badge {
+.jarbris-stock-urgency-badge {
   position: relative;
   background: #ef4444; /* Bright Red for urgency */
   color: #ffffff;
@@ -735,17 +735,17 @@
   overflow: visible;
 }
 
-.yuume-stock-urgency-badge::after {
+.jarbris-stock-urgency-badge::after {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
   background: rgba(239, 68, 68, 0.5);
   z-index: -1;
-  animation: yuume-urgency-pulse 1.5s infinite ease-in-out;
+  animation: jarbris-urgency-pulse 1.5s infinite ease-in-out;
 }
 
-@keyframes yuume-urgency-pulse {
+@keyframes jarbris-urgency-pulse {
   0% {
     opacity: 0.6;
     transform: scale(1);
@@ -761,12 +761,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .yuume-stock-urgency-badge::after {
+  .jarbris-stock-urgency-badge::after {
     animation: none;
   }
 }
 
-.yuume-stock-dot {
+.jarbris-stock-dot {
   width: 5px;
   height: 5px;
   background: #10b981;
@@ -774,13 +774,13 @@
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
-.yuume-pills-container {
+.jarbris-pills-container {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
 
-.yuume-pill {
+.jarbris-pill {
   padding: 7px 14px;
   font-size: 11px;
   font-weight: 600;
@@ -796,21 +796,21 @@
     transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.yuume-pill:hover {
+.jarbris-pill:hover {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.2);
   color: #ffffff;
   transform: translateY(-1px);
 }
 
-.yuume-pill.active {
+.jarbris-pill.active {
   background: #ffffff;
   color: #121212;
   border-color: #ffffff;
   box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
 }
 
-.yuume-variant-select {
+.jarbris-variant-select {
   width: 100%;
   padding: 6px 10px;
   border-radius: 8px;
@@ -824,77 +824,77 @@
   transition: border-color 0.2s, background 0.2s;
 }
 
-.yuume-variant-select:focus {
+.jarbris-variant-select:focus {
   border-color: rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.1);
 }
 
-.yuume-products-footer-link {
+.jarbris-products-footer-link {
   text-align: center;
   padding: 8px 0;
 }
 
-.yuume-products-footer-link a {
+.jarbris-products-footer-link a {
   color: rgba(255, 255, 255, 0.8);
   font-size: 11px;
   text-decoration: underline;
 }
 
-.yuume-no-products {
+.jarbris-no-products {
   color: white;
   font-size: 14px;
   padding: 10px;
 }
 
 /* Mobile GPU optimization: reduce backdrop-filter blur */
-.mobile-device .yuume-product-card-side {
+.mobile-device .jarbris-product-card-side {
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 
-.mobile-device .yuume-stock-status-badge {
+.mobile-device .jarbris-stock-status-badge {
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
 
-.mobile-device .yuume-back-gallery {
+.mobile-device .jarbris-back-gallery {
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
 
 /* --- PRODUCT SHEET VALIDATION & FOOTER --- */
 
-.yuume-sheet-footer-inner {
+.jarbris-sheet-footer-inner {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
 }
 
-.yuume-sheet-validation-error {
+.jarbris-sheet-validation-error {
   margin: 0;
   font-size: 11px;
   color: #ef4444; /* red-500 */
   font-weight: 600;
   text-align: center;
-  animation: yuume-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation: jarbris-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-.yuume-variant-group--error .yuume-variant-label {
+.jarbris-variant-group--error .jarbris-variant-label {
   color: #ef4444;
 }
 
-.yuume-variant-required-badge {
+.jarbris-variant-required-badge {
   color: #ef4444;
   font-weight: 800;
 }
 
-.yuume-variant-select.error {
+.jarbris-variant-select.error {
   border-color: #fca5a5; /* red-300 */
   background-color: #fef2f2; /* red-50 */
 }
 
-@keyframes yuume-shake {
+@keyframes jarbris-shake {
   10%, 90% { transform: translate3d(-1px, 0, 0); }
   20%, 80% { transform: translate3d(2px, 0, 0); }
   30%, 50%, 70% { transform: translate3d(-2px, 0, 0); }

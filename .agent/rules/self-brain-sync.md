@@ -1,6 +1,6 @@
 # Self Brain Sync Rules
 
-Jarbris has a "Self Brain" — a knowledge layer in `yuume-api/services/selfBrain/` that describes its own UI elements, capabilities, and privacy behavior. This data is used to answer user questions like "what does this button do?" or "how do I register?".
+Jarbris has a "Self Brain" — a knowledge layer in `jarbris-api/services/selfBrain/` that describes its own UI elements, capabilities, and privacy behavior. This data is used to answer user questions like "what does this button do?" or "how do I register?".
 
 ## 1. When Widget Changes Trigger API Updates
 
@@ -19,7 +19,7 @@ Any change to the following areas in the widget **MUST** trigger a corresponding
 
 When your widget change affects any of the above:
 
-1. **Flag it** in the implementation plan: "This change requires a Self Brain update in `yuume-api`"
+1. **Flag it** in the implementation plan: "This change requires a Self Brain update in `jarbris-api`"
 2. **Specify which registries** need updating
 3. **Include the update** in the same task if possible, or create a follow-up task
 

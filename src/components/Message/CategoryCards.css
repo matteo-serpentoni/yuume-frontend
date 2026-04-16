@@ -1,6 +1,6 @@
 /* CategoryCards.css */
 
-.yuume-category-card {
+.jarbris-category-card {
   width: 100%;
   min-width: 260px;
   max-width: 340px;
@@ -22,7 +22,7 @@
     transform 0.2s ease;
 }
 
-.yuume-category-card-image-container {
+.jarbris-category-card-image-container {
   width: 48px;
   height: 48px;
   border-radius: 10px;
@@ -35,49 +35,49 @@
   border: 1px solid #e2e8f0;
 }
 
-.yuume-category-card-image {
+.jarbris-category-card-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.yuume-category-placeholder {
+.jarbris-category-placeholder {
   font-size: 20px;
 }
 
-.yuume-category-info {
+.jarbris-category-info {
   flex: 1;
   min-width: 0;
   text-align: left;
 }
 
-.yuume-category-name {
+.jarbris-category-name {
   font-size: 14px;
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 2px;
 }
 
-.yuume-category-count {
+.jarbris-category-count {
   font-size: 12px;
   color: #64748b;
   font-weight: 500;
 }
 
-.yuume-category-arrow {
+.jarbris-category-arrow {
   color: #94a3b8;
   font-size: 12px;
   display: flex;
   align-items: center;
 }
 
-.yuume-category-cards-container {
+.jarbris-category-cards-container {
   width: auto;
   pointer-events: auto;
   box-sizing: border-box;
 }
 
-.yuume-category-intro {
+.jarbris-category-intro {
   font-size: 14px;
   color: white;
   margin-bottom: 10px;
@@ -87,13 +87,13 @@
   padding: 0 4px;
 }
 
-.yuume-category-list {
+.jarbris-category-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.yuume-category-help-text {
+.jarbris-category-help-text {
   margin-top: 8px;
   font-size: 11px;
   color: rgba(255, 255, 255, 0.6);

@@ -1,6 +1,6 @@
 # Socket.io Client Rules
 
-These rules define the real-time communication patterns for yuume-widget.
+These rules define the real-time communication patterns for jarbris-widget.
 
 ## 1. Connection Management
 

@@ -11,13 +11,13 @@ export const BRIDGE_CONFIG = {
     'http://localhost:5001', // Local API
     'https://yuumechat.com',
     'https://widget.yuumechat.com',
-    'https://yuume-widget.vercel.app',
-    'https://yuume-dashboard.vercel.app',
+    'https://jarbris-widget.vercel.app',
+    'https://jarbris-dashboard.vercel.app',
     'https://cdn.shopify.com', // Shopify Previews
   ],
 
-  // Prefix required for all Yuume-related messages
-  prefix: 'YUUME:',
+  // Prefix required for all Jarbris-related messages
+  prefix: 'JARBRIS:',
 
   // Helper to validate origin
   isValidOrigin: (origin, authorizedDomain = null, messageType = null) => {
@@ -36,7 +36,7 @@ export const BRIDGE_CONFIG = {
     }
 
     // 3. Bootstrap Handshake: If we don't have an authorized domain yet,
-    // we allow messages that follow our protocol (YUUME: prefix).
+    // we allow messages that follow our protocol (JARBRIS: prefix).
     // This allows custom domains to initiate the handshake.
     if (!authorizedDomain && messageType && BRIDGE_CONFIG.hasPrefix(messageType)) {
       return true;
@@ -52,9 +52,9 @@ export const BRIDGE_CONFIG = {
 
   // Standard checkout message types (for reference / documentation)
   checkoutMessages: {
-    GET_URL: 'YUUME:getCheckoutUrl',
-    URL_RESPONSE: 'YUUME:checkoutUrlResponse',
-    FALLBACK: 'YUUME:checkoutFallback',
-    COMPLETE: 'YUUME:checkoutComplete',
+    GET_URL: 'JARBRIS:getCheckoutUrl',
+    URL_RESPONSE: 'JARBRIS:checkoutUrlResponse',
+    FALLBACK: 'JARBRIS:checkoutFallback',
+    COMPLETE: 'JARBRIS:checkoutComplete',
   },
 };

@@ -220,10 +220,10 @@ const MessageList = memo(
       // 6. Return Submitted (Final Step)
       if (msg.type?.toLowerCase() === 'return_submitted') {
         return (
-          <div className="yuume-return-success-block">
-            <div className="yuume-return-success-glow" />
-            <div className="yuume-success-check-wrapper">
-              <div className="yuume-success-check">
+          <div className="jarbris-return-success-block">
+            <div className="jarbris-return-success-glow" />
+            <div className="jarbris-success-check-wrapper">
+              <div className="jarbris-success-check">
                 <svg viewBox="0 0 52 52">
                   <title>Successo</title>
                   <circle cx="26" cy="26" r="25" fill="none" />
@@ -231,7 +231,7 @@ const MessageList = memo(
                 </svg>
               </div>
             </div>
-            <div className="yuume-return-success-text">
+            <div className="jarbris-return-success-text">
               <h4>Richiesta Ricevuta!</h4>
               <p>{msg.message}</p>
             </div>
@@ -335,7 +335,7 @@ const MessageList = memo(
       ].includes(type?.toLowerCase());
 
       return (
-        <div className={`yuume-message-block ${isStandalone ? 'standalone' : ''}`}>
+        <div className={`jarbris-message-block ${isStandalone ? 'standalone' : ''}`}>
           {!isStandalone ? (
             <MessageBubble
               sender={msg.sender}
@@ -362,7 +362,7 @@ const MessageList = memo(
                   <TextMessage message={{ text: msg.text }} />
                 </MessageBubble>
               )}
-              <div className="yuume-standalone-content">{content}</div>
+              <div className="jarbris-standalone-content">{content}</div>
             </>
           )}
 
@@ -386,7 +386,7 @@ const MessageList = memo(
     return (
       <div
         ref={messagesAreaRef}
-        className={`messages-area ${activeProduct || activeOrder ? 'yuume-drawer-active' : ''}`}
+        className={`messages-area ${activeProduct || activeOrder ? 'jarbris-drawer-active' : ''}`}
         aria-live="polite"
         aria-atomic="false"
       >
@@ -399,7 +399,7 @@ const MessageList = memo(
               <motion.div
                 key={msg.id}
                 ref={index === chatBlocks.length - 1 ? lastMessageRef : null}
-                className="yuume-message-wrapper"
+                className="jarbris-message-wrapper"
                 initial={isHydrated ? false : { opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{

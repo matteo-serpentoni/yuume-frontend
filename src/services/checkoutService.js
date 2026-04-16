@@ -12,7 +12,7 @@
  *
  * The service handles:
  *   a) Requesting checkout URL from host via bridge
- *   b) Requesting checkout config from yuume-api (for future inline mode)
+ *   b) Requesting checkout config from jarbris-api (for future inline mode)
  *   c) Presenting checkout (popup or new tab)
  *   d) Listening for checkout lifecycle events
  *   e) Cleanup on close/complete
@@ -39,7 +39,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 let pendingCallback = null;
 
 /**
- * Listens for the YUUME:checkoutUrlResponse bridge message (one-shot).
+ * Listens for the JARBRIS:checkoutUrlResponse bridge message (one-shot).
  *
  * @returns {Promise<{ checkoutUrl: string|null, itemCount: number }>}
  */
@@ -140,7 +140,7 @@ function openCheckoutPopup(url) {
 
   const popup = window.open(
     url,
-    'yuume_checkout',
+    'jarbris_checkout',
     `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`,
   );
 

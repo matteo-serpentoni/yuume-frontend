@@ -53,10 +53,10 @@
   function getVisitorId() {
     try {
       // Migration: rename legacy keys to unified name
-      var legacy = localStorage.getItem('yuume_visitor_id');
+      var legacy = localStorage.getItem('jarbris_visitor_id');
       if (legacy) {
         localStorage.setItem('jarbris_visitor_id', legacy);
-        localStorage.removeItem('yuume_visitor_id');
+        localStorage.removeItem('jarbris_visitor_id');
         return legacy;
       }
       var legacyAnon = localStorage.getItem('jarbris_anon_id');
@@ -222,7 +222,7 @@
     '&shop=' +
     encodeURIComponent(SHOP_DOMAIN);
 
-  iframe.id = 'yuume-orb-iframe';
+  iframe.id = 'jarbris-orb-iframe';
   iframe.allow = 'clipboard-write;';
   iframe.style.position = 'fixed';
   iframe.style.bottom = '0px';
@@ -239,7 +239,7 @@
   iframe.onload = function () {
     iframe.contentWindow.postMessage(
       {
-        type: 'YUUME:shopDomain',
+        type: 'JARBRIS:shopDomain',
         shopDomain: SHOP_DOMAIN,
         widgetToken: tokenParam,
         visitorId: VISITOR_ID,
@@ -284,7 +284,7 @@
         // Only send update if item count actually changed
         if (count !== lastCartCount) {
           lastCartCount = count;
-          iframe.contentWindow.postMessage({ type: 'YUUME:cartUpdate', cart: cart }, WIDGET_ORIGIN);
+          iframe.contentWindow.postMessage({ type: 'JARBRIS:cartUpdate', cart: cart }, WIDGET_ORIGIN);
         }
       })
       .catch(function () {});
@@ -294,7 +294,7 @@
   const cartSyncInterval = setInterval(syncCart, 5000);
 
   // Also sync on Shopify theme cart events
-  ['cart:refresh', 'cart:updated', 'yuume:cart-updated'].forEach(function (evt) {
+  ['cart:refresh', 'cart:updated', 'jarbris:cart-updated'].forEach(function (evt) {
     document.addEventListener(evt, syncCart);
   });
 
@@ -316,7 +316,7 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // FATAL ERROR (Self-Destruct to avoid blocking UI)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:fatalError') {
+    if (event.data.type === 'JARBRIS:fatalError') {
       iframe.style.display = 'none';
       return;
     }
@@ -324,10 +324,10 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // SHOP DOMAIN REQUEST
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:requestShopDomain') {
+    if (event.data.type === 'JARBRIS:requestShopDomain') {
       iframe.contentWindow.postMessage(
         {
-          type: 'YUUME:shopDomain',
+          type: 'JARBRIS:shopDomain',
           shopDomain: SHOP_DOMAIN,
           widgetToken: tokenParam,
         },
@@ -338,10 +338,10 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // IDENTITY REQUEST (from widget Ready)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:ready') {
+    if (event.data.type === 'JARBRIS:ready') {
       iframe.contentWindow.postMessage(
         {
-          type: 'YUUME:identity',
+          type: 'JARBRIS:identity',
           visitorId: VISITOR_ID,
           sessionId: getOrCreateSessionId(),
           customer: getShopifyIdentity(),
@@ -354,7 +354,7 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // NEW SESSION REQUEST (from widget clearChat)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:requestNewSession') {
+    if (event.data.type === 'JARBRIS:requestNewSession') {
       try {
         localStorage.removeItem(SESSION_KEY);
         localStorage.removeItem(SESSION_TIME_KEY);
@@ -363,7 +363,7 @@
       }
       iframe.contentWindow.postMessage(
         {
-          type: 'YUUME:identity',
+          type: 'JARBRIS:identity',
           visitorId: VISITOR_ID,
           sessionId: getOrCreateSessionId(),
           customer: getShopifyIdentity(),
@@ -376,28 +376,28 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // CHAT OPENED (utente apre chat)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:chatOpened') {
+    if (event.data.type === 'JARBRIS:chatOpened') {
       notifyChatStart();
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // CHAT CLOSED (utente chiude chat)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:chatClosed') {
+    if (event.data.type === 'JARBRIS:chatClosed') {
       notifyChatEnd();
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // GET CART
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:getCart') {
+    if (event.data.type === 'JARBRIS:getCart') {
       syncCart();
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // ADD TO CART
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:addToCart') {
+    if (event.data.type === 'JARBRIS:addToCart') {
       let addDataCache = null;
       let cartCache = null;
 
@@ -505,7 +505,7 @@
 
                 document.dispatchEvent(new Event('cart:refresh'));
                 document.dispatchEvent(new Event('cart:updated'));
-                document.dispatchEvent(new CustomEvent('yuume:cart-updated', { detail: cart }));
+                document.dispatchEvent(new CustomEvent('jarbris:cart-updated', { detail: cart }));
               })
               .catch(() => {});
           }
@@ -513,7 +513,7 @@
         .then(() => {
           iframe.contentWindow.postMessage(
             {
-              type: 'YUUME:addToCartResponse',
+              type: 'JARBRIS:addToCartResponse',
               success: true,
               data: { addData: addDataCache, cart: cartCache },
             },
@@ -523,7 +523,7 @@
         .catch((error) => {
           iframe.contentWindow.postMessage(
             {
-              type: 'YUUME:addToCartResponse',
+              type: 'JARBRIS:addToCartResponse',
               success: false,
               error: error.message,
             },
@@ -535,7 +535,7 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // CHECKOUT — Get Checkout URL
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:getCheckoutUrl') {
+    if (event.data.type === 'JARBRIS:getCheckoutUrl') {
       fetch('/cart.js', { credentials: 'same-origin' })
         .then(function (r) {
           return r.json();
@@ -551,7 +551,7 @@
           }
           iframe.contentWindow.postMessage(
             {
-              type: 'YUUME:checkoutUrlResponse',
+              type: 'JARBRIS:checkoutUrlResponse',
               checkoutUrl: checkoutUrl,
               itemCount: cart ? cart.item_count : 0,
             },
@@ -561,7 +561,7 @@
         .catch(function () {
           iframe.contentWindow.postMessage(
             {
-              type: 'YUUME:checkoutUrlResponse',
+              type: 'JARBRIS:checkoutUrlResponse',
               checkoutUrl: null,
               error: 'cart_fetch_failed',
             },
@@ -573,14 +573,14 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // CHECKOUT — Fallback (open in new tab)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:checkoutFallback') {
+    if (event.data.type === 'JARBRIS:checkoutFallback') {
       window.open('/checkout', '_blank');
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // CHECKOUT — Complete (resync cart)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:checkoutComplete') {
+    if (event.data.type === 'JARBRIS:checkoutComplete') {
       lastCartCount = -1; // Force resync
       syncCart();
       document.dispatchEvent(new Event('cart:refresh'));
@@ -590,7 +590,7 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // RESIZE
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (event.data.type === 'YUUME:resize') {
+    if (event.data.type === 'JARBRIS:resize') {
       touchSessionTime(); // Keep session alive while widget is active
       const { enlarged, width, height } = event.data;
 

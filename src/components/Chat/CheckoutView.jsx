@@ -25,7 +25,7 @@ const CheckoutView = memo(({ checkoutState, checkoutMode, error, onClose }) => {
 
   return (
     <motion.div
-      className="yuume-checkout-overlay"
+      className="jarbris-checkout-overlay"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -33,12 +33,12 @@ const CheckoutView = memo(({ checkoutState, checkoutMode, error, onClose }) => {
     >
       {/* Header — always visible except in completed state */}
       {checkoutState !== 'completed' && (
-        <div className="yuume-checkout-header">
-          <span className="yuume-checkout-header-title">
+        <div className="jarbris-checkout-header">
+          <span className="jarbris-checkout-header-title">
             {checkoutState === 'loading' ? 'Checkout' : 'Pagamento'}
           </span>
           <button
-            className="yuume-checkout-back-btn"
+            className="jarbris-checkout-back-btn"
             onClick={onClose}
             aria-label="Torna alla chat"
           >
@@ -50,9 +50,9 @@ const CheckoutView = memo(({ checkoutState, checkoutMode, error, onClose }) => {
 
       {/* LOADING STATE */}
       {checkoutState === 'loading' && (
-        <div className="yuume-checkout-loading">
-          <div className="yuume-checkout-loading-spinner" />
-          <span className="yuume-checkout-loading-text">Preparazione pagamento...</span>
+        <div className="jarbris-checkout-loading">
+          <div className="jarbris-checkout-loading-spinner" />
+          <span className="jarbris-checkout-loading-text">Preparazione pagamento...</span>
         </div>
       )}
 
@@ -61,21 +61,21 @@ const CheckoutView = memo(({ checkoutState, checkoutMode, error, onClose }) => {
        *
        * When Shopify Checkout Kit Web goes stable, add:
        *   {checkoutState === 'presenting' && checkoutMode === 'inline' && (
-       *     <div className="yuume-checkout-body" ref={checkoutContainerRef} />
+       *     <div className="jarbris-checkout-body" ref={checkoutContainerRef} />
        *   )}
        */}
 
       {/* PRESENTING — POPUP MODE */}
       {checkoutState === 'presenting' && checkoutMode === 'popup' && (
-        <div className="yuume-checkout-popup-active">
-          <div className="yuume-checkout-popup-icon">
+        <div className="jarbris-checkout-popup-active">
+          <div className="jarbris-checkout-popup-icon">
             <ExternalLinkIcon />
           </div>
-          <h3 className="yuume-checkout-popup-title">Checkout in corso</h3>
-          <p className="yuume-checkout-popup-text">
+          <h3 className="jarbris-checkout-popup-title">Checkout in corso</h3>
+          <p className="jarbris-checkout-popup-text">
             Il pagamento si è aperto in una nuova finestra. Completa il pagamento e torna qui.
           </p>
-          <button className="yuume-checkout-popup-btn" onClick={onClose}>
+          <button className="jarbris-checkout-popup-btn" onClick={onClose}>
             Torna alla chat
           </button>
         </div>
@@ -83,13 +83,13 @@ const CheckoutView = memo(({ checkoutState, checkoutMode, error, onClose }) => {
 
       {/* PRESENTING — NEW TAB MODE */}
       {checkoutState === 'presenting' && checkoutMode === 'newtab' && (
-        <div className="yuume-checkout-popup-active">
-          <div className="yuume-checkout-popup-icon">
+        <div className="jarbris-checkout-popup-active">
+          <div className="jarbris-checkout-popup-icon">
             <ExternalLinkIcon />
           </div>
-          <h3 className="yuume-checkout-popup-title">Checkout aperto</h3>
-          <p className="yuume-checkout-popup-text">Il pagamento si è aperto in una nuova scheda.</p>
-          <button className="yuume-checkout-popup-btn" onClick={onClose}>
+          <h3 className="jarbris-checkout-popup-title">Checkout aperto</h3>
+          <p className="jarbris-checkout-popup-text">Il pagamento si è aperto in una nuova scheda.</p>
+          <button className="jarbris-checkout-popup-btn" onClick={onClose}>
             Torna alla chat
           </button>
         </div>
@@ -98,28 +98,28 @@ const CheckoutView = memo(({ checkoutState, checkoutMode, error, onClose }) => {
       {/* COMPLETED STATE */}
       {checkoutState === 'completed' && (
         <motion.div
-          className="yuume-checkout-completed"
+          className="jarbris-checkout-completed"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
           <motion.div
-            className="yuume-checkout-success-icon"
+            className="jarbris-checkout-success-icon"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 15 }}
           >
             <CheckCircleIcon />
           </motion.div>
-          <h3 className="yuume-checkout-success-text">Pagamento completato</h3>
-          <p className="yuume-checkout-success-sub">Grazie per il tuo acquisto</p>
+          <h3 className="jarbris-checkout-success-text">Pagamento completato</h3>
+          <p className="jarbris-checkout-success-sub">Grazie per il tuo acquisto</p>
         </motion.div>
       )}
 
       {/* ERROR STATE */}
       {checkoutState === 'error' && (
-        <div className="yuume-checkout-error">
-          <div className="yuume-checkout-error-icon">
+        <div className="jarbris-checkout-error">
+          <div className="jarbris-checkout-error-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
@@ -130,7 +130,7 @@ const CheckoutView = memo(({ checkoutState, checkoutMode, error, onClose }) => {
               />
             </svg>
           </div>
-          <p className="yuume-checkout-error-text">
+          <p className="jarbris-checkout-error-text">
             {error === 'cart_empty'
               ? 'Il carrello è vuoto.'
               : error === 'checkout_url_unavailable'
@@ -138,7 +138,7 @@ const CheckoutView = memo(({ checkoutState, checkoutMode, error, onClose }) => {
                 : 'Si è verificato un problema con il pagamento. Riprova o apri il checkout esternamente.'}
           </p>
           <button
-            className="yuume-checkout-error-btn"
+            className="jarbris-checkout-error-btn"
             onClick={onClose}
             aria-label="Torna alla chat"
           >

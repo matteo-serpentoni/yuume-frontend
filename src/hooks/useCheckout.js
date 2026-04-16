@@ -100,8 +100,8 @@ export function useCheckout({ onCartReset, onAddMessage } = {}) {
     setCheckoutState('idle');
     setCheckoutMode(null);
 
-    // Request cart resync — embed.js will send YUUME:cartUpdate
-    window.parent.postMessage({ type: 'YUUME:getCart' }, '*');
+    // Request cart resync — embed.js will send JARBRIS:cartUpdate
+    window.parent.postMessage({ type: 'JARBRIS:getCart' }, '*');
   }, [checkoutState]);
 
   /**

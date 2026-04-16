@@ -10,17 +10,17 @@ const OrderItemRow = memo(({ item, index, theme = 'dark' }) => {
       initial={{ opacity: 0, x: -5 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.03 }}
-      className={`yuume-order-item-row ${theme}`}
+      className={`jarbris-order-item-row ${theme}`}
     >
-      <div className="yuume-order-item-info">
-        <div className="yuume-order-item-title">{item.title}</div>
+      <div className="jarbris-order-item-info">
+        <div className="jarbris-order-item-title">{item.title}</div>
         {item.variantTitle && item.variantTitle !== 'Default Title' && (
-          <div className="yuume-order-item-variant">{item.variantTitle}</div>
+          <div className="jarbris-order-item-variant">{item.variantTitle}</div>
         )}
       </div>
-      <div className="yuume-order-item-right">
-        <div className="yuume-order-item-quantity">x{item.quantity}</div>
-        <div className="yuume-order-item-price">{item.price}</div>
+      <div className="jarbris-order-item-right">
+        <div className="jarbris-order-item-quantity">x{item.quantity}</div>
+        <div className="jarbris-order-item-price">{item.price}</div>
       </div>
     </motion.div>
   );
@@ -41,25 +41,25 @@ export const OrderDetailCard = memo(({ order, theme = 'dark' }) => {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`yuume-order-detail-card ${theme}`}
+      className={`jarbris-order-detail-card ${theme}`}
     >
       {/* Header */}
-      <div className="yuume-order-detail-header">
-        <div className="yuume-order-detail-header-top">
+      <div className="jarbris-order-detail-header">
+        <div className="jarbris-order-detail-header-top">
           <div>
-            <h4 className="yuume-order-number">{`#${normalizeOrderNumber(orderNumber)}`}</h4>
-            <p className="yuume-order-date">{createdAt}</p>
+            <h4 className="jarbris-order-number">{`#${normalizeOrderNumber(orderNumber)}`}</h4>
+            <p className="jarbris-order-date">{createdAt}</p>
           </div>
-          <div className="yuume-order-total-large">{total}</div>
+          <div className="jarbris-order-total-large">{total}</div>
         </div>
 
-        <div className="yuume-order-badges">
+        <div className="jarbris-order-badges">
           {paymentLabel && (
-            <span className={`yuume-status-badge ${getStatusClass(paymentLabel)}`}>
+            <span className={`jarbris-status-badge ${getStatusClass(paymentLabel)}`}>
               💳 {paymentLabel}
             </span>
           )}
-          <span className={`yuume-status-badge ${getStatusClass(statusLabel)}`}>
+          <span className={`jarbris-status-badge ${getStatusClass(statusLabel)}`}>
             📦 {statusLabel}
           </span>
           {tracking.length > 0 && (
@@ -67,7 +67,7 @@ export const OrderDetailCard = memo(({ order, theme = 'dark' }) => {
               href={tracking[0].url}
               target="_blank"
               rel="noreferrer"
-              className="yuume-tracking-link"
+              className="jarbris-tracking-link"
             >
               🚀 Traccia pacco
             </a>
@@ -76,8 +76,8 @@ export const OrderDetailCard = memo(({ order, theme = 'dark' }) => {
       </div>
 
       {/* Items */}
-      <div className="yuume-order-detail-items-container">
-        <p className="yuume-order-items-label">ARTICOLI ({items.length})</p>
+      <div className="jarbris-order-detail-items-container">
+        <p className="jarbris-order-items-label">ARTICOLI ({items.length})</p>
         <div>
           {items.map((item, idx) => (
             <OrderItemRow key={idx} item={item} index={idx} theme={theme} />
@@ -97,7 +97,7 @@ const OrderListRow = memo(({ order, index, onClick }) => {
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       onClick={isClickable ? () => onClick(order) : undefined}
-      className={`yuume-order-list-row ${isClickable ? 'clickable' : ''}`}
+      className={`jarbris-order-list-row ${isClickable ? 'clickable' : ''}`}
       whileHover={
         isClickable
           ? {
@@ -113,22 +113,22 @@ const OrderListRow = memo(({ order, index, onClick }) => {
         damping: 25,
       }}
     >
-      <div className="yuume-order-list-row-info">
-        <div className="yuume-order-row-top">
-          <span className="yuume-order-row-number">
+      <div className="jarbris-order-list-row-info">
+        <div className="jarbris-order-row-top">
+          <span className="jarbris-order-row-number">
             {order.orderNumber ? `#${normalizeOrderNumber(order.orderNumber)}` : order.createdAt}
           </span>
-          {order.orderNumber && <span className="yuume-order-row-date">• {order.createdAt}</span>}
+          {order.orderNumber && <span className="jarbris-order-row-date">• {order.createdAt}</span>}
         </div>
-        <div className="yuume-order-row-status">
+        <div className="jarbris-order-row-status">
           {typeof order.status === 'object'
             ? order.status.fulfillment || 'In elaborazione'
             : order.status}
         </div>
       </div>
-      <div className="yuume-order-row-right">
-        {order.total && <div className="yuume-order-row-total">{order.total}</div>}
-        {isClickable && <div className="yuume-order-row-details-arrow">Dettagli →</div>}
+      <div className="jarbris-order-row-right">
+        {order.total && <div className="jarbris-order-row-total">{order.total}</div>}
+        {isClickable && <div className="jarbris-order-row-details-arrow">Dettagli →</div>}
       </div>
     </motion.div>
   );
@@ -166,8 +166,8 @@ const OrderCards = memo(({ message, onOrderClick }) => {
     const isClickable = !!targetOrder.orderNumber;
 
     return (
-      <div className="yuume-order-cards-container">
-        {finalDisplayMessage && <p className="yuume-order-detail-message">{finalDisplayMessage}</p>}
+      <div className="jarbris-order-cards-container">
+        {finalDisplayMessage && <p className="jarbris-order-detail-message">{finalDisplayMessage}</p>}
         <OrderListRow
           order={targetOrder}
           index={0}
@@ -179,22 +179,22 @@ const OrderCards = memo(({ message, onOrderClick }) => {
 
   // 2. Order List View (Minimal summaries, NOT clickable)
   return (
-    <div className="yuume-order-cards-container">
-      <div className="yuume-order-list-header">
-        <div className="yuume-order-list-icon">📦</div>
+    <div className="jarbris-order-cards-container">
+      <div className="jarbris-order-list-header">
+        <div className="jarbris-order-list-icon">📦</div>
         <div>
-          <h4 className="yuume-order-list-title">{title || 'I tuoi ordini'}</h4>
-          {email && <p className="yuume-order-list-email">{email}</p>}
+          <h4 className="jarbris-order-list-title">{title || 'I tuoi ordini'}</h4>
+          {email && <p className="jarbris-order-list-email">{email}</p>}
         </div>
       </div>
 
       {finalDisplayMessage && (
-        <p className="yuume-order-list-message">
+        <p className="jarbris-order-list-message">
           {String(finalDisplayMessage).replace('1 ordini', '1 ordine')}
         </p>
       )}
 
-      <div className="yuume-order-list-items">
+      <div className="jarbris-order-list-items">
         {orders.map((o, idx) => (
           <OrderListRow key={o.id || idx} order={o} index={idx} />
         ))}

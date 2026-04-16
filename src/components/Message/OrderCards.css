@@ -1,6 +1,6 @@
 /* OrderCards.css */
 
-.yuume-order-item-row {
+.jarbris-order-item-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -8,51 +8,51 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.yuume-order-item-row.light {
+.jarbris-order-item-row.light {
   border-bottom-color: rgba(0, 0, 0, 0.04);
 }
 
-.yuume-order-item-info {
+.jarbris-order-item-info {
   flex: 1;
 }
 
-.yuume-order-item-title {
+.jarbris-order-item-title {
   font-size: 13px;
   font-weight: 600;
   color: #ffffff;
   margin-bottom: 1px;
 }
 
-.yuume-order-item-row.light .yuume-order-item-title {
+.jarbris-order-item-row.light .jarbris-order-item-title {
   color: #1e293b;
 }
 
-.yuume-order-item-variant {
+.jarbris-order-item-variant {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.5);
 }
 
-.yuume-order-item-row.light .yuume-order-item-variant {
+.jarbris-order-item-row.light .jarbris-order-item-variant {
   color: #64748b;
 }
 
-.yuume-order-item-right {
+.jarbris-order-item-right {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.yuume-order-item-quantity {
+.jarbris-order-item-quantity {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.6);
   font-weight: 500;
 }
 
-.yuume-order-item-row.light .yuume-order-item-quantity {
+.jarbris-order-item-row.light .jarbris-order-item-quantity {
   color: #64748b;
 }
 
-.yuume-order-item-price {
+.jarbris-order-item-price {
   font-size: 13px;
   font-weight: 700;
   color: #ffffff;
@@ -60,12 +60,12 @@
   text-align: right;
 }
 
-.yuume-order-item-row.light .yuume-order-item-price {
+.jarbris-order-item-row.light .jarbris-order-item-price {
   color: #0f172a;
 }
 
 /* Detail Card */
-.yuume-order-detail-card {
+.jarbris-order-detail-card {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
@@ -75,69 +75,69 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-.yuume-order-detail-card.light {
+.jarbris-order-detail-card.light {
   background: transparent;
   backdrop-filter: none;
   border: none;
   box-shadow: none;
 }
 
-.yuume-order-detail-header {
+.jarbris-order-detail-header {
   padding: 12px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   background: rgba(255, 255, 255, 0.01);
 }
 
-.yuume-order-detail-card.light .yuume-order-detail-header {
+.jarbris-order-detail-card.light .jarbris-order-detail-header {
   padding: 0 0 12px 0;
   border-bottom-color: rgba(0, 0, 0, 0.06);
   background: transparent;
 }
 
-.yuume-order-detail-header-top {
+.jarbris-order-detail-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
 }
 
-.yuume-order-number {
+.jarbris-order-number {
   margin: 0;
   color: #ffffff;
   font-weight: 700;
 }
 
-.yuume-order-detail-card.light .yuume-order-number {
+.jarbris-order-detail-card.light .jarbris-order-number {
   color: #1e293b;
 }
 
-.yuume-order-date {
+.jarbris-order-date {
   margin: 2px 0 0;
   font-size: 11px;
   color: rgba(255, 255, 255, 0.4);
 }
 
-.yuume-order-detail-card.light .yuume-order-date {
+.jarbris-order-detail-card.light .jarbris-order-date {
   color: #64748b;
 }
 
-.yuume-order-total-large {
+.jarbris-order-total-large {
   font-size: 16px;
   font-weight: 800;
   color: #ffffff;
 }
 
-.yuume-order-detail-card.light .yuume-order-total-large {
+.jarbris-order-detail-card.light .jarbris-order-total-large {
   color: #0f172a;
 }
 
-.yuume-order-badges {
+.jarbris-order-badges {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.yuume-status-badge {
+.jarbris-status-badge {
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 11px;
@@ -146,43 +146,43 @@
 }
 
 /* Status variants */
-.yuume-status-badge.paid,
-.yuume-status-badge.fulfilled,
-.yuume-status-badge.speditol {
+.jarbris-status-badge.paid,
+.jarbris-status-badge.fulfilled,
+.jarbris-status-badge.speditol {
   background: rgba(16, 185, 129, 0.12);
   color: #10b981;
   border-color: rgba(16, 185, 129, 0.2);
 }
 
-.yuume-status-badge.pending,
-.yuume-status-badge.authorized,
-.yuume-status-badge.in_preparazione {
+.jarbris-status-badge.pending,
+.jarbris-status-badge.authorized,
+.jarbris-status-badge.in_preparazione {
   background: rgba(245, 158, 11, 0.12);
   color: #f59e0b;
   border-color: rgba(245, 158, 11, 0.2);
 }
 
-.yuume-status-badge.refunded,
-.yuume-status-badge.voided,
-.yuume-status-badge.annullato {
+.jarbris-status-badge.refunded,
+.jarbris-status-badge.voided,
+.jarbris-status-badge.annullato {
   background: rgba(239, 68, 68, 0.12);
   color: #ef4444;
   border-color: rgba(239, 68, 68, 0.2);
 }
 
-.yuume-status-badge.partially_fulfilled {
+.jarbris-status-badge.partially_fulfilled {
   background: rgba(59, 130, 246, 0.12);
   color: #3b82f6;
   border-color: rgba(59, 130, 246, 0.2);
 }
 
-.yuume-status-badge.default {
+.jarbris-status-badge.default {
   background: rgba(148, 163, 184, 0.12);
   color: #94a3b8;
   border-color: rgba(148, 163, 184, 0.2);
 }
 
-.yuume-tracking-link {
+.jarbris-tracking-link {
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 11px;
@@ -197,19 +197,19 @@
   transition: background 0.2s ease;
 }
 
-.yuume-tracking-link:hover {
+.jarbris-tracking-link:hover {
   background: rgba(59, 130, 246, 0.2);
 }
 
-.yuume-order-detail-items-container {
+.jarbris-order-detail-items-container {
   padding: 12px 14px;
 }
 
-.yuume-order-detail-card.light .yuume-order-detail-items-container {
+.jarbris-order-detail-card.light .jarbris-order-detail-items-container {
   padding: 16px 0;
 }
 
-.yuume-order-items-label {
+.jarbris-order-items-label {
   margin: 0 0 10px;
   font-size: 10px;
   font-weight: 800;
@@ -218,12 +218,12 @@
   letter-spacing: 0.08em;
 }
 
-.yuume-order-detail-card.light .yuume-order-items-label {
+.jarbris-order-detail-card.light .jarbris-order-items-label {
   color: #64748b;
 }
 
 /* List Row */
-.yuume-order-list-row {
+.jarbris-order-list-row {
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -237,40 +237,40 @@
     transform 0.2s;
 }
 
-.yuume-order-list-row.clickable {
+.jarbris-order-list-row.clickable {
   cursor: pointer;
 }
 
-.yuume-order-list-row.clickable:hover {
+.jarbris-order-list-row.clickable:hover {
   background: rgba(255, 255, 255, 0.08);
   transform: scale(1.01);
 }
 
-.yuume-order-list-row-info {
+.jarbris-order-list-row-info {
   flex: 1;
   min-width: 0;
 }
 
-.yuume-order-row-top {
+.jarbris-order-row-top {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.yuume-order-row-number {
+.jarbris-order-row-number {
   font-weight: 700;
   color: white;
   font-size: 13px;
   white-space: nowrap;
 }
 
-.yuume-order-row-date {
+.jarbris-order-row-date {
   font-size: 10px;
   color: rgba(255, 255, 255, 0.3);
   white-space: nowrap;
 }
 
-.yuume-order-row-status {
+.jarbris-order-row-status {
   font-size: 11px;
   color: #10b981;
   margin-top: 2px;
@@ -279,19 +279,19 @@
   letter-spacing: 0.02em;
 }
 
-.yuume-order-row-right {
+.jarbris-order-row-right {
   text-align: right;
   flex-shrink: 0;
 }
 
-.yuume-order-row-total {
+.jarbris-order-row-total {
   font-weight: 700;
   color: white;
   font-size: 14px;
   letter-spacing: -0.01em;
 }
 
-.yuume-order-row-details-arrow {
+.jarbris-order-row-details-arrow {
   font-size: 9px;
   color: #3b82f6;
   margin-top: 1px;
@@ -300,12 +300,12 @@
 }
 
 /* Container */
-.yuume-order-cards-container {
+.jarbris-order-cards-container {
   width: 100%;
   padding: 4px 0;
 }
 
-.yuume-order-list-header {
+.jarbris-order-list-header {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -314,7 +314,7 @@
   padding-bottom: 8px;
 }
 
-.yuume-order-list-icon {
+.jarbris-order-list-icon {
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -325,38 +325,38 @@
   font-size: 14px;
 }
 
-.yuume-order-list-title {
+.jarbris-order-list-title {
   margin: 0;
   color: white;
   font-size: 14px;
 }
 
-.yuume-order-list-email {
+.jarbris-order-list-email {
   margin: 0;
   font-size: 11px;
   color: rgba(255, 255, 255, 0.3);
 }
 
-.yuume-order-list-message {
+.jarbris-order-list-message {
   color: rgba(255, 255, 255, 0.8);
   font-size: 13px;
   margin-bottom: 16px;
   font-weight: 500;
 }
 
-.yuume-order-list-items {
+.jarbris-order-list-items {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.yuume-order-detail-message {
+.jarbris-order-detail-message {
   color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
   margin-bottom: 12px;
 }
 
 /* Mobile GPU optimization: reduce backdrop-filter blur */
-.mobile-device .yuume-order-detail-card {
+.mobile-device .jarbris-order-detail-card {
   backdrop-filter: blur(6px);
 }

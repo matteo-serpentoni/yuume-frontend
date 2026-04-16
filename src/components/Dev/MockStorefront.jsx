@@ -125,7 +125,7 @@ const MockStorefront = ({ theme = 'light' }) => {
   ];
 
   return (
-    <div className="yuume-mock-storefront" style={styles.container}>
+    <div className="jarbris-mock-storefront" style={styles.container}>
       <header style={styles.header}>
         <div style={styles.logo}>MOCKSTORE.</div>
         <nav style={styles.nav}>

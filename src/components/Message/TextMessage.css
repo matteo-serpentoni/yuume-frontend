@@ -1,4 +1,4 @@
-.yuume-text-message-title {
+.jarbris-text-message-title {
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -6,7 +6,7 @@
   margin-bottom: 8px;
 }
 
-.yuume-text-message-content {
+.jarbris-text-message-content {
   line-height: 1.6;
   word-break: break-word;
 }

@@ -26,7 +26,7 @@ const ProductModal = memo(({
   title,
   children,
   footer,
-  portalId = 'yuume-drawer-portal',
+  portalId = 'jarbris-drawer-portal',
 }) => {
   const dialogRef = useRef(null);
   const [target, setTarget] = React.useState(null);
@@ -111,7 +111,7 @@ const ProductModal = memo(({
         // Overlay acts as flexbox centering container — clicking it dismisses.
         // Mirrors ConfirmDialog: no transform-based centering on the dialog itself.
         <motion.div
-          className="yuume-product-modal-overlay"
+          className="jarbris-product-modal-overlay"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -121,10 +121,10 @@ const ProductModal = memo(({
           {/* Dialog: centered by parent flexbox, Framer Motion only animates scale+y */}
           <motion.div
             ref={dialogRef}
-            className="yuume-product-modal"
+            className="jarbris-product-modal"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="yuume-product-modal-title"
+            aria-labelledby="jarbris-product-modal-title"
             initial={{ scale: 0.95, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -132,12 +132,12 @@ const ProductModal = memo(({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="yuume-product-modal-header">
-              <h4 id="yuume-product-modal-title" className="yuume-product-modal-title">
+            <div className="jarbris-product-modal-header">
+              <h4 id="jarbris-product-modal-title" className="jarbris-product-modal-title">
                 {title}
               </h4>
               <button
-                className="yuume-product-modal-close"
+                className="jarbris-product-modal-close"
                 onClick={onClose}
                 aria-label="Chiudi"
               >
@@ -146,13 +146,13 @@ const ProductModal = memo(({
             </div>
 
             {/* Body */}
-            <div className="yuume-product-modal-body">
+            <div className="jarbris-product-modal-body">
               {children}
             </div>
 
             {/* Footer */}
             {footer && (
-              <div className="yuume-product-modal-footer">
+              <div className="jarbris-product-modal-footer">
                 {footer}
               </div>
             )}

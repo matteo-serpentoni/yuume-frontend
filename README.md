@@ -1,4 +1,4 @@
-# Yuume Widget
+# Jarbris Widget
 
 Embeddable AI-powered chat widget for e-commerce websites. Renders as an iframe with a WebGL orb interface, glassmorphism UI, and real-time messaging via Socket.io.
 
@@ -70,14 +70,14 @@ src/
 The widget is embedded on merchant sites via `public/embed.js`, which creates an iframe pointing to the hosted widget build.
 
 ```html
-<script src="https://cdn.yuume.io/embed.js" data-shop="merchant-store.myshopify.com"></script>
+<script src="https://cdn.jarbris.io/embed.js" data-shop="merchant-store.myshopify.com"></script>
 ```
 
 ## Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_API_URL` | Yuume API base URL | `http://localhost:5001` |
+| `VITE_API_URL` | Jarbris API base URL | `http://localhost:5001` |
 
 ## Architecture Notes
 

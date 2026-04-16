@@ -18,7 +18,7 @@ const CategoryCard = memo(({ category, index, onCategoryClick }) => {
           onCategoryClick(category);
         }
       }}
-      className="yuume-category-card"
+      className="jarbris-category-card"
       role="button"
       tabIndex={0}
       aria-label={`Visualizza prodotti della categoria ${title}`}
@@ -26,24 +26,24 @@ const CategoryCard = memo(({ category, index, onCategoryClick }) => {
       whileTap={{ scale: 0.98 }}
     >
       {/* Category Image / Icon */}
-      <div className="yuume-category-card-image-container">
+      <div className="jarbris-category-card-image-container">
         {image ? (
-          <img src={image} alt={title} className="yuume-category-card-image" loading="lazy" />
+          <img src={image} alt={title} className="jarbris-category-card-image" loading="lazy" />
         ) : (
-          <span className="yuume-category-placeholder">📁</span>
+          <span className="jarbris-category-placeholder">📁</span>
         )}
       </div>
 
       {/* Info */}
-      <div className="yuume-category-info">
-        <div className="yuume-category-name">{title}</div>
-        <div className="yuume-category-count">
+      <div className="jarbris-category-info">
+        <div className="jarbris-category-name">{title}</div>
+        <div className="jarbris-category-count">
           {count} {count === 1 ? 'prodotto' : 'prodotti'}
         </div>
       </div>
 
       {/* Arrow Icon */}
-      <div className="yuume-category-arrow">
+      <div className="jarbris-category-arrow">
         <svg
           width="16"
           height="16"
@@ -69,12 +69,12 @@ const CategoryCards = memo(({ message, onCategoryClick }) => {
   }
 
   return (
-    <div className="yuume-category-cards-container">
+    <div className="jarbris-category-cards-container">
       {/* Intro Message */}
-      <div className="yuume-category-intro">{displayMessage || 'Seleziona una categoria:'}</div>
+      <div className="jarbris-category-intro">{displayMessage || 'Seleziona una categoria:'}</div>
 
       {/* Cards List */}
-      <div className="yuume-category-list">
+      <div className="jarbris-category-list">
         {categories.map((category, index) => (
           <CategoryCard
             key={category.handle || index}
@@ -86,7 +86,7 @@ const CategoryCards = memo(({ message, onCategoryClick }) => {
       </div>
 
       {/* Help text */}
-      <div className="yuume-category-help-text">Clicca su una categoria per vedere i prodotti</div>
+      <div className="jarbris-category-help-text">Clicca su una categoria per vedere i prodotti</div>
     </div>
   );
 });

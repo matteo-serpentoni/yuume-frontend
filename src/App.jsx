@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Orb from './components/Orb/Orb';
 import AppInstalled from './components/AppInstalled/AppInstalled';
 
-const ORB_STATE_KEY = 'yuume_orb_enlarged';
+const ORB_STATE_KEY = 'jarbris_orb_enlarged';
 
 function App() {
   const [enlarged, setEnlarged] = useState(() => {
@@ -20,7 +20,7 @@ function App() {
 
     const performResize = () => {
       const resizeData = {
-        type: 'YUUME:resize',
+        type: 'JARBRIS:resize',
         enlarged: isEnlarged,
         width: isEnlarged ? 1000 : enlarged?.proactive ? 380 : cartBubbleVisible ? 460 : 350,
         height: isEnlarged ? 1000 : enlarged?.proactive ? 450 : 350,
@@ -63,14 +63,14 @@ function App() {
   const [devPreview, setDevPreview] = useState({
     show: (() => {
       try {
-        return localStorage.getItem('yuume_dev_show_storefront') === 'true';
+        return localStorage.getItem('jarbris_dev_show_storefront') === 'true';
       } catch {
         return false;
       }
     })(),
     theme: (() => {
       try {
-        return localStorage.getItem('yuume_dev_storefront_theme') || 'light';
+        return localStorage.getItem('jarbris_dev_storefront_theme') || 'light';
       } catch {
         return 'light';
       }
@@ -84,14 +84,14 @@ function App() {
       setDevPreview({
         show: (() => {
           try {
-            return localStorage.getItem('yuume_dev_show_storefront') === 'true';
+            return localStorage.getItem('jarbris_dev_show_storefront') === 'true';
           } catch {
             return false;
           }
         })(),
         theme: (() => {
           try {
-            return localStorage.getItem('yuume_dev_storefront_theme') || 'light';
+            return localStorage.getItem('jarbris_dev_storefront_theme') || 'light';
           } catch {
             return 'light';
           }
@@ -99,8 +99,8 @@ function App() {
       });
     };
 
-    window.addEventListener('yuume_dev_update', handleDevUpdate);
-    return () => window.removeEventListener('yuume_dev_update', handleDevUpdate);
+    window.addEventListener('jarbris_dev_update', handleDevUpdate);
+    return () => window.removeEventListener('jarbris_dev_update', handleDevUpdate);
   }, []);
 
   // Conditionally load MockStorefront only in dev

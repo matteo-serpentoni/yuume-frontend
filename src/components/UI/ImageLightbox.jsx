@@ -10,7 +10,7 @@ const ImageLightbox = ({
   currentIndex = 0,
   onClose,
   onNavigate,
-  portalId = 'yuume-gallery-portal',
+  portalId = 'jarbris-gallery-portal',
 }) => {
   const dragControls = useDragControls();
   const [target, setTarget] = useState(null);
@@ -45,7 +45,7 @@ const ImageLightbox = ({
     if (el) {
       setTarget(el);
     } else {
-      setTarget(document.getElementById('yuume-drawer-portal') || document.body);
+      setTarget(document.getElementById('jarbris-drawer-portal') || document.body);
     }
   }, [portalId]);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -130,15 +130,15 @@ const ImageLightbox = ({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="yuume-lightbox-root"
+          className="jarbris-lightbox-root"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className="yuume-lightbox-backdrop" onClick={onClose} />
+          <div className="jarbris-lightbox-backdrop" onClick={onClose} />
 
-          <div className="yuume-lightbox-content-group">
-            <div className="yuume-lightbox-container">
+          <div className="jarbris-lightbox-content-group">
+            <div className="jarbris-lightbox-container">
               <AnimatePresence initial={false} custom={direction}>
                 <motion.div
                   key={currentIndex}
@@ -169,12 +169,12 @@ const ImageLightbox = ({
                       prevImage();
                     }
                   }}
-                  className="yuume-lightbox-image-wrapper"
+                  className="jarbris-lightbox-image-wrapper"
                 >
                   <img
                     src={imageUrl}
                     alt="Product Detail"
-                    className="yuume-lightbox-img"
+                    className="jarbris-lightbox-img"
                     draggable="false"
                   />
                 </motion.div>
@@ -183,7 +183,7 @@ const ImageLightbox = ({
               {images.length > 1 && (
                 <>
                   <button
-                    className="yuume-lightbox-nav prev"
+                    className="jarbris-lightbox-nav prev"
                     onClick={(e) => {
                       e.stopPropagation();
                       prevImage();
@@ -204,7 +204,7 @@ const ImageLightbox = ({
                     </svg>
                   </button>
                   <button
-                    className="yuume-lightbox-nav next"
+                    className="jarbris-lightbox-nav next"
                     onClick={(e) => {
                       e.stopPropagation();
                       nextImage();
@@ -229,12 +229,12 @@ const ImageLightbox = ({
             </div>
 
             {images.length > 1 && (
-              <div className="yuume-lightbox-thumbnails-wrapper">
-                <div className="yuume-lightbox-thumbnails" ref={thumbnailsRef}>
+              <div className="jarbris-lightbox-thumbnails-wrapper">
+                <div className="jarbris-lightbox-thumbnails" ref={thumbnailsRef}>
                   {images.map((img, i) => (
                     <div
                       key={i}
-                      className={`yuume-lightbox-thumbnail ${i === currentIndex ? 'active' : ''}`}
+                      className={`jarbris-lightbox-thumbnail ${i === currentIndex ? 'active' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (i !== currentIndex) {
@@ -249,7 +249,7 @@ const ImageLightbox = ({
               </div>
             )}
 
-            <button className="yuume-lightbox-close" onClick={onClose} aria-label="Chiudi gallery">
+            <button className="jarbris-lightbox-close" onClick={onClose} aria-label="Chiudi gallery">
               <svg
                 width="24"
                 height="24"

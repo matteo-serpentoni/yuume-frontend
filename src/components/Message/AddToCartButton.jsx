@@ -39,7 +39,7 @@ const AddToCartButton = memo(
         // Invece di fare la fetch, invia un messaggio al parent
         window.parent.postMessage(
           {
-            type: 'YUUME:addToCart',
+            type: 'JARBRIS:addToCart',
             variantId: numericVariantId,
             quantity: quantity,
           },
@@ -50,7 +50,7 @@ const AddToCartButton = memo(
         const handleResponse = (event) => {
           if (!BRIDGE_CONFIG.isValidOrigin(event.origin, null, event.data?.type)) return;
 
-          if (event.data.type === 'YUUME:addToCartResponse') {
+          if (event.data.type === 'JARBRIS:addToCartResponse') {
             window.removeEventListener('message', handleResponse);
 
             if (event.data.success) {
@@ -281,8 +281,8 @@ const AddToCartButton = memo(
     }, [variantId, quantity, onSuccess, onError]);
 
     return (
-      <div className={`yuume-add-to-cart-container ${compact ? 'compact' : ''}`}>
-        <button className={`add-to-cart ${compact ? 'yuume-add-to-cart-btn' : ''}`} ref={buttonRef}>
+      <div className={`jarbris-add-to-cart-container ${compact ? 'compact' : ''}`}>
+        <button className={`add-to-cart ${compact ? 'jarbris-add-to-cart-btn' : ''}`} ref={buttonRef}>
           <span>Add to cart</span>
           <svg className="morph" viewBox="0 0 64 13">
             <path d="M0 12C6 12 17 12 32 12C47.9024 12 58 12 64 12V13H0V12Z" />

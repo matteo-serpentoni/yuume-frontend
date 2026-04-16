@@ -63,9 +63,9 @@ const ProductCard = memo(
     const galleryImages = allImages && allImages.length > 0 ? allImages : image ? [image] : [];
 
     return (
-      <div className="yuume-product-card-perspective">
+      <div className="jarbris-product-card-perspective">
         <motion.div
-          className={`yuume-product-card-minimal ${isFlipped ? 'is-flipped' : ''} clickable`}
+          className={`jarbris-product-card-minimal ${isFlipped ? 'is-flipped' : ''} clickable`}
           role="button"
           tabIndex={0}
           aria-label={`Visualizza dettagli per ${name}`}
@@ -91,9 +91,9 @@ const ProductCard = memo(
           }}
         >
           {/* --- FRONT SIDE --- */}
-          <div className="yuume-product-side yuume-card-front">
+          <div className="jarbris-product-side jarbris-card-front">
             <div
-              className={`yuume-product-image-container ${!image ? 'no-image' : ''}`}
+              className={`jarbris-product-image-container ${!image ? 'no-image' : ''}`}
               role={image ? 'button' : 'img'}
               tabIndex={image ? 0 : -1}
               aria-label={image ? 'Ingrandisci immagine' : 'Immagine non disponibile'}
@@ -124,12 +124,12 @@ const ProductCard = memo(
               {image ? (
                 <img src={image.url || image} alt={product.name} loading="lazy" />
               ) : (
-                <div className="yuume-product-placeholder">
+                <div className="jarbris-product-placeholder">
                   <ImagePlaceholderIcon size={32} />
                 </div>
               )}
               {(discountCode || isAutomatic || discountPercentage > 0) && (
-                <div className="yuume-product-discount-badge">
+                <div className="jarbris-product-discount-badge">
                   {discountCode
                     ? `SCONTO: ${discountCode}`
                     : discountPercentage > 0
@@ -138,19 +138,19 @@ const ProductCard = memo(
                 </div>
               )}
               {isAvailable && (
-                <div className="yuume-stock-status-badge-container">
+                <div className="jarbris-stock-status-badge-container">
                   {totalInventory > 0 && totalInventory <= 10 ? (
-                    <span className="yuume-stock-urgency-badge">Solo {totalInventory} rimasti</span>
+                    <span className="jarbris-stock-urgency-badge">Solo {totalInventory} rimasti</span>
                   ) : (
-                    <span className="yuume-stock-status-badge">
-                      <span className="yuume-stock-dot" />
+                    <span className="jarbris-stock-status-badge">
+                      <span className="jarbris-stock-dot" />
                       In stock
                     </span>
                   )}
                 </div>
               )}
               {image && (
-                <div className="yuume-image-zoom-overlay" aria-hidden="true">
+                <div className="jarbris-image-zoom-overlay" aria-hidden="true">
                   <svg
                     width="20"
                     height="20"
@@ -172,30 +172,30 @@ const ProductCard = memo(
               )}
             </div>
 
-            <div className="yuume-product-info">
+            <div className="jarbris-product-info">
               <a
                 href={url}
-                className="yuume-product-link-wrapper"
+                className="jarbris-product-link-wrapper"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 className="yuume-product-name">
+                <h3 className="jarbris-product-name">
                   {name}
                   <ExternalLinkIcon size={12} />
                 </h3>
               </a>
-              <div className="yuume-product-price-row">
-                <div className="yuume-price-stack">
+              <div className="jarbris-product-price-row">
+                <div className="jarbris-price-stack">
                   {compareAtPrice > price && (
-                    <span className="yuume-original-price">
+                    <span className="jarbris-original-price">
                       {formatPrice(compareAtPrice, currency)}
                     </span>
                   )}
-                  <span className="yuume-current-price">{formatPrice(price, currency)}</span>
+                  <span className="jarbris-current-price">{formatPrice(price, currency)}</span>
                 </div>
                 <button
-                  className="yuume-product-details-toggle"
+                  className="jarbris-product-details-toggle"
                   onClick={toggleFlip}
                   aria-label="Mostra descrizione prodotto"
                 >
@@ -204,17 +204,17 @@ const ProductCard = memo(
               </div>
 
               {product.smartBadges?.length > 0 && (
-                <div className="yuume-card-badges-wrapper">
+                <div className="jarbris-card-badges-wrapper">
                   <SmartBadges badges={product.smartBadges} />
                 </div>
               )}
             </div>
 
             {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
-              <div className="yuume-product-card-footer" onClick={(e) => e.stopPropagation()}>
+              <div className="jarbris-product-card-footer" onClick={(e) => e.stopPropagation()}>
                 {hasVariants ? (
                   <button
-                    className="yuume-options-btn"
+                    className="jarbris-options-btn"
                     aria-label={`Seleziona opzioni per ${product.name}`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -225,15 +225,15 @@ const ProductCard = memo(
                     Customize
                   </button>
                 ) : (
-                  <div className="yuume-card-spacer" />
+                  <div className="jarbris-card-spacer" />
                 )}
                 {isAvailable && (product.variants[0] || product.variantId) && (
-                  <div className="yuume-add-to-cart-wrapper">
+                  <div className="jarbris-add-to-cart-wrapper">
                     {hasVariants ? (
                       // Product has variants: ATC opens the sheet to let user pick options first
-                      <div className="yuume-add-to-cart-container compact">
+                      <div className="jarbris-add-to-cart-container compact">
                         <button
-                          className="add-to-cart yuume-add-to-cart-btn"
+                          className="add-to-cart jarbris-add-to-cart-btn"
                           aria-label={`Aggiungi al carrello ${product.name}`}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -264,29 +264,29 @@ const ProductCard = memo(
           </div>
 
           {/* --- BACK SIDE --- */}
-          <div className="yuume-product-side yuume-card-back">
-            <div className="yuume-back-content">
-              <div className="yuume-back-header">
-                <div className="yuume-back-title">{name}</div>
+          <div className="jarbris-product-side jarbris-card-back">
+            <div className="jarbris-back-content">
+              <div className="jarbris-back-header">
+                <div className="jarbris-back-title">{name}</div>
               </div>
 
-              <div className="yuume-product-details-list">
-                <div className="yuume-detail-item">
-                  <p className="yuume-product-description">
+              <div className="jarbris-product-details-list">
+                <div className="jarbris-detail-item">
+                  <p className="jarbris-product-description">
                     {description || 'No description available for this product.'}
                   </p>
                 </div>
 
-                <div className="yuume-detail-grid">
+                <div className="jarbris-detail-grid">
                   {vendor && (
-                    <div className="yuume-detail-item">
+                    <div className="jarbris-detail-item">
                       <span className="label">Brand</span>
                       <span className="value">{vendor}</span>
                     </div>
                   )}
 
                   {productType && (
-                    <div className="yuume-detail-item">
+                    <div className="jarbris-detail-item">
                       <span className="label">Type</span>
                       <span className="value">{productType}</span>
                     </div>
@@ -294,11 +294,11 @@ const ProductCard = memo(
                 </div>
 
                 {product.tags && product.tags.length > 0 && (
-                  <div className="yuume-detail-item">
+                  <div className="jarbris-detail-item">
                     <span className="label">Tags</span>
-                    <div className="yuume-product-tags">
+                    <div className="jarbris-product-tags">
                       {product.tags.slice(0, 5).map((tag) => (
-                        <span key={tag} className="yuume-tag-pill">
+                        <span key={tag} className="jarbris-tag-pill">
                           {tag}
                         </span>
                       ))}
@@ -308,7 +308,7 @@ const ProductCard = memo(
               </div>
               <a
                 href={url}
-                className="yuume-view-in-store-btn"
+                className="jarbris-view-in-store-btn"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
@@ -318,7 +318,7 @@ const ProductCard = memo(
               </a>
             </div>
 
-            <button className="yuume-back-return-overlay-btn" onClick={toggleFlip}>
+            <button className="jarbris-back-return-overlay-btn" onClick={toggleFlip}>
               <CloseIcon size={16} />
             </button>
           </div>
@@ -358,7 +358,7 @@ const ProductCards = memo(
       if (scrollRef.current) {
         const container = scrollRef.current;
         const cardWidth =
-          container.querySelector('.yuume-product-card-minimal')?.offsetWidth || 240;
+          container.querySelector('.jarbris-product-card-minimal')?.offsetWidth || 240;
         const gap = 12;
         const scrollAmount = direction === 'next' ? cardWidth + gap : -(cardWidth + gap);
 
@@ -371,20 +371,20 @@ const ProductCards = memo(
 
     if (!Array.isArray(products) || products.length === 0) {
       return (
-        <div className="yuume-no-products">
+        <div className="jarbris-no-products">
           Non ho trovato prodotti che corrispondono alla tua ricerca.
         </div>
       );
     }
 
     return (
-      <div className="yuume-products-container">
+      <div className="jarbris-products-container">
         {displayMessage && (
           <MessageBubble
             sender={message.sender || 'assistant'}
             timestamp={message.timestamp}
             chatColors={chatColors}
-            className="yuume-products-message-bubble"
+            className="jarbris-products-message-bubble"
             feedback={message.feedback}
             onFeedback={(type) => sendFeedback(message.id, type, message.text)}
             showFeedback={
@@ -394,10 +394,10 @@ const ProductCards = memo(
             <TextMessage message={{ message: displayMessage }} />
           </MessageBubble>
         )}
-        <div className="yuume-carousel-wrapper">
+        <div className="jarbris-carousel-wrapper">
           {showLeftArrow && (
             <button
-              className="yuume-carousel-nav-btn prev"
+              className="jarbris-carousel-nav-btn prev"
               onClick={() => scroll('prev')}
               aria-label="Prodotto precedente"
             >
@@ -405,7 +405,7 @@ const ProductCards = memo(
             </button>
           )}
 
-          <div className="yuume-products-list" ref={scrollRef}>
+          <div className="jarbris-products-list" ref={scrollRef}>
             {products.map((product, index) => (
               <ProductCard
                 key={product.id || index}
@@ -421,7 +421,7 @@ const ProductCards = memo(
 
           {showRightArrow && products.length > 1 && (
             <button
-              className="yuume-carousel-nav-btn next"
+              className="jarbris-carousel-nav-btn next"
               onClick={() => scroll('next')}
               aria-label="Prodotto successivo"
             >

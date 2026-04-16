@@ -1,6 +1,6 @@
 # Widget Security Rules
 
-These rules define the security standards specific to yuume-widget, which runs as an embedded iframe on third-party merchant sites.
+These rules define the security standards specific to jarbris-widget, which runs as an embedded iframe on third-party merchant sites.
 
 ## 1. iframe Isolation
 
@@ -27,22 +27,22 @@ These keys are permitted because without them the chat service cannot function a
 
 | Key | Reason |
 |---|---|
-| `yuume_session_id` | Chat session continuity across page navigations |
-| `yuume_messages` | Restoring the conversation the user was actively having |
-| `yuume_session_time` | Detecting session timeout (functional, not tracking) |
-| `yuume_session_status` | Displaying correct UI state on return |
-| `yuume_profile` | Name/email **actively submitted by the user** via the profile form |
+| `jarbris_session_id` | Chat session continuity across page navigations |
+| `jarbris_messages` | Restoring the conversation the user was actively having |
+| `jarbris_session_time` | Detecting session timeout (functional, not tracking) |
+| `jarbris_session_status` | Displaying correct UI state on return |
+| `jarbris_profile` | Name/email **actively submitted by the user** via the profile form |
 
 ### Prohibited in localStorage
 
-- **`yuume_shopify_customer`** — PII (name, email, Shopify customer ID) received **passively** from the storefront via `postMessage`, without any user action. Must be stored **in React state (memory) only**. On page reload, the parent storefront re-sends it via `postMessage` immediately, so there is zero UX degradation.
+- **`jarbris_shopify_customer`** — PII (name, email, Shopify customer ID) received **passively** from the storefront via `postMessage`, without any user action. Must be stored **in React state (memory) only**. On page reload, the parent storefront re-sends it via `postMessage` immediately, so there is zero UX degradation.
 - **Auth tokens / API secrets** — Never in localStorage under any circumstances.
 - **Analytics/tracking data** — Must not be stored until the user has given **explicit consent**. Check consent via `/api/chat/consent` or `window.Shopify.customerPrivacy` before writing any tracking data.
 - **Cookies** — The widget must not set any cookies on the merchant's domain.
 
 ### Cleanup on session expiry
 
-When a session times out (30 min), all `yuume_*` keys in `localStorage` MUST be removed. This is implemented in the `getOrCreateSessionId()` function in `useChat.js`.
+When a session times out (30 min), all `jarbris_*` keys in `localStorage` MUST be removed. This is implemented in the `getOrCreateSessionId()` function in `useChat.js`.
 
 
 ## 4. CSP Compliance

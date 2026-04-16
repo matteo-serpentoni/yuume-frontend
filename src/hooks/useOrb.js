@@ -44,7 +44,7 @@ export const useOrb = (modeOverride = null) => {
 
     // 2. Check localStorage (Manual Override in Dev)
     if (import.meta.env.DEV) {
-      const savedDevShop = localStorage.getItem('yuume_dev_shop_domain');
+      const savedDevShop = localStorage.getItem('jarbris_dev_shop_domain');
       if (savedDevShop) return savedDevShop;
     }
 
@@ -80,8 +80,8 @@ export const useOrb = (modeOverride = null) => {
       // ✅ Security: Validate Origin (using authorizedDomain from backend if available)
       if (!BRIDGE_CONFIG.isValidOrigin(event.origin, authorizedDomain, event.data?.type)) return;
 
-      // Normalize message types with YUUME: prefix
-      if (event.data.type === 'YUUME:updateCustomization') {
+      // Normalize message types with JARBRIS: prefix
+      if (event.data.type === 'JARBRIS:updateCustomization') {
         const { orbTheme, chatColors, mobileMode } = event.data.data;
 
         if (mobileMode !== undefined) {
@@ -94,7 +94,7 @@ export const useOrb = (modeOverride = null) => {
         }));
       }
 
-      if (event.data.type === 'YUUME:shopDomain') {
+      if (event.data.type === 'JARBRIS:shopDomain') {
         const isDev = mode === 'development';
         const incomingDomain = event.data.shopDomain;
 
@@ -104,14 +104,14 @@ export const useOrb = (modeOverride = null) => {
         }
 
         if (isDev) {
-          const hasManualOverride = !!localStorage.getItem('yuume_dev_shop_domain');
+          const hasManualOverride = !!localStorage.getItem('jarbris_dev_shop_domain');
           if (hasManualOverride || (shopDomain && incomingDomain === 'localhost')) {
             return;
           }
         }
 
         setShopDomain(incomingDomain);
-        localStorage.setItem('yuume_dev_shop_domain', incomingDomain);
+        localStorage.setItem('jarbris_dev_shop_domain', incomingDomain);
       }
     };
 
@@ -119,7 +119,7 @@ export const useOrb = (modeOverride = null) => {
 
     // Request shop domain if needed
     if (window.parent && !shopDomain && mode === 'production') {
-      window.parent.postMessage({ type: 'YUUME:requestShopDomain' }, '*');
+      window.parent.postMessage({ type: 'JARBRIS:requestShopDomain' }, '*');
     }
 
     return () => window.removeEventListener('message', handleMessage);

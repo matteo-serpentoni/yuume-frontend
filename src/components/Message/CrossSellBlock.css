@@ -9,7 +9,7 @@
    - Shadows: multi-layer
    ══════════════════════════════════════════════ */
 
-.yuume-cross-sell-block {
+.jarbris-cross-sell-block {
   margin-top: 12px;
   padding: 14px;
   background: rgba(255, 255, 255, 0.08);
@@ -19,10 +19,10 @@
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  animation: yuume-xs-fade-in 0.35s ease-out;
+  animation: jarbris-xs-fade-in 0.35s ease-out;
 }
 
-@keyframes yuume-xs-fade-in {
+@keyframes jarbris-xs-fade-in {
   from {
     opacity: 0;
     transform: translateY(6px);
@@ -35,19 +35,19 @@
 
 /* ── Header ── */
 
-.yuume-xs-header {
+.jarbris-xs-header {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 10px;
 }
 
-.yuume-xs-header svg {
+.jarbris-xs-header svg {
   flex-shrink: 0;
   opacity: 0.7;
 }
 
-.yuume-xs-title {
+.jarbris-xs-title {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -57,7 +57,7 @@
 
 /* ── Grid of cards ── */
 
-.yuume-xs-grid {
+.jarbris-xs-grid {
   display: flex;
   gap: 8px;
   overflow-x: auto;
@@ -67,13 +67,13 @@
   padding-bottom: 2px;
 }
 
-.yuume-xs-grid::-webkit-scrollbar {
+.jarbris-xs-grid::-webkit-scrollbar {
   display: none;
 }
 
 /* ── Individual card ── */
 
-.yuume-xs-card {
+.jarbris-xs-card {
   flex: 0 0 136px;
   min-width: 0;
   display: flex;
@@ -86,10 +86,10 @@
     transform 0.18s ease,
     border-color 0.18s ease;
   scroll-snap-align: start;
-  animation: yuume-xs-card-in 0.3s ease-out both;
+  animation: jarbris-xs-card-in 0.3s ease-out both;
 }
 
-@keyframes yuume-xs-card-in {
+@keyframes jarbris-xs-card-in {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -100,14 +100,14 @@
   }
 }
 
-.yuume-xs-card:hover {
+.jarbris-xs-card:hover {
   transform: translateY(-2px);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ── Image ── */
 
-.yuume-xs-image-wrapper {
+.jarbris-xs-image-wrapper {
   position: relative;
   display: block;
   aspect-ratio: 3 / 4;
@@ -117,24 +117,24 @@
   flex-shrink: 0;
 }
 
-.yuume-xs-image {
+.jarbris-xs-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.25s ease;
 }
 
-.yuume-xs-image-wrapper:hover .yuume-xs-image {
+.jarbris-xs-image-wrapper:hover .jarbris-xs-image {
   transform: scale(1.04);
 }
 
-.yuume-xs-image-placeholder {
+.jarbris-xs-image-placeholder {
   width: 100%;
   height: 100%;
   background: rgba(255, 255, 255, 0.06);
 }
 
-.yuume-xs-promo-badge {
+.jarbris-xs-promo-badge {
   position: absolute;
   top: 6px;
   left: 6px;
@@ -149,7 +149,7 @@
 
 /* ── Info section ── */
 
-.yuume-xs-info {
+.jarbris-xs-info {
   padding: 8px;
   display: flex;
   flex-direction: column;
@@ -157,7 +157,7 @@
   flex: 1;
 }
 
-.yuume-xs-name {
+.jarbris-xs-name {
   font-size: 11px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
@@ -168,17 +168,17 @@
   line-height: 1.35;
 }
 
-.yuume-xs-name:hover {
+.jarbris-xs-name:hover {
   color: rgba(255, 255, 255, 1);
 }
 
-.yuume-xs-name svg {
+.jarbris-xs-name svg {
   flex-shrink: 0;
   margin-top: 2px;
   opacity: 0.45;
 }
 
-.yuume-xs-name-text {
+.jarbris-xs-name-text {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -186,20 +186,20 @@
   overflow: hidden;
 }
 
-.yuume-xs-price-row {
+.jarbris-xs-price-row {
   display: flex;
   align-items: baseline;
   gap: 4px;
   flex-wrap: wrap;
 }
 
-.yuume-xs-original-price {
+.jarbris-xs-original-price {
   font-size: 9px;
   text-decoration: line-through;
   color: rgba(255, 255, 255, 0.35);
 }
 
-.yuume-xs-price {
+.jarbris-xs-price {
   font-size: 12px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
@@ -207,7 +207,7 @@
 
 /* ── CTA ── */
 
-.yuume-xs-cta {
+.jarbris-xs-cta {
   display: block;
   text-align: center;
   font-size: 10px;
@@ -228,23 +228,23 @@
   background: transparent;
 }
 
-.yuume-xs-cta--view {
+.jarbris-xs-cta--view {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.15);
   color: #ffffff;
 }
 
-.yuume-xs-cta--view:hover {
+.jarbris-xs-cta--view:hover {
   background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.3);
   color: #ffffff;
 }
 
-.yuume-xs-atc-wrapper {
+.jarbris-xs-atc-wrapper {
   margin-top: auto;
 }
 
-.yuume-xs-unavailable {
+.jarbris-xs-unavailable {
   font-size: 9px;
   color: rgba(255, 255, 255, 0.35);
   text-align: center;
@@ -257,7 +257,7 @@
 /* ── Mobile performance (styling.md §3) ── */
 
 @media (max-width: 480px) {
-  .yuume-cross-sell-block {
+  .jarbris-cross-sell-block {
     backdrop-filter: blur(12px) saturate(130%);
   }
 }

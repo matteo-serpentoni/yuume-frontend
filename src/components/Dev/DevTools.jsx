@@ -12,7 +12,7 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
   const [sites, setSites] = useState([]);
   const [selectedThemeId, setSelectedThemeId] = useState('purple-dream');
   const [selectedSiteDomain, setSelectedSiteDomain] = useState(() => {
-    return localStorage.getItem('yuume_dev_shop_domain') || '';
+    return localStorage.getItem('jarbris_dev_shop_domain') || '';
   });
   const [loading, setLoading] = useState(true);
   const [_error, setError] = useState(null);
@@ -22,14 +22,14 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
 
   // Storefront Preview State
   const [showStorefront, setShowStorefront] = useState(() => {
-    return localStorage.getItem('yuume_dev_show_storefront') === 'true';
+    return localStorage.getItem('jarbris_dev_show_storefront') === 'true';
   });
   const [storefrontTheme, setStorefrontTheme] = useState(() => {
-    return localStorage.getItem('yuume_dev_storefront_theme') || 'light';
+    return localStorage.getItem('jarbris_dev_storefront_theme') || 'light';
   });
 
   const dispatchDevUpdate = () => {
-    window.dispatchEvent(new CustomEvent('yuume_dev_update'));
+    window.dispatchEvent(new CustomEvent('jarbris_dev_update'));
   };
 
   // Mobile detection for DevTools UI
@@ -62,11 +62,11 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
             setSites(filteredSites);
 
             // If no site is selected yet, pick the first one
-            const savedDevShop = localStorage.getItem('yuume_dev_shop_domain');
+            const savedDevShop = localStorage.getItem('jarbris_dev_shop_domain');
             if (!savedDevShop && filteredSites.length > 0) {
               const firstDomain = filteredSites[0].domain;
               setSelectedSiteDomain(firstDomain);
-              localStorage.setItem('yuume_dev_shop_domain', firstDomain);
+              localStorage.setItem('jarbris_dev_shop_domain', firstDomain);
               onSiteChange && onSiteChange(firstDomain);
             }
           }
@@ -207,7 +207,7 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
 
   return (
     <div
-      className="yuume-dev-tools"
+      className="jarbris-dev-tools"
       style={{
         position: 'fixed',
         top: isMobile ? 'auto' : '20px',
@@ -271,9 +271,9 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
                 const domain = e.target.value;
                 setSelectedSiteDomain(domain);
                 if (domain) {
-                  localStorage.setItem('yuume_dev_shop_domain', domain);
+                  localStorage.setItem('jarbris_dev_shop_domain', domain);
                 } else {
-                  localStorage.removeItem('yuume_dev_shop_domain');
+                  localStorage.removeItem('jarbris_dev_shop_domain');
                 }
                 onSiteChange && onSiteChange(domain);
               }}
@@ -370,7 +370,7 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
               <button
                 onClick={() =>
                   window.postMessage(
-                    { type: 'YUUME:cartUpdate', cart: { item_count: 1, token: 'dev_1' } },
+                    { type: 'JARBRIS:cartUpdate', cart: { item_count: 1, token: 'dev_1' } },
                     '*',
                   )
                 }
@@ -390,7 +390,7 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
               <button
                 onClick={() =>
                   window.postMessage(
-                    { type: 'YUUME:cartUpdate', cart: { item_count: 3, token: 'dev_3' } },
+                    { type: 'JARBRIS:cartUpdate', cart: { item_count: 3, token: 'dev_3' } },
                     '*',
                   )
                 }
@@ -410,7 +410,7 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
               <button
                 onClick={() =>
                   window.postMessage(
-                    { type: 'YUUME:cartUpdate', cart: { item_count: 0, token: 'dev_0' } },
+                    { type: 'JARBRIS:cartUpdate', cart: { item_count: 0, token: 'dev_0' } },
                     '*',
                   )
                 }
@@ -439,7 +439,7 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
               onClick={() => {
                 // Signal useChat.js to organically clear session through the unified flow
                 // This prevents debounce-flush bugs during reload
-                window.postMessage({ type: 'YUUME:devResetSession' }, '*');
+                window.postMessage({ type: 'JARBRIS:devResetSession' }, '*');
               }}
               style={{
                 padding: '8px',
@@ -463,7 +463,7 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
               onClick={() => {
                 const newVal = !showStorefront;
                 setShowStorefront(newVal);
-                localStorage.setItem('yuume_dev_show_storefront', newVal);
+                localStorage.setItem('jarbris_dev_show_storefront', newVal);
                 dispatchDevUpdate();
               }}
               style={{
@@ -488,7 +488,7 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
                 <button
                   onClick={() => {
                     setStorefrontTheme('light');
-                    localStorage.setItem('yuume_dev_storefront_theme', 'light');
+                    localStorage.setItem('jarbris_dev_storefront_theme', 'light');
                     dispatchDevUpdate();
                   }}
                   style={{
@@ -507,7 +507,7 @@ const DevTools = ({ onConfigChange, onSiteChange, onMobileToggle }) => {
                 <button
                   onClick={() => {
                     setStorefrontTheme('dark');
-                    localStorage.setItem('yuume_dev_storefront_theme', 'dark');
+                    localStorage.setItem('jarbris_dev_storefront_theme', 'dark');
                     dispatchDevUpdate();
                   }}
                   style={{

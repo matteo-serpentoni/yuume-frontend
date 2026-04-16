@@ -1,6 +1,6 @@
 # State & Hooks Rules
 
-These rules define the state management patterns for yuume-widget.
+These rules define the state management patterns for jarbris-widget.
 
 ## 1. Custom Hooks
 

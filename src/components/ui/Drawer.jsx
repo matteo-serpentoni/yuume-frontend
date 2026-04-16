@@ -19,7 +19,7 @@ const Drawer = ({
   title, // Added title prop
   children,
   footer,
-  portalId = 'yuume-drawer-portal',
+  portalId = 'jarbris-drawer-portal',
 }) => {
   const [target, setTarget] = React.useState(null);
 
@@ -40,7 +40,7 @@ const Drawer = ({
         <>
           {/* Backdrop */}
           <motion.div
-            className="yuume-drawer-backdrop"
+            className="jarbris-drawer-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -48,26 +48,26 @@ const Drawer = ({
           />
 
           {/* Drawer Clipping Container */}
-          <div className="yuume-drawer-container">
+          <div className="jarbris-drawer-container">
             {/* Drawer Shell */}
             <motion.div
-              className="yuume-drawer"
+              className="jarbris-drawer"
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             >
-              <div className={`yuume-drawer-header ${title ? 'has-title' : ''}`}>
-                <div className="yuume-drawer-handle" onClick={onClose} />
-                {title && <h3 className="yuume-drawer-title">{title}</h3>}
-                <button className="yuume-drawer-close" onClick={onClose}>
+              <div className={`jarbris-drawer-header ${title ? 'has-title' : ''}`}>
+                <div className="jarbris-drawer-handle" onClick={onClose} />
+                {title && <h3 className="jarbris-drawer-title">{title}</h3>}
+                <button className="jarbris-drawer-close" onClick={onClose}>
                   ✕
                 </button>
               </div>
 
-              <div className="yuume-drawer-content">{children}</div>
+              <div className="jarbris-drawer-content">{children}</div>
 
-              {footer && <div className="yuume-drawer-footer">{footer}</div>}
+              {footer && <div className="jarbris-drawer-footer">{footer}</div>}
             </motion.div>
           </div>
         </>

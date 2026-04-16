@@ -184,7 +184,7 @@
 }
 
 /* COMPACT MODE FOR PRODUCT CARDS */
-.add-to-cart.yuume-add-to-cart-btn {
+.add-to-cart.jarbris-add-to-cart-btn {
   --text-x: 6px; /* Even closer as requested */
   --cart-x: -38px; /* Adjusted for tighter space */
   --text-color: #ffffff;
@@ -194,63 +194,63 @@
   transform: none !important;
 }
 
-.add-to-cart.yuume-add-to-cart-btn span {
+.add-to-cart.jarbris-add-to-cart-btn span {
   font-size: 13px !important;
   font-weight: 700 !important;
   line-height: 34px !important;
   color: #ffffff !important;
 }
 
-.add-to-cart.yuume-add-to-cart-btn .cart {
+.add-to-cart.jarbris-add-to-cart-btn .cart {
   top: 4px;
 }
 
-.add-to-cart.yuume-add-to-cart-btn .morph {
+.add-to-cart.jarbris-add-to-cart-btn .morph {
   --svg-top: -12px;
   opacity: 0;
   transition: opacity 0.2s;
 }
 
-.add-to-cart.yuume-add-to-cart-btn.active .morph {
+.add-to-cart.jarbris-add-to-cart-btn.active .morph {
   opacity: 1;
 }
 
-.add-to-cart.yuume-add-to-cart-btn:before {
+.add-to-cart.jarbris-add-to-cart-btn:before {
   border-radius: 14px;
   background: linear-gradient(135deg, #10b981, #059669); /* High contrast emerald to match price */
   box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.add-to-cart.yuume-add-to-cart-btn:disabled,
-.add-to-cart.yuume-add-to-cart-btn.disabled {
+.add-to-cart.jarbris-add-to-cart-btn:disabled,
+.add-to-cart.jarbris-add-to-cart-btn.disabled {
   cursor: not-allowed;
   transform: none !important;
 }
 
-.add-to-cart.yuume-add-to-cart-btn:disabled:not(.active):hover,
-.add-to-cart.yuume-add-to-cart-btn.disabled:not(.active):hover {
+.add-to-cart.jarbris-add-to-cart-btn:disabled:not(.active):hover,
+.add-to-cart.jarbris-add-to-cart-btn.disabled:not(.active):hover {
   --background: transparent; /* Prevent hover gradient on disabled */
 }
 
-.add-to-cart.yuume-add-to-cart-btn:disabled:before,
-.add-to-cart.yuume-add-to-cart-btn.disabled:before {
+.add-to-cart.jarbris-add-to-cart-btn:disabled:before,
+.add-to-cart.jarbris-add-to-cart-btn.disabled:before {
   background: rgba(15, 23, 42, 0.4);
   border: 1px dashed rgba(255, 255, 255, 0.2);
   box-shadow: none;
 }
 
-.add-to-cart.yuume-add-to-cart-btn:disabled span,
-.add-to-cart.yuume-add-to-cart-btn.disabled span {
+.add-to-cart.jarbris-add-to-cart-btn:disabled span,
+.add-to-cart.jarbris-add-to-cart-btn.disabled span {
   color: rgba(255, 255, 255, 0.4) !important;
 }
 
 /* CONTAINER */
-.yuume-add-to-cart-container {
+.jarbris-add-to-cart-container {
   width: 140px;
   display: flex;
 }
 
-.yuume-add-to-cart-container.compact {
+.jarbris-add-to-cart-container.compact {
   width: 100%;
 }

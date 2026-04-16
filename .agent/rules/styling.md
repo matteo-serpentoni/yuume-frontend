@@ -1,6 +1,6 @@
 # Styling & Performance Rules
 
-These rules define the styling patterns for yuume-widget, prioritizing performance and isolation.
+These rules define the styling patterns for jarbris-widget, prioritizing performance and isolation.
 
 ## 1. Vanilla CSS over Tailwind
 

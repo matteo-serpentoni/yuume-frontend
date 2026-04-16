@@ -47,7 +47,7 @@ const ConfirmDialog = ({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="yuume-confirm-dialog-overlay"
+          className="jarbris-confirm-dialog-overlay"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -56,7 +56,7 @@ const ConfirmDialog = ({
         >
           <motion.div
             ref={dialogRef}
-            className="yuume-confirm-dialog"
+            className="jarbris-confirm-dialog"
             initial={{ scale: 0.95, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -64,18 +64,18 @@ const ConfirmDialog = ({
             onClick={(e) => e.stopPropagation()} // Prevent overlay click from closing
             role="dialog"
             aria-modal="true"
-            aria-labelledby="yuume-confirm-title"
+            aria-labelledby="jarbris-confirm-title"
           >
-            <h4 id="yuume-confirm-title" className="yuume-confirm-title">
+            <h4 id="jarbris-confirm-title" className="jarbris-confirm-title">
               {title}
             </h4>
-            <p className="yuume-confirm-message">{message}</p>
+            <p className="jarbris-confirm-message">{message}</p>
 
-            <div className="yuume-confirm-actions">
-              <button type="button" className="yuume-confirm-btn cancel" onClick={onCancel}>
+            <div className="jarbris-confirm-actions">
+              <button type="button" className="jarbris-confirm-btn cancel" onClick={onCancel}>
                 {cancelText}
               </button>
-              <button type="button" className="yuume-confirm-btn confirm" onClick={onConfirm}>
+              <button type="button" className="jarbris-confirm-btn confirm" onClick={onConfirm}>
                 {confirmText}
               </button>
             </div>

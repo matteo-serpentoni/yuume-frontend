@@ -1,6 +1,6 @@
 # Performance Rules
 
-These rules define the performance standards for yuume-widget. The widget runs as an iframe on merchant sites, so performance directly impacts the merchant's customers.
+These rules define the performance standards for jarbris-widget. The widget runs as an iframe on merchant sites, so performance directly impacts the merchant's customers.
 
 ## 1. Bundle Size
 

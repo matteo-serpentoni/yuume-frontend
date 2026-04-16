@@ -13,7 +13,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 const CONSENT_EXEMPT_EVENTS = new Set(['jarbris_session_started', 'privacy_consent_updated']);
 
 const buildWelcomeMessage = (profileOverride = null) => {
-  let welcomeText = 'Ciao! 👋 Sono Yuume, il tuo assistente. Come posso aiutarti?';
+  let welcomeText = 'Ciao! 👋 Sono Jarbris, il tuo assistente. Come posso aiutarti?';
   const profile = profileOverride || storage.getProfile();
   if (profile?.name) {
     const firstName = profile.name.trim().split(' ')[0];
@@ -56,7 +56,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         return saved;
       }
 
-      // Personalized Welcome: Check if we have a saved name from Yuume Profile
+      // Personalized Welcome: Check if we have a saved name from Jarbris Profile
       return [buildWelcomeMessage()];
     } catch {
       return [buildWelcomeMessage()];
@@ -130,7 +130,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     setBootConsent(null);
 
     // Request new session from parent (embed.js)
-    window.parent?.postMessage({ type: 'YUUME:requestNewSession' }, '*');
+    window.parent?.postMessage({ type: 'JARBRIS:requestNewSession' }, '*');
   }, []);
 
   const addUserMessage = useCallback((text, id = Date.now(), hidden = false) => {
@@ -221,7 +221,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
     const handleMessage = (event) => {
       // 1. Identity & ShopDomain — parent is source of truth for visitorId + sessionId
-      if (event.data?.type === 'YUUME:identity' || event.data?.type === 'YUUME:shopDomain') {
+      if (event.data?.type === 'JARBRIS:identity' || event.data?.type === 'JARBRIS:shopDomain') {
         // B22: Receive persistent identity from parent (1st-party localStorage)
         if (event.data.visitorId) setVisitorId(event.data.visitorId);
         if (event.data.sessionId) {
@@ -260,15 +260,15 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         setIdentityReady(true);
       }
 
-      if (event.data?.type === 'YUUME:devResetSession') {
+      if (event.data?.type === 'JARBRIS:devResetSession') {
         clearChat();
         setTimeout(() => window.location.reload(), 100);
       }
 
       // 2. Cart Updates (initial or after add-to-cart)
       if (
-        event.data?.type === 'YUUME:cartUpdate' ||
-        event.data?.type === 'YUUME:addToCartResponse'
+        event.data?.type === 'JARBRIS:cartUpdate' ||
+        event.data?.type === 'JARBRIS:addToCartResponse'
       ) {
         const cart = event.data.cart || event.data.data?.cart;
         if (cart) {
@@ -284,8 +284,8 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     window.addEventListener('message', handleMessage);
 
     // Request identity and current cart status from parent
-    window.parent?.postMessage({ type: 'YUUME:ready' }, '*');
-    window.parent?.postMessage({ type: 'YUUME:getCart' }, '*');
+    window.parent?.postMessage({ type: 'JARBRIS:ready' }, '*');
+    window.parent?.postMessage({ type: 'JARBRIS:getCart' }, '*');
 
     return () => window.removeEventListener('message', handleMessage);
   }, [disabled, clearChat]);
@@ -546,7 +546,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       // AUTO-START NEW SESSION IF COMPLETED
       if (sessionStatus === 'completed' || sessionStatus === 'abandoned') {
         // B22: queue the pending message so it auto-sends after the new sessionId arrives.
-        // clearChat() resets state + welcome message + sends YUUME:requestNewSession.
+        // clearChat() resets state + welcome message + sends JARBRIS:requestNewSession.
         pendingAfterResetRef.current = { text, options, fromSessionId: sessionId };
         clearChat();
         return;
@@ -772,7 +772,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   }, []);
 
   // Drain pending message after session renewal.
-  // Fires when sendChatMessage recreates (sessionId changed after YUUME:identity).
+  // Fires when sendChatMessage recreates (sessionId changed after JARBRIS:identity).
   // The fromSessionId guard prevents premature send while still on the old session.
   useEffect(() => {
     const pending = pendingAfterResetRef.current;

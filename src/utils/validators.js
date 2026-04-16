@@ -1,5 +1,5 @@
 /**
- * Shared validation utilities for the Yuume Widget.
+ * Shared validation utilities for the Jarbris Widget.
  */
 
 /**

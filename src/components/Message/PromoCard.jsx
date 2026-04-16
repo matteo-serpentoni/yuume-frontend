@@ -14,7 +14,7 @@ const Icons = {
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="yuume-promo-icon"
+      className="jarbris-promo-icon"
     >
       <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
       <line x1="7" y1="7" x2="7.01" y2="7" />
@@ -66,7 +66,7 @@ const Icons = {
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="yuume-promo-icon"
+      className="jarbris-promo-icon"
     >
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
       <polyline points="22 4 12 14.01 9 11.01" />
@@ -80,7 +80,7 @@ const Icons = {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="yuume-promo-icon"
+      className="jarbris-promo-icon"
     >
       <rect x="1" y="3" width="15" height="13" />
       <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
@@ -96,7 +96,7 @@ const Icons = {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="yuume-promo-icon"
+      className="jarbris-promo-icon"
     >
       <polyline points="20 12 20 22 4 22 4 12" />
       <rect x="2" y="7" width="20" height="5" />
@@ -208,9 +208,9 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
   const expiryText = formatPromoExpiry(promo.endsAt);
 
   return (
-    <div className="yuume-promo-card-perspective">
+    <div className="jarbris-promo-card-perspective">
       <motion.div
-        className={`yuume-promo-card ${isFlipped ? 'is-flipped' : ''}`}
+        className={`jarbris-promo-card ${isFlipped ? 'is-flipped' : ''}`}
         initial={{ opacity: 0, y: 15 }}
         animate={{
           opacity: 1,
@@ -224,63 +224,63 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
         }}
         style={{ transformStyle: 'preserve-3d' }}
       >
-        <div className="yuume-promo-refraction" />
+        <div className="jarbris-promo-refraction" />
 
         {/* --- FRONT SIDE --- */}
-        <div className="yuume-card-side yuume-card-front">
-          <div className="yuume-coupon-top">
-            <div className="yuume-promo-header">
-              <div className="yuume-promo-tag">
+        <div className="jarbris-card-side jarbris-card-front">
+          <div className="jarbris-coupon-top">
+            <div className="jarbris-promo-header">
+              <div className="jarbris-promo-tag">
                 {getIcon()}
-                <span className="yuume-promo-badge">
+                <span className="jarbris-promo-badge">
                   {promo.isAutomatic ? 'Sconto Automatico' : 'Codice Sconto'}
                 </span>
               </div>
-              <div className="yuume-promo-header-actions">
+              <div className="jarbris-promo-header-actions">
                 {promo.isAutomatic && (
                   <motion.div
-                    className="yuume-promo-status-active"
+                    className="jarbris-promo-status-active"
                     animate={{ opacity: [0.4, 1, 0.4] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                   >
-                    <div className="yuume-status-pulse" />
+                    <div className="jarbris-status-pulse" />
                     Attivo
                   </motion.div>
                 )}
-                <button className="yuume-promo-info-btn" onClick={toggleFlip} title="Dettagli">
+                <button className="jarbris-promo-info-btn" onClick={toggleFlip} title="Dettagli">
                   <Icons.Info />
                 </button>
               </div>
             </div>
 
-            <div className="yuume-front-content">
-              <div className="yuume-promo-value-stack">
-                {showTitle && <h3 className="yuume-promo-title">{promo.title}</h3>}
-                <div className="yuume-promo-value">
+            <div className="jarbris-front-content">
+              <div className="jarbris-promo-value-stack">
+                {showTitle && <h3 className="jarbris-promo-title">{promo.title}</h3>}
+                <div className="jarbris-promo-value">
                   {promo.value.replace(/1 PEZZI/g, '1 pezzo').replace(/1 PEZZO/g, '1 pezzo')}
                 </div>
                 {(promo.requirements || expiryText) && (
-                  <div className="yuume-promo-requirements">
+                  <div className="jarbris-promo-requirements">
                     {promo.requirements.replace(/1 PEZZI/g, '1 pezzo')}
-                    {promo.requirements && expiryText && <span className="yuume-req-dot" />}
-                    {expiryText && <span className="yuume-promo-expiry">{expiryText}</span>}
+                    {promo.requirements && expiryText && <span className="jarbris-req-dot" />}
+                    {expiryText && <span className="jarbris-promo-expiry">{expiryText}</span>}
                   </div>
                 )}
               </div>
 
-              <div className="yuume-promo-flow-container">
+              <div className="jarbris-promo-flow-container">
                 {/* Reward Section */}
                 {promo.targets && promo.targets.length > 0 && (
                   <div
-                    className={`yuume-promo-flow-item reward-item ${!isAllCatalog ? 'interactive' : ''}`}
+                    className={`jarbris-promo-flow-item reward-item ${!isAllCatalog ? 'interactive' : ''}`}
                     onClick={!isAllCatalog ? handleSearchTargets : undefined}
                   >
-                    <div className="yuume-flow-icon">
+                    <div className="jarbris-flow-icon">
                       <Icons.Gift />
                     </div>
-                    <div className="yuume-targets-info">
-                      <span className="yuume-targets-label">Sconto applicabile a:</span>
-                      <span className={`yuume-targets-value ${isAllCatalog ? 'all-catalog' : ''}`}>
+                    <div className="jarbris-targets-info">
+                      <span className="jarbris-targets-label">Sconto applicabile a:</span>
+                      <span className={`jarbris-targets-value ${isAllCatalog ? 'all-catalog' : ''}`}>
                         {isAllCatalog
                           ? 'Tutto il catalogo'
                           : promo.targets.slice(0, 2).join(', ') +
@@ -288,7 +288,7 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
                       </span>
                     </div>
                     {!isAllCatalog && (
-                      <div className="yuume-search-indicator">
+                      <div className="jarbris-search-indicator">
                         <Icons.Search />
                       </div>
                     )}
@@ -298,27 +298,27 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
                 {/* Requirement Section (for BXGY) */}
                 {promo.buyObjects && promo.buyObjects.length > 0 && (
                   <>
-                    <div className="yuume-flow-connector">
+                    <div className="jarbris-flow-connector">
                       <div className="connector-line"></div>
                       <div className="connector-text uppercase">acquistando almeno:</div>
                       <div className="connector-line"></div>
                     </div>
                     <div
-                      className="yuume-promo-flow-item requirement-item interactive"
+                      className="jarbris-promo-flow-item requirement-item interactive"
                       onClick={handleSearchBuyItems}
                     >
-                      <div className="yuume-flow-icon">
+                      <div className="jarbris-flow-icon">
                         <Icons.Cart />
                       </div>
-                      <div className="yuume-targets-info">
-                        <span className="yuume-targets-value">
+                      <div className="jarbris-targets-info">
+                        <span className="jarbris-targets-value">
                           {promo.buyObjects
                             .slice(0, 2)
                             .map((o) => o.title)
                             .join(', ') + (promo.buyObjects.length > 2 ? ' e Altri' : '')}
                         </span>
                       </div>
-                      <div className="yuume-search-indicator">
+                      <div className="jarbris-search-indicator">
                         <Icons.Search />
                       </div>
                     </div>
@@ -328,15 +328,15 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
             </div>
           </div>
 
-          <div className="yuume-coupon-divider" />
+          <div className="jarbris-coupon-divider" />
 
-          <div className="yuume-coupon-bottom">
+          <div className="jarbris-coupon-bottom">
             {promo.code ? (
               <button
-                className={`yuume-promo-copy-btn ${copied ? 'copied' : ''}`}
+                className={`jarbris-promo-copy-btn ${copied ? 'copied' : ''}`}
                 onClick={handleCopy}
               >
-                <div className="yuume-code-container">
+                <div className="jarbris-code-container">
                   <span className="code-text" title={promo.code}>
                     {promo.code}
                   </span>
@@ -369,7 +369,7 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
               </button>
             ) : (
               promo.isAutomatic && (
-                <div className="yuume-promo-auto-info">
+                <div className="jarbris-promo-auto-info">
                   <Icons.Auto />
                   Applicato automaticamente
                 </div>
@@ -379,14 +379,14 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
         </div>
 
         {/* --- BACK SIDE --- */}
-        <div className="yuume-card-side yuume-card-back">
-          <div className="yuume-back-header">
-            <div className="yuume-back-title">
+        <div className="jarbris-card-side jarbris-card-back">
+          <div className="jarbris-back-header">
+            <div className="jarbris-back-title">
               <Icons.Shield />
               Termini & Condizioni
             </div>
             <button
-              className="yuume-promo-close-btn"
+              className="jarbris-promo-close-btn"
               onClick={toggleFlip}
               title="Torna all'offerta"
             >
@@ -394,9 +394,9 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
             </button>
           </div>
 
-          <div className="yuume-back-content">
-            <div className="yuume-details-list">
-              <div className="yuume-detail-item">
+          <div className="jarbris-back-content">
+            <div className="jarbris-details-list">
+              <div className="jarbris-detail-item">
                 <span className="label">Validità:</span>
                 <span className="value">
                   Solo {promo.details?.channels?.join(', ') || 'Online'}
@@ -408,7 +408,7 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
               </div>
 
               {promo.details?.shipping && (
-                <div className="yuume-detail-item">
+                <div className="jarbris-detail-item">
                   <span className="label">Spedizione:</span>
                   <span className="value">
                     {promo.details.shipping.countries.includes('*') ||
@@ -425,7 +425,7 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
               )}
 
               {(promo.details?.totalUsageLimit || promo.details?.oncePerCustomer) && (
-                <div className="yuume-detail-item">
+                <div className="jarbris-detail-item">
                   <span className="label">Limiti:</span>
                   <span className="value">
                     {promo.details.totalUsageLimit && 'Disponibilità limitata'}
@@ -436,13 +436,13 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
               )}
 
               {promo.buyObjects && promo.buyObjects.length > 0 && (
-                <div className="yuume-detail-item">
+                <div className="jarbris-detail-item">
                   <span className="label">Requisito Acquisto:</span>
                   <span className="value">{promo.buyObjects.map((o) => o.title).join(', ')}</span>
                 </div>
               )}
 
-              <div className="yuume-detail-item">
+              <div className="jarbris-detail-item">
                 <span className="label">Cumulabilità:</span>
                 {promo.details?.canCombineWith?.productDiscounts ||
                 promo.details?.canCombineWith?.orderDiscounts ? (
@@ -452,9 +452,9 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
                 )}
               </div>
 
-              <div className="yuume-detail-item">
+              <div className="jarbris-detail-item">
                 <span className="label">Altre note:</span>
-                <ul className="yuume-notes-list">
+                <ul className="jarbris-notes-list">
                   {promo.details?.onOneTimePurchaseOnly && (
                     <li>Valido solo per acquisti singoli</li>
                   )}
@@ -473,8 +473,8 @@ const PromoCard = memo(({ promo, onSearch, index = 0 }) => {
             </div>
           </div>
 
-          <div className="yuume-back-footer">
-            <button className="yuume-back-return-btn" onClick={toggleFlip}>
+          <div className="jarbris-back-footer">
+            <button className="jarbris-back-return-btn" onClick={toggleFlip}>
               Torna al Coupon
             </button>
           </div>

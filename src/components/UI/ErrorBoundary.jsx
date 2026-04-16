@@ -28,7 +28,7 @@ class ErrorBoundary extends React.Component {
     });
 
     // Notify parent to self-destruct iframe so it doesn't block the screen
-    window.parent?.postMessage({ type: 'YUUME:fatalError' }, '*');
+    window.parent?.postMessage({ type: 'JARBRIS:fatalError' }, '*');
   }
 
   render() {

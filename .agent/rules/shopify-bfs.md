@@ -1,6 +1,6 @@
 # Shopify BFS Rules (Widget)
 
-These rules ensure the yuume-widget meets Built for Shopify (BFS) performance and compatibility requirements on merchant storefronts.
+These rules ensure the jarbris-widget meets Built for Shopify (BFS) performance and compatibility requirements on merchant storefronts.
 
 ## 1. Web Vitals Budget
 

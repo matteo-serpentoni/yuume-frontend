@@ -3,12 +3,12 @@
    Physical voucher shape with high-end refraction
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-.yuume-promo-card-perspective {
+.jarbris-promo-card-perspective {
   perspective: 1000px;
   width: 100%;
 }
 
-.yuume-promo-card {
+.jarbris-promo-card {
   position: relative;
   width: 92%;
   height: 300px;
@@ -18,11 +18,11 @@
   transform-style: preserve-3d;
 }
 
-.yuume-promo-card.is-flipped {
+.jarbris-promo-card.is-flipped {
   transform: rotateY(180deg);
 }
 
-.yuume-card-side {
+.jarbris-card-side {
   position: absolute;
   top: 0;
   left: 0;
@@ -69,7 +69,7 @@
   mask-composite: intersect;
 }
 
-.yuume-card-back {
+.jarbris-card-back {
   transform: rotateY(180deg);
   background: linear-gradient(135deg, rgba(15, 15, 15, 0.95), rgba(30, 30, 30, 0.95));
   border-color: rgba(255, 255, 255, 0.1);
@@ -77,7 +77,7 @@
 
 /* Internal Sections */
 /* Internal Sections */
-.yuume-coupon-top {
+.jarbris-coupon-top {
   padding: 0;
   height: 240px;
   display: flex;
@@ -86,26 +86,26 @@
 }
 
 /* Front side is only interactive when NOT flipped */
-.yuume-promo-card:not(.is-flipped) .yuume-card-front {
+.jarbris-promo-card:not(.is-flipped) .jarbris-card-front {
   pointer-events: auto;
   z-index: 2;
 }
-.yuume-promo-card.is-flipped .yuume-card-front {
+.jarbris-promo-card.is-flipped .jarbris-card-front {
   pointer-events: none;
   z-index: 1;
 }
 
 /* Back side is only interactive when flipped */
-.yuume-promo-card.is-flipped .yuume-card-back {
+.jarbris-promo-card.is-flipped .jarbris-card-back {
   pointer-events: auto;
   z-index: 2;
 }
-.yuume-promo-card:not(.is-flipped) .yuume-card-back {
+.jarbris-promo-card:not(.is-flipped) .jarbris-card-back {
   pointer-events: none;
   z-index: 1;
 }
 
-.yuume-front-content {
+.jarbris-front-content {
   flex: 1;
   padding: 0 20px 20px 20px;
   overflow-y: auto !important;
@@ -113,23 +113,23 @@
 }
 
 /* Scrollbar styling (EXACT CLONE OF BACK SIDE) */
-.yuume-front-content::-webkit-scrollbar,
-.yuume-back-content::-webkit-scrollbar {
+.jarbris-front-content::-webkit-scrollbar,
+.jarbris-back-content::-webkit-scrollbar {
   width: 5px;
 }
 
-.yuume-front-content::-webkit-scrollbar-track,
-.yuume-back-content::-webkit-scrollbar-track {
+.jarbris-front-content::-webkit-scrollbar-track,
+.jarbris-back-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.yuume-front-content::-webkit-scrollbar-thumb,
-.yuume-back-content::-webkit-scrollbar-thumb {
+.jarbris-front-content::-webkit-scrollbar-thumb,
+.jarbris-back-content::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
 }
 
-.yuume-coupon-divider {
+.jarbris-coupon-divider {
   height: 0px;
   position: relative;
   margin: 0 14px;
@@ -138,7 +138,7 @@
   top: -1px; /* Center with the mask hole */
 }
 
-.yuume-coupon-bottom {
+.jarbris-coupon-bottom {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -148,7 +148,7 @@
 }
 
 /* Icons & Labels */
-.yuume-promo-header {
+.jarbris-promo-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -156,7 +156,7 @@
   flex-shrink: 0;
 }
 
-.yuume-promo-tag {
+.jarbris-promo-tag {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -166,13 +166,13 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.yuume-promo-icon {
+.jarbris-promo-icon {
   width: 14px;
   height: 14px;
   color: #10b981;
 }
 
-.yuume-promo-badge {
+.jarbris-promo-badge {
   font-size: 10px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.6);
@@ -180,7 +180,7 @@
   letter-spacing: 0.05em;
 }
 
-.yuume-promo-status-active {
+.jarbris-promo-status-active {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -195,7 +195,7 @@
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-.yuume-status-pulse {
+.jarbris-status-pulse {
   width: 5px;
   height: 5px;
   background: #10b981;
@@ -204,13 +204,13 @@
 }
 
 /* Main Value */
-.yuume-promo-value-stack {
+.jarbris-promo-value-stack {
   display: flex;
   flex-direction: column;
   pointer-events: none; /* Let scroll pass through */
 }
 
-.yuume-promo-title {
+.jarbris-promo-title {
   font-size: 13px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.4);
@@ -219,7 +219,7 @@
   letter-spacing: 0.02em;
 }
 
-.yuume-promo-value {
+.jarbris-promo-value {
   font-size: 32px;
   font-weight: 800;
   color: #ffffff;
@@ -231,7 +231,7 @@
   -webkit-text-fill-color: transparent;
 }
 
-.yuume-promo-requirements {
+.jarbris-promo-requirements {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.4);
   margin-top: 8px;
@@ -242,37 +242,37 @@
   gap: 6px;
 }
 
-.yuume-req-dot {
+.jarbris-req-dot {
   width: 3px;
   height: 3px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
 }
 
-.yuume-promo-expiry {
+.jarbris-promo-expiry {
   color: #fbbf24; /* Un tocco di ambra per l'urgenza */
   font-weight: 600;
 }
 
 /* Connectors and flow items need pointer events for buttons */
-.yuume-promo-flow-container {
+.jarbris-promo-flow-container {
   pointer-events: auto;
 }
 
-.yuume-promo-flow-item {
+.jarbris-promo-flow-item {
   /* ... exists ... */
   pointer-events: auto;
 }
 
 /* Flow Layout (Reward -> Requirement) */
-.yuume-promo-flow-container {
+.jarbris-promo-flow-container {
   display: flex;
   flex-direction: column;
   gap: 0;
   margin-top: 4px;
 }
 
-.yuume-promo-flow-item {
+.jarbris-promo-flow-item {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 8px 12px;
@@ -287,14 +287,14 @@
   min-height: 44px;
 }
 
-.yuume-flow-icon {
+.jarbris-flow-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.4);
 }
 
-.yuume-flow-icon svg {
+.jarbris-flow-icon svg {
   width: 14px;
   height: 14px;
 }
@@ -304,7 +304,7 @@
   border-color: rgba(16, 185, 129, 0.1);
 }
 
-.reward-item .yuume-flow-icon {
+.reward-item .jarbris-flow-icon {
   color: #10b981;
 }
 
@@ -313,11 +313,11 @@
   border-color: rgba(251, 191, 36, 0.1);
 }
 
-.requirement-item .yuume-flow-icon {
+.requirement-item .jarbris-flow-icon {
   color: #fbbf24;
 }
 
-.yuume-flow-connector {
+.jarbris-flow-connector {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -338,11 +338,11 @@
   white-space: nowrap;
 }
 
-.yuume-promo-flow-item.interactive {
+.jarbris-promo-flow-item.interactive {
   cursor: pointer;
 }
 
-.yuume-promo-flow-item.interactive:hover {
+.jarbris-promo-flow-item.interactive:hover {
   background: rgba(255, 255, 255, 0.12);
   transform: translateY(-1px);
 }
@@ -355,7 +355,7 @@
   border-color: rgba(251, 191, 36, 0.3);
 }
 
-.yuume-targets-info {
+.jarbris-targets-info {
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -363,7 +363,7 @@
   min-width: 0;
 }
 
-.yuume-targets-label {
+.jarbris-targets-label {
   font-size: 8px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.3);
@@ -372,7 +372,7 @@
   display: block;
 }
 
-.yuume-targets-value {
+.jarbris-targets-value {
   font-size: 11px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
@@ -382,11 +382,11 @@
   display: block;
 }
 
-.yuume-targets-value.all-catalog {
+.jarbris-targets-value.all-catalog {
   color: #10b981;
 }
 
-.yuume-search-indicator {
+.jarbris-search-indicator {
   color: rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
@@ -402,28 +402,28 @@
     transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.reward-item .yuume-search-indicator {
+.reward-item .jarbris-search-indicator {
   color: #10b981;
   background: rgba(16, 185, 129, 0.1);
 }
 
-.requirement-item .yuume-search-indicator {
+.requirement-item .jarbris-search-indicator {
   color: #fbbf24;
   background: rgba(251, 191, 36, 0.1);
 }
 
-.yuume-search-indicator svg {
+.jarbris-search-indicator svg {
   width: 12px;
   height: 12px;
 }
 
-.interactive:hover .yuume-search-indicator {
+.interactive:hover .jarbris-search-indicator {
   background: rgba(16, 185, 129, 0.2);
   transform: scale(1.05);
 }
 
 /* Action: Copy Button */
-.yuume-promo-copy-btn {
+.jarbris-promo-copy-btn {
   width: 100%;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -441,7 +441,7 @@
   overflow: hidden;
 }
 
-.yuume-promo-copy-btn::after {
+.jarbris-promo-copy-btn::after {
   content: '';
   position: absolute;
   top: 0;
@@ -450,10 +450,10 @@
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
   transform: skewX(-20deg);
-  animation: yuume-shimmer-sweep 4s infinite;
+  animation: jarbris-shimmer-sweep 4s infinite;
 }
 
-@keyframes yuume-shimmer-sweep {
+@keyframes jarbris-shimmer-sweep {
   0% {
     left: -150%;
   }
@@ -465,17 +465,17 @@
   }
 }
 
-.yuume-promo-copy-btn:hover {
+.jarbris-promo-copy-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.yuume-promo-copy-btn.copied {
+.jarbris-promo-copy-btn.copied {
   background: #10b981;
   border-color: #10b981;
 }
 
-.yuume-code-container {
+.jarbris-code-container {
   flex: 1;
   min-width: 0;
   margin-right: 12px;
@@ -521,19 +521,19 @@
   display: block;
 }
 
-.yuume-promo-copy-btn:hover .copy-action {
+.jarbris-promo-copy-btn:hover .copy-action {
   opacity: 1;
 }
 
 /* Header Actions on Front side */
-.yuume-promo-header-actions {
+.jarbris-promo-header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.yuume-promo-info-btn,
-.yuume-promo-close-btn {
+.jarbris-promo-info-btn,
+.jarbris-promo-close-btn {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.6);
@@ -552,21 +552,21 @@
   flex-shrink: 0;
 }
 
-.yuume-promo-info-btn:hover,
-.yuume-promo-close-btn:hover {
+.jarbris-promo-info-btn:hover,
+.jarbris-promo-close-btn:hover {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
   transform: scale(1.1);
 }
 
-.yuume-promo-info-btn svg,
-.yuume-promo-close-btn svg {
+.jarbris-promo-info-btn svg,
+.jarbris-promo-close-btn svg {
   width: 14px;
   height: 14px;
 }
 
 /* Back Side Content */
-.yuume-back-header {
+.jarbris-back-header {
   padding: 16px 20px;
   display: flex;
   align-items: center;
@@ -574,7 +574,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.yuume-back-title {
+.jarbris-back-title {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -585,31 +585,31 @@
   letter-spacing: 0.05em;
 }
 
-.yuume-back-title svg {
+.jarbris-back-title svg {
   width: 14px;
   height: 14px;
 }
 
-.yuume-back-content {
+.jarbris-back-content {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.yuume-details-list {
+.jarbris-details-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.yuume-detail-item {
+.jarbris-detail-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.yuume-detail-item .label {
+.jarbris-detail-item .label {
   font-size: 10px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.3);
@@ -617,26 +617,26 @@
   letter-spacing: 0.05em;
 }
 
-.yuume-detail-item .value {
+.jarbris-detail-item .value {
   font-size: 12px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
 }
 
-.yuume-detail-item .value.success {
+.jarbris-detail-item .value.success {
   color: #10b981;
 }
-.yuume-detail-item .value.warning {
+.jarbris-detail-item .value.warning {
   color: #fbbf24;
 }
 
-.yuume-detail-item .meta {
+.jarbris-detail-item .meta {
   font-size: 10px;
   color: rgba(255, 255, 255, 0.3);
   font-style: italic;
 }
 
-.yuume-notes-list {
+.jarbris-notes-list {
   margin: 6px 0 0 0;
   padding: 0;
   list-style: none;
@@ -645,26 +645,26 @@
   gap: 4px;
 }
 
-.yuume-notes-list li {
+.jarbris-notes-list li {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.6);
   position: relative;
   padding-left: 14px;
 }
 
-.yuume-notes-list li::before {
+.jarbris-notes-list li::before {
   content: '•';
   position: absolute;
   left: 0;
   color: #10b981;
 }
 
-.yuume-back-footer {
+.jarbris-back-footer {
   padding: 16px 20px;
   background: rgba(255, 255, 255, 0.02);
 }
 
-.yuume-back-return-btn {
+.jarbris-back-return-btn {
   width: 100%;
   padding: 10px;
   background: rgba(255, 255, 255, 0.05);
@@ -680,13 +680,13 @@
     border-color 0.3s ease;
 }
 
-.yuume-back-return-btn:hover {
+.jarbris-back-return-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(16, 185, 129, 0.3);
 }
 
 /* Glow & refraction details */
-.yuume-promo-refraction {
+.jarbris-promo-refraction {
   position: absolute;
   top: 0;
   left: 0;
@@ -706,12 +706,12 @@
 }
 
 /* Carousel Integration */
-.yuume-promos-container.carousel {
+.jarbris-promos-container.carousel {
   width: 100%;
   margin: 4px 0 0 0;
 }
 
-.yuume-promos-list {
+.jarbris-promos-list {
   display: flex;
   gap: 16px;
   padding: 10px 24px 12px 24px;
@@ -721,18 +721,18 @@
   scrollbar-width: none;
 }
 
-.yuume-promos-list::-webkit-scrollbar {
+.jarbris-promos-list::-webkit-scrollbar {
   display: none;
 }
 
-.yuume-promo-card-wrapper {
+.jarbris-promo-card-wrapper {
   flex: 0 0 calc(100% - 48px);
   max-width: 320px;
   scroll-snap-align: center;
 }
 
 /* Mobile GPU optimization: reduce backdrop-filter blur */
-.mobile-device .yuume-card-side {
+.mobile-device .jarbris-card-side {
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
 }

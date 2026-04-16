@@ -1,4 +1,4 @@
-.yuume-dynamic-form {
+.jarbris-dynamic-form {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
@@ -13,7 +13,7 @@
   color: white;
 }
 
-.yuume-dynamic-form-header {
+.jarbris-dynamic-form-header {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -22,11 +22,11 @@
   padding-bottom: 8px;
 }
 
-.yuume-dynamic-form-icon {
+.jarbris-dynamic-form-icon {
   font-size: 18px;
 }
 
-.yuume-dynamic-form-title {
+.jarbris-dynamic-form-title {
   font-size: 13px;
   font-weight: 600;
   margin: 0;
@@ -34,7 +34,7 @@
   letter-spacing: 0.01em;
 }
 
-.yuume-dynamic-progress-dots {
+.jarbris-dynamic-progress-dots {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -42,7 +42,7 @@
   padding: 12px 0;
 }
 
-.yuume-dynamic-step-dot {
+.jarbris-dynamic-step-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -54,49 +54,49 @@
   flex-shrink: 0;
 }
 
-.yuume-dynamic-step-dot.active {
+.jarbris-dynamic-step-dot.active {
   width: 18px;
   background: #a855f7;
   border-radius: 4px;
 }
 
-.yuume-dynamic-step-dot.completed {
+.jarbris-dynamic-step-dot.completed {
   background: #a855f7;
   opacity: 0.6;
 }
 
-.yuume-dynamic-form-body {
+.jarbris-dynamic-form-body {
   display: flex;
   flex-direction: column;
 }
 
-.yuume-dynamic-step-wrapper {
+.jarbris-dynamic-step-wrapper {
   display: flex;
   flex-direction: column;
 }
 
-.yuume-dynamic-fields-container {
+.jarbris-dynamic-fields-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 /* Fields & Groups */
-.yuume-form-group {
+.jarbris-form-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.yuume-form-group-notes {
+.jarbris-form-group-notes {
   display: flex;
   flex-direction: column;
   gap: 4px;
   margin-top: 8px;
 }
 
-.yuume-form-group label,
-.yuume-form-group-notes label {
+.jarbris-form-group label,
+.jarbris-form-group-notes label {
   font-size: 9px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.65); /* Increased from 0.4 for better visibility */
@@ -105,8 +105,8 @@
   margin-left: 2px;
 }
 
-.yuume-form-group input,
-.yuume-dynamic-textarea {
+.jarbris-form-group input,
+.jarbris-dynamic-textarea {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
@@ -120,30 +120,30 @@
   font-family: inherit;
 }
 
-.yuume-form-group input::placeholder,
-.yuume-dynamic-textarea::placeholder {
+.jarbris-form-group input::placeholder,
+.jarbris-dynamic-textarea::placeholder {
   color: rgba(255, 255, 255, 0.45); /* Increased visibility for placeholders */
 }
 
-.yuume-dynamic-textarea {
+.jarbris-dynamic-textarea {
   min-height: 60px;
   resize: none;
 }
 
-.yuume-form-group input:focus,
-.yuume-dynamic-textarea:focus {
+.jarbris-form-group input:focus,
+.jarbris-dynamic-textarea:focus {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* List Select Specifics */
-.yuume-dynamic-info-text {
+.jarbris-dynamic-info-text {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.5);
   margin-bottom: 4px;
 }
 
-.yuume-dynamic-list {
+.jarbris-dynamic-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -152,15 +152,15 @@
   padding-right: 4px;
 }
 
-.yuume-dynamic-list::-webkit-scrollbar {
+.jarbris-dynamic-list::-webkit-scrollbar {
   width: 4px;
 }
-.yuume-dynamic-list::-webkit-scrollbar-thumb {
+.jarbris-dynamic-list::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
 }
 
-.yuume-dynamic-list-option {
+.jarbris-dynamic-list-option {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -174,17 +174,17 @@
     border-color 0.2s ease;
 }
 
-.yuume-dynamic-list-option:hover {
+.jarbris-dynamic-list-option:hover {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-.yuume-dynamic-list-option.active {
+.jarbris-dynamic-list-option.active {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.yuume-dynamic-radio {
+.jarbris-dynamic-radio {
   width: 16px;
   height: 16px;
   border: 1.5px solid rgba(255, 255, 255, 0.2);
@@ -195,18 +195,18 @@
   flex-shrink: 0;
 }
 
-.active .yuume-dynamic-radio {
+.active .jarbris-dynamic-radio {
   border-color: white;
 }
 
-.yuume-dynamic-radio-inner {
+.jarbris-dynamic-radio-inner {
   width: 8px;
   height: 8px;
   background: white;
   border-radius: 50%;
 }
 
-.yuume-dynamic-option-image {
+.jarbris-dynamic-option-image {
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -215,31 +215,31 @@
   flex-shrink: 0;
 }
 
-.yuume-dynamic-option-image img {
+.jarbris-dynamic-option-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.yuume-dynamic-option-content {
+.jarbris-dynamic-option-content {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.yuume-dynamic-option-title {
+.jarbris-dynamic-option-title {
   font-size: 12px;
   font-weight: 500;
   color: white;
 }
 
-.yuume-dynamic-option-meta {
+.jarbris-dynamic-option-meta {
   font-size: 10px;
   color: rgba(255, 255, 255, 0.5);
 }
 
 /* Error & Submit */
-.yuume-dynamic-error-message {
+.jarbris-dynamic-error-message {
   color: white;
   font-size: 11px;
   font-weight: 600;
@@ -252,13 +252,13 @@
   backdrop-filter: blur(4px);
 }
 
-.yuume-dynamic-form-actions {
+.jarbris-dynamic-form-actions {
   display: flex;
   gap: 10px;
   margin-top: 12px;
 }
 
-.yuume-dynamic-form-submit {
+.jarbris-dynamic-form-submit {
   flex: 2;
   background: rgba(255, 255, 255, 0.9);
   color: #000;
@@ -278,7 +278,7 @@
   align-items: center;
 }
 
-.yuume-dynamic-form-back-btn {
+.jarbris-dynamic-form-back-btn {
   flex: 1;
   background: rgba(255, 255, 255, 0.05);
   color: white;
@@ -297,37 +297,37 @@
   align-items: center;
 }
 
-.yuume-dynamic-form-back-btn:hover:not(:disabled) {
+.jarbris-dynamic-form-back-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.yuume-dynamic-form-submit:hover:not(:disabled) {
+.jarbris-dynamic-form-submit:hover:not(:disabled) {
   background: #ffffff;
   transform: translateY(-1px);
 }
 
-.yuume-dynamic-form-submit:disabled {
+.jarbris-dynamic-form-submit:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   filter: grayscale(0.8);
   transform: none;
 }
 
-.yuume-dynamic-input:disabled,
-.yuume-dynamic-textarea:disabled,
-.yuume-dynamic-select:disabled {
+.jarbris-dynamic-input:disabled,
+.jarbris-dynamic-textarea:disabled,
+.jarbris-dynamic-select:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Select Styling */
-.yuume-select-wrapper {
+.jarbris-select-wrapper {
   position: relative;
   width: 100%;
 }
 
-.yuume-dynamic-select {
+.jarbris-dynamic-select {
   width: 100%;
   padding: 10px 35px 10px 12px;
   background: rgba(255, 255, 255, 0.05);
@@ -346,13 +346,13 @@
   outline: none;
 }
 
-.yuume-dynamic-select:focus {
+.jarbris-dynamic-select:focus {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.3);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
 }
 
-.yuume-select-arrow {
+.jarbris-select-arrow {
   position: absolute;
   right: 12px;
   top: 50%;
@@ -367,35 +367,35 @@
   transition: transform 0.2s ease;
 }
 
-.yuume-dynamic-select:focus + .yuume-select-arrow {
+.jarbris-dynamic-select:focus + .jarbris-select-arrow {
   transform: translateY(-50%) rotate(180deg);
   opacity: 1;
 }
 
-.yuume-dynamic-select option {
+.jarbris-dynamic-select option {
   background: #1a1a1a;
   color: white;
   padding: 10px;
 }
 
 /* Loader animation for submit button */
-.yuume-loader-small {
+.jarbris-loader-small {
   width: 16px;
   height: 16px;
   border: 2px solid rgba(0, 0, 0, 0.2);
   border-top-color: #000;
   border-radius: 50%;
-  animation: yuume-spin 0.8s linear infinite;
+  animation: jarbris-spin 0.8s linear infinite;
 }
 
-@keyframes yuume-spin {
+@keyframes jarbris-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
 /* Success Flow & Animations */
-.yuume-return-success-block {
+.jarbris-return-success-block {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -405,7 +405,7 @@
   overflow: hidden;
 }
 
-.yuume-return-success-glow {
+.jarbris-return-success-glow {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -417,13 +417,13 @@
   pointer-events: none;
 }
 
-.yuume-success-check-wrapper {
+.jarbris-success-check-wrapper {
   position: relative;
   z-index: 1;
   margin-bottom: 20px;
 }
 
-.yuume-success-check {
+.jarbris-success-check {
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -433,33 +433,33 @@
   stroke-miterlimit: 10;
   box-shadow: inset 0px 0px 0px #10b981;
   animation:
-    yuume-fill 0.4s ease-in-out 0.4s forwards,
-    yuume-scale 0.3s ease-in-out 0.9s both;
+    jarbris-fill 0.4s ease-in-out 0.4s forwards,
+    jarbris-scale 0.3s ease-in-out 0.9s both;
 }
 
-.yuume-success-check circle {
+.jarbris-success-check circle {
   stroke-dasharray: 166;
   stroke-dashoffset: 166;
   stroke-width: 2;
   stroke-miterlimit: 10;
   stroke: #10b981;
   fill: none;
-  animation: yuume-stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  animation: jarbris-stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
 }
 
-.yuume-success-check path {
+.jarbris-success-check path {
   transform-origin: 50% 50%;
   stroke-dasharray: 48;
   stroke-dashoffset: 48;
-  animation: yuume-stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+  animation: jarbris-stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
 }
 
-.yuume-return-success-text {
+.jarbris-return-success-text {
   position: relative;
   z-index: 1;
 }
 
-.yuume-return-success-text h4 {
+.jarbris-return-success-text h4 {
   font-size: 18px;
   font-weight: 700;
   margin: 0 0 8px 0;
@@ -467,7 +467,7 @@
   letter-spacing: -0.02em;
 }
 
-.yuume-return-success-text p {
+.jarbris-return-success-text p {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.5;
@@ -475,13 +475,13 @@
   max-width: 240px;
 }
 
-@keyframes yuume-stroke {
+@keyframes jarbris-stroke {
   100% {
     stroke-dashoffset: 0;
   }
 }
 
-@keyframes yuume-scale {
+@keyframes jarbris-scale {
   0%,
   100% {
     transform: none;
@@ -491,25 +491,25 @@
   }
 }
 
-@keyframes yuume-fill {
+@keyframes jarbris-fill {
   100% {
     box-shadow: inset 0px 0px 0px 30px rgba(16, 185, 129, 0.1);
   }
 }
 
 /* 🛡️ Duplicate Return Prevention */
-.yuume-dynamic-list-option.disabled {
+.jarbris-dynamic-list-option.disabled {
   opacity: 0.5;
   cursor: not-allowed;
   filter: grayscale(0.6);
 }
 
-.yuume-dynamic-list-option.disabled:hover {
+.jarbris-dynamic-list-option.disabled:hover {
   background: rgba(255, 255, 255, 0.03);
   border-color: rgba(255, 255, 255, 0.05);
 }
 
-.yuume-return-status-badge {
+.jarbris-return-status-badge {
   display: inline-block;
   padding: 2px 6px;
   border-radius: 5px;
@@ -522,20 +522,20 @@
   line-height: 1;
 }
 
-.yuume-return-status-badge.status-pending {
+.jarbris-return-status-badge.status-pending {
   background: rgba(234, 179, 8, 0.15);
   color: #fbbf24;
   border: 1px solid rgba(234, 179, 8, 0.25);
 }
 
-.yuume-return-status-badge.status-approved {
+.jarbris-return-status-badge.status-approved {
   background: rgba(16, 185, 129, 0.15);
   color: #34d399;
   border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
 /* Mobile GPU optimization: reduce backdrop-filter blur */
-.mobile-device .yuume-dynamic-form {
+.mobile-device .jarbris-dynamic-form {
   backdrop-filter: blur(6px) saturate(150%);
   -webkit-backdrop-filter: blur(6px) saturate(150%);
 }

@@ -1,6 +1,6 @@
 /* MessageList.css */
 
-.yuume-order-lookup-results-text {
+.jarbris-order-lookup-results-text {
   padding: 16px;
   text-align: center;
   background: rgba(255, 255, 255, 0.05);
@@ -8,19 +8,19 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.yuume-order-lookup-icon {
+.jarbris-order-lookup-icon {
   font-size: 24px;
   margin-bottom: 8px;
 }
 
-.yuume-order-lookup-message {
+.jarbris-order-lookup-message {
   font-size: 14px;
   margin: 0 0 16px 0;
   color: white;
   opacity: 0.8;
 }
 
-.yuume-order-lookup-retry-btn {
+.jarbris-order-lookup-retry-btn {
   background: white;
   color: black;
   border: none;
@@ -39,42 +39,42 @@
   min-width: 100px;
 }
 
-.yuume-order-lookup-retry-btn:hover:not(:disabled) {
+.jarbris-order-lookup-retry-btn:hover:not(:disabled) {
   opacity: 0.9;
   transform: translateY(-1px);
 }
 
-.yuume-order-lookup-retry-btn:disabled {
+.jarbris-order-lookup-retry-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.yuume-message-wrapper {
+.jarbris-message-wrapper {
   scroll-margin-top: 110px; /* Strong clearance for long messages */
 }
 
-.yuume-message-block {
+.jarbris-message-block {
   margin-bottom: 12px;
 }
 
-.yuume-message-block.standalone {
+.jarbris-message-block.standalone {
   margin-bottom: 0px;
 }
 
-.yuume-standalone-content {
+.jarbris-standalone-content {
   width: 100%;
   padding: 0 4px;
   overflow: visible;
 }
 
-.yuume-standalone-meta {
+.jarbris-standalone-meta {
   display: flex;
   justify-content: flex-end;
   margin-top: 4px;
   padding-right: 8px;
 }
 
-.yuume-promos-container {
+.jarbris-promos-container {
   display: flex;
   flex-direction: column;
   gap: 12px;

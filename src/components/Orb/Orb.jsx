@@ -374,9 +374,9 @@ const Orb = memo(
       if (mode === 'preview') return; // Skip in preview mode
 
       if (enlarged) {
-        window.parent?.postMessage({ type: 'YUUME:chatOpened' }, '*');
+        window.parent?.postMessage({ type: 'JARBRIS:chatOpened' }, '*');
       } else {
-        window.parent?.postMessage({ type: 'YUUME:chatClosed' }, '*');
+        window.parent?.postMessage({ type: 'JARBRIS:chatClosed' }, '*');
       }
     }, [enlarged, mode]);
 
@@ -423,8 +423,8 @@ const Orb = memo(
 
       const handleCartMessage = (event) => {
         if (
-          event.data?.type === 'YUUME:cartUpdate' ||
-          event.data?.type === 'YUUME:addToCartResponse'
+          event.data?.type === 'JARBRIS:cartUpdate' ||
+          event.data?.type === 'JARBRIS:addToCartResponse'
         ) {
           const cart = event.data.cart || event.data.data?.cart;
           if (cart) {
@@ -498,7 +498,7 @@ const Orb = memo(
           ref={containerRef}
           role="button"
           tabIndex={0}
-          aria-label={isMinimized ? 'Apri assistente Yuume' : 'Widget Yuume attivo'}
+          aria-label={isMinimized ? 'Apri assistente Jarbris' : 'Widget Jarbris attivo'}
           className={`orb-container ${isMinimized ? 'minimized' : ''} ${
             isMobileView ? 'mobile-device' : ''
           } ${mode === 'preview' ? 'preview-mode' : ''} ${loading ? 'loading' : ''}`}
@@ -531,7 +531,7 @@ const Orb = memo(
           )}
 
           {/* Gallery Portal - Top level for perfect circular alignment */}
-          <div id="yuume-gallery-portal" className="drawer-portal-container" />
+          <div id="jarbris-gallery-portal" className="drawer-portal-container" />
 
           {/* Minimized Text */}
           {isMinimized && (
