@@ -11,7 +11,7 @@ import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
 import { ProductDrawer } from '../Message/ProductCards';
 import { OrderDetailCard } from '../Message/OrderCards';
-import { normalizeOrderNumber, extractShopifyId } from '../../utils/shopifyUtils';
+import { normalizeOrderNumber, extractShopifyId, extractVariantId } from '../../utils/shopifyUtils';
 import Drawer from '../UI/Drawer';
 import ProfileView from './ProfileView';
 import StarRating from './StarRating';
@@ -123,12 +123,35 @@ const Chat = ({
   const handleSystemChipAction = useCallback(
     (action, payload) => {
       if (action === 'ADD_TO_CART') {
-        if (payload.variantId) {
+        // Resolve variantId: use payload value if present, otherwise fall back to the
+        // first variant of the matching product in the message history (same lookup as
+        // OPEN_VARIANT_DRAWER). This mirrors the card AddToCartButton behavior for
+        // no-variant products where the API payload may omit variantId.
+        let resolvedVariantId = payload.variantId;
+        if (!resolvedVariantId && payload.productId) {
+          const allProducts = liveChat.messages
+            .flatMap((m) => m.products || m.cards || [])
+            .filter(Boolean);
+          const match = allProducts.find(
+            (p) => extractShopifyId(p.productId || p.id) === extractShopifyId(payload.productId),
+          );
+          resolvedVariantId = match?.variants?.[0]?.id || match?.variantId;
+        }
+
+        // Extract numeric ID from GID (gid://shopify/ProductVariant/123) — Shopify's
+        // cart/add.js requires a numeric variantId. Mirrors AddToCartButton behavior.
+        const numericVariantId = extractVariantId(resolvedVariantId);
+        if (numericVariantId) {
           window.parent?.postMessage(
-            { type: 'YUUME:addToCart', variantId: payload.variantId, quantity: payload.quantity || 1 },
+            { type: 'YUUME:addToCart', variantId: numericVariantId, quantity: payload.quantity || 1 },
             '*',
           );
-          // Notify backend (same as card button) so cross-sell is triggered.
+        }
+
+        // Always notify backend so cross-sell is triggered, regardless of variantId.
+        // This matches the card AddToCartButton flow where onAnimationComplete fires
+        // handleProductCartAction unconditionally after the postMessage.
+        if (payload.productId) {
           handleProductCartAction(payload.productId);
         }
       } else if (action === 'OPEN_VARIANT_DRAWER') {
