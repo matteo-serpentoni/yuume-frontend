@@ -61,10 +61,7 @@ const ProfileCardMessage = ({
           aria-expanded={effectiveExpanded}
           aria-label={effectiveExpanded ? 'Comprimi dettagli profilo' : 'Espandi dettagli profilo'}
         >
-          <div
-            className="jarbris-profile-card-icon"
-            style={{ color: chatColors?.header || '#4CC2E9' }}
-          >
+          <div className="jarbris-profile-card-icon" style={{ color: 'rgba(255, 255, 255, 0.35)' }}>
             <UserIcon size={18} />
           </div>
           <div className="jarbris-profile-card-text">

@@ -212,26 +212,11 @@ const ProductCard = memo(
 
             {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
               <div className="jarbris-product-card-footer" onClick={(e) => e.stopPropagation()}>
-                {hasVariants ? (
-                  <button
-                    className="jarbris-options-btn"
-                    aria-label={`Seleziona opzioni per ${product.name}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      onOpen(product);
-                    }}
-                  >
-                    Customize
-                  </button>
-                ) : (
-                  <div className="jarbris-card-spacer" />
-                )}
-                {isAvailable && (product.variants[0] || product.variantId) && (
-                  <div className="jarbris-add-to-cart-wrapper">
+                {((isAvailable && (product.variants[0] || product.variantId)) || hasVariants) && (
+                  <div className="jarbris-add-to-cart-wrapper" style={{ flex: 1, width: '100%' }}>
                     {hasVariants ? (
                       // Product has variants: ATC opens the sheet to let user pick options first
-                      <div className="jarbris-add-to-cart-container compact">
+                      <div className="jarbris-add-to-cart-container compact" style={{ flex: 1 }}>
                         <button
                           className="add-to-cart jarbris-add-to-cart-btn"
                           aria-label={`Aggiungi al carrello ${product.name}`}

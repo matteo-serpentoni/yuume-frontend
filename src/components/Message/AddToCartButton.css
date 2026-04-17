@@ -14,14 +14,14 @@
   --cart-clip: 0px;
   --cart-clip-x: 0px;
   --cart-tick-offset: 10px;
-  --cart-tick-color: #ff328b;
+  --cart-tick-color: #ffffff;
   --package-y: -16px;
   --package-scale: 0;
   --package-color: #8b4513;
   --package-tape: #d2691e;
   --package-second-y: 24px;
-  --package-second-color: #fff;
-  --package-second-tape: #17171b;
+  --package-second-color: #f1f5f9;
+  --package-second-tape: #16a34a;
   -webkit-tap-highlight-color: transparent;
   -webkit-appearance: none;
   appearance: none;
@@ -50,7 +50,7 @@
   transition:
     background 0.25s,
     transform 0.15s;
-  background: #17171b;
+  background: #167c7a;
   transform: scaleX(var(--background-scale)) translateZ(0);
 }
 
@@ -97,7 +97,7 @@
   --svg-left: 50%;
   --svg-top: -12px;
   --svg-position: absolute;
-  --svg-fill: #17171b;
+  --svg-fill: #16a34a;
   pointer-events: none;
   margin-left: -32px;
 }
@@ -217,9 +217,18 @@
 
 .add-to-cart.jarbris-add-to-cart-btn:before {
   border-radius: 14px;
-  background: linear-gradient(135deg, #10b981, #059669); /* High contrast emerald to match price */
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #55a57a; /* Exact color match to the rendered checkout chip */
+  box-shadow: none;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: all 0.3s ease;
+}
+
+.add-to-cart.jarbris-add-to-cart-btn:not(:disabled):not(.active):hover:before {
+  background: #5db084;
+  box-shadow: none;
+  border-color: rgba(74, 222, 128, 0.6);
 }
 
 .add-to-cart.jarbris-add-to-cart-btn:disabled,
