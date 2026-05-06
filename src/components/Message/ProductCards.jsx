@@ -174,29 +174,32 @@ const ProductCard = memo(
                 </div>
               )}
               {(() => {
-                const badge = resolvePurchaseOptionBadge(product.purchaseOptions, product.requiresSellingPlan);
+                const badge = resolvePurchaseOptionBadge(
+                  product.purchaseOptions,
+                  product.requiresSellingPlan,
+                );
                 if (!badge) return null;
                 return (
                   <div
                     className={`jarbris-product-subscription-badge${
-                      badge.namespace === 'only_badge' ? ' jarbris-product-subscription-badge--only' : ''
+                      badge.namespace === 'only_badge'
+                        ? ' jarbris-product-subscription-badge--only'
+                        : ''
                     }`}
                   >
                     {t(`purchase_options.${badge.namespace}.${badge.type}`)}
                   </div>
                 );
               })()}
-              {isAvailable && (
+              {isAvailable && totalInventory > 0 && totalInventory <= 10 && (
                 <div className="jarbris-stock-status-badge-container">
-                  {totalInventory > 0 && totalInventory <= 10 ? (
-                    <span className="jarbris-stock-urgency-badge">{t('product.only_left', { count: totalInventory })}</span>
-                  ) : (
-                    <span className="jarbris-stock-status-badge">
-                      <span className="jarbris-stock-dot" />
-                      {t('product.in_stock')}
-                    </span>
-                  )}
+                  <span className="jarbris-stock-urgency-badge">
+                    {t('product.only_left', { count: totalInventory })}
+                  </span>
                 </div>
+              )}
+              {product.merchantBadge && (
+                <div className="jarbris-merchant-badge-overlay">{product.merchantBadge.label}</div>
               )}
               {image && (
                 <div className="jarbris-image-zoom-overlay" aria-hidden="true">
@@ -379,7 +382,6 @@ const ProductCard = memo(
   },
 );
 
-
 const ProductCards = memo(
   ({ message, shopDomain, onOpen, onImageClick, chatColors, sendFeedback, onProductAction }) => {
     const { products = [], message: displayMessage } = message;
@@ -422,11 +424,7 @@ const ProductCards = memo(
     };
 
     if (!Array.isArray(products) || products.length === 0) {
-      return (
-        <div className="jarbris-no-products">
-          {t('product.no_products_found')}
-        </div>
-      );
+      return <div className="jarbris-no-products">{t('product.no_products_found')}</div>;
     }
 
     return (

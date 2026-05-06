@@ -730,22 +730,6 @@
   pointer-events: none;
 }
 
-.jarbris-stock-status-badge {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
 .jarbris-stock-urgency-badge {
   position: relative;
   background: #ef4444; /* Bright Red for urgency */
@@ -789,12 +773,24 @@
   }
 }
 
-.jarbris-stock-dot {
-  width: 5px;
-  height: 5px;
-  background: #10b981;
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+.jarbris-merchant-badge-overlay {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(99, 102, 241, 0.9);
+  color: rgba(255, 255, 255, 0.95);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  z-index: 5;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .jarbris-pills-container {
@@ -844,7 +840,9 @@
   font-weight: 600;
   height: 34px;
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 
 .jarbris-variant-select:focus {
@@ -873,11 +871,6 @@
 .mobile-device .jarbris-product-card-side {
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
-}
-
-.mobile-device .jarbris-stock-status-badge {
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .mobile-device .jarbris-back-gallery {
@@ -918,8 +911,21 @@
 }
 
 @keyframes jarbris-shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-2px, 0, 0); }
-  40%, 60% { transform: translate3d(2px, 0, 0); }
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-2px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(2px, 0, 0);
+  }
 }
