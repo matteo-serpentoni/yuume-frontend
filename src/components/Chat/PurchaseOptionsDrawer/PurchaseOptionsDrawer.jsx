@@ -19,7 +19,6 @@ import './PurchaseOptionsDrawer.css';
  * @param {Array}   props.availablePlans     - NormalizedAllocation[]
  * @param {string|null} props.sellingPlanId  - Currently selected plan GID
  * @param {string|null} props.variantId      - Selected variant GID (for AddToCartButton)
- * @param {string}  props.shopDomain         - Merchant shop domain
  * @param {string}  props.mode              - 'one_time' | 'subscription'
  * @param {Function} props.onSelectPlan     - (sellingPlanId: string) => void
  * @param {Function} props.onSelectOneTime  - () => void
@@ -35,7 +34,6 @@ function PurchaseOptionsDrawer({
   availablePlans = [],
   sellingPlanId,
   variantId,
-  shopDomain,
   mode,
   onSelectPlan,
   onSelectOneTime,
@@ -122,7 +120,9 @@ function PurchaseOptionsDrawer({
 
             {/* One-time option (only if hasOneTimePurchase) */}
             {hasOneTimePurchase && (
-              <label className={`jarbris-purchase-drawer__radio-row${mode === 'one_time' ? ' selected' : ''}`}>
+              <label
+                className={`jarbris-purchase-drawer__radio-row${mode === 'one_time' ? ' selected' : ''}`}
+              >
                 <input
                   type="radio"
                   name="purchase-mode"
@@ -198,7 +198,6 @@ function PurchaseOptionsDrawer({
           {!addToCartBlocked && variantId ? (
             <AddToCartButton
               variantId={variantId}
-              shopDomain={shopDomain}
               quantity={1}
               sellingPlanId={activeSellingPlanId}
               compact={true}

@@ -2,6 +2,7 @@ import React, { useRef, useEffect, memo } from 'react';
 import { extractVariantId } from '../../utils/shopifyUtils';
 import { useI18n } from '../../hooks/useI18n';
 import { trackEvent } from '../../services/trackingService.js';
+import { useChatSession } from '../../contexts/useChatSession';
 import './AddToCartButton.css';
 
 import { BRIDGE_CONFIG } from '../../config/bridge';
@@ -9,7 +10,6 @@ import { BRIDGE_CONFIG } from '../../config/bridge';
 const AddToCartButton = memo(
   ({
     variantId,
-    shopDomain,
     quantity = 1,
     sellingPlanId = null,
     onSuccess,
@@ -19,6 +19,7 @@ const AddToCartButton = memo(
     searchId = null,
     productId = null,
   }) => {
+    const { shopDomain } = useChatSession();
     const t = useI18n();
     const buttonRef = useRef(null);
     const isMounted = useRef(true);

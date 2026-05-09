@@ -19,6 +19,9 @@ import {
 } from '../UI/Icons';
 import { trackEvent, sanitizeQuery } from '../../services/trackingService.js';
 import { useProductViewTracker } from '../../hooks/useProductViewTracker.js';
+import { useChatSession } from '../../contexts/useChatSession';
+import { ProductResultProvider } from '../../contexts/ProductResultContext';
+import { useProductResult } from '../../contexts/useProductResult';
 
 // Re-export ProductDrawer from ProductSheet for backward-compatible imports in Chat.jsx
 export { default as ProductDrawer } from './ProductSheet';
@@ -59,129 +62,131 @@ function resolvePurchaseOptionBadge(purchaseOptions, requiresSellingPlan) {
   };
 }
 
-const ProductCard = memo(
-  ({
-    product,
-    index,
-    onOpen,
-    onImageClick,
-    shopDomain,
-    onProductAction,
-    observeCard,
-    unobserveCard,
-    searchId,
-    query,
-  }) => {
-    const [isFlipped, setIsFlipped] = useState(false);
-    const t = useI18n();
-    const cardRef = useRef(null);
+const ProductCard = memo(({ product, index, onImageClick, observeCard, unobserveCard }) => {
+  const { onProductAction, setActiveProduct } = useChatSession();
+  const { searchId, query } = useProductResult();
+  const [isFlipped, setIsFlipped] = useState(false);
+  const t = useI18n();
+  const cardRef = useRef(null);
 
-    // Register card with IntersectionObserver for view tracking
-    useEffect(() => {
-      const el = cardRef.current;
-      if (el && observeCard) {
-        observeCard(el, {
-          productId: product.productId || product.id,
-          position: index,
-          query: query || null,
-        });
-      }
-      return () => {
-        if (el && unobserveCard) unobserveCard(el);
-      };
-    }, [product.productId, product.id, index, query, observeCard, unobserveCard]);
-
-    // 2c: Memoize normalization — normalizeStorefrontProduct is a non-trivial transform
-    // and ProductCard re-renders when the parent carousel re-renders (scroll events).
-    const normalizedProduct = useMemo(
-      () => normalizeStorefrontProduct(product),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [product.id || product.productId],
-    );
-
-    const {
-      primaryImage: image,
-      images: allImages,
-      isAvailable,
-      hasVariants,
-      name,
-      description,
-      productType,
-      vendor,
-      price,
-      compareAtPrice,
-      discountPercentage,
-      discountCode,
-      isAutomatic,
-      currency,
-      variants,
-      url,
-      totalInventory,
-    } = normalizedProduct;
-
-    const toggleFlip = (e) => {
-      e.stopPropagation();
-      setIsFlipped(!isFlipped);
+  // Register card with IntersectionObserver for view tracking
+  useEffect(() => {
+    const el = cardRef.current;
+    if (el && observeCard) {
+      observeCard(el, {
+        productId: product.productId || product.id,
+        position: index,
+        query: query || null,
+      });
+    }
+    return () => {
+      if (el && unobserveCard) unobserveCard(el);
     };
+  }, [product.productId, product.id, index, query, observeCard, unobserveCard]);
 
-    // Ensure images is always a non-empty array for the gallery
-    const galleryImages = allImages && allImages.length > 0 ? allImages : image ? [image] : [];
+  // 2c: Memoize normalization — normalizeStorefrontProduct is a non-trivial transform
+  // and ProductCard re-renders when the parent carousel re-renders (scroll events).
+  const normalizedProduct = useMemo(
+    () => normalizeStorefrontProduct(product),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [product.id || product.productId],
+  );
 
-    return (
-      <div className="jarbris-product-card-perspective" ref={cardRef}>
-        <motion.div
-          className={`jarbris-product-card-minimal ${isFlipped ? 'is-flipped' : ''} clickable`}
-          role="button"
-          tabIndex={0}
-          aria-label={`${t('product.details_for')} ${name}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{
-            opacity: 1,
-            y: 0,
-            rotateY: isFlipped ? 180 : 0,
-          }}
-          whileHover={!isFlipped ? { y: -4, transition: { duration: 0.2 } } : {}}
-          transition={{
-            opacity: { delay: index * 0.1, duration: 0.6 },
-            y: { delay: index * 0.1, duration: 0.6 },
-            rotateY: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-          }}
-          style={{ transformStyle: 'preserve-3d' }}
-          onClick={
-            !isFlipped && hasVariants
-              ? () => {
-                  trackEvent('product_card_clicked', {
-                    searchId: searchId || null,
-                    productId: product.productId || product.id,
-                    position: index,
-                    query: sanitizeQuery(query),
-                  });
-                  onOpen({ ...product, searchId: searchId || null });
-                }
-              : undefined
+  const {
+    primaryImage: image,
+    images: allImages,
+    isAvailable,
+    hasVariants,
+    name,
+    description,
+    productType,
+    vendor,
+    price,
+    compareAtPrice,
+    discountPercentage,
+    discountCode,
+    isAutomatic,
+    currency,
+    variants,
+    url,
+    totalInventory,
+  } = normalizedProduct;
+
+  const toggleFlip = (e) => {
+    e.stopPropagation();
+    setIsFlipped(!isFlipped);
+  };
+
+  // Ensure images is always a non-empty array for the gallery
+  const galleryImages = allImages && allImages.length > 0 ? allImages : image ? [image] : [];
+
+  return (
+    <div className="jarbris-product-card-perspective" ref={cardRef}>
+      <motion.div
+        className={`jarbris-product-card-minimal ${isFlipped ? 'is-flipped' : ''} clickable`}
+        role="button"
+        tabIndex={0}
+        aria-label={`${t('product.details_for')} ${name}`}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          rotateY: isFlipped ? 180 : 0,
+        }}
+        whileHover={!isFlipped ? { y: -4, transition: { duration: 0.2 } } : {}}
+        transition={{
+          opacity: { delay: index * 0.1, duration: 0.6 },
+          y: { delay: index * 0.1, duration: 0.6 },
+          rotateY: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+        }}
+        style={{ transformStyle: 'preserve-3d' }}
+        onClick={
+          !isFlipped && hasVariants
+            ? () => {
+                trackEvent('product_card_clicked', {
+                  searchId: searchId || null,
+                  productId: product.productId || product.id,
+                  position: index,
+                  query: sanitizeQuery(query),
+                });
+                setActiveProduct({ ...product, searchId: searchId || null });
+              }
+            : undefined
+        }
+        onKeyDown={(e) => {
+          if (!isFlipped && hasVariants && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            trackEvent('product_card_clicked', {
+              searchId: searchId || null,
+              productId: product.productId || product.id,
+              position: index,
+              query: sanitizeQuery(query),
+            });
+            setActiveProduct({ ...product, searchId: searchId || null });
           }
-          onKeyDown={(e) => {
-            if (!isFlipped && hasVariants && (e.key === 'Enter' || e.key === ' ')) {
-              e.preventDefault();
-              trackEvent('product_card_clicked', {
-                searchId: searchId || null,
-                productId: product.productId || product.id,
-                position: index,
-                query: sanitizeQuery(query),
-              });
-              onOpen({ ...product, searchId: searchId || null });
-            }
-          }}
-        >
-          {/* --- FRONT SIDE --- */}
-          <div className="jarbris-product-side jarbris-card-front">
-            <div
-              className={`jarbris-product-image-container ${!image ? 'no-image' : ''}`}
-              role={image ? 'button' : 'img'}
-              tabIndex={image ? 0 : -1}
-              aria-label={image ? t('product.zoom_image') : t('product.no_image')}
-              onClick={(e) => {
+        }}
+      >
+        {/* --- FRONT SIDE --- */}
+        <div className="jarbris-product-side jarbris-card-front">
+          <div
+            className={`jarbris-product-image-container ${!image ? 'no-image' : ''}`}
+            role={image ? 'button' : 'img'}
+            tabIndex={image ? 0 : -1}
+            aria-label={image ? t('product.zoom_image') : t('product.no_image')}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!image) return;
+              onImageClick &&
+                onImageClick({
+                  images: galleryImages,
+                  index: 0,
+                  product: product,
+                });
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation();
+                e.preventDefault();
                 if (!image) return;
                 onImageClick &&
                   onImageClick({
@@ -189,313 +194,301 @@ const ProductCard = memo(
                     index: 0,
                     product: product,
                   });
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (!image) return;
-                  onImageClick &&
-                    onImageClick({
-                      images: galleryImages,
-                      index: 0,
-                      product: product,
-                    });
-                }
-              }}
-            >
-              {image ? (
-                <img src={image.url || image} alt={product.name} loading="lazy" />
-              ) : (
-                <div className="jarbris-product-placeholder">
-                  <ImagePlaceholderIcon size={32} />
-                </div>
-              )}
-              {(discountCode || isAutomatic || discountPercentage > 0) && (
-                <div className="jarbris-product-discount-badge">
-                  {discountCode
-                    ? `${t('product.discount')}: ${discountCode}`
-                    : discountPercentage > 0
-                      ? `-${discountPercentage}%`
-                      : t('product.offer')}
-                </div>
-              )}
-              {(() => {
-                const badge = resolvePurchaseOptionBadge(
-                  product.purchaseOptions,
-                  product.requiresSellingPlan,
-                );
-                if (!badge) return null;
-                return (
-                  <div
-                    className={`jarbris-product-subscription-badge${
-                      badge.namespace === 'only_badge'
-                        ? ' jarbris-product-subscription-badge--only'
-                        : ''
-                    }`}
-                  >
-                    {t(`purchase_options.${badge.namespace}.${badge.type}`)}
-                  </div>
-                );
-              })()}
-              {isAvailable && totalInventory > 0 && totalInventory <= 10 && (
-                <div className="jarbris-stock-status-badge-container">
-                  <span className="jarbris-stock-urgency-badge">
-                    {t('product.only_left', { count: totalInventory })}
-                  </span>
-                </div>
-              )}
-              {product.merchantBadge && (
-                <div className="jarbris-merchant-badge-overlay">{product.merchantBadge.label}</div>
-              )}
-              {image && (
-                <div className="jarbris-image-zoom-overlay" aria-hidden="true">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    role="img"
-                    aria-label={t('product.zoom_image')}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    <line x1="11" y1="8" x2="11" y2="14"></line>
-                    <line x1="8" y1="11" x2="14" y2="11"></line>
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            <div className="jarbris-product-info">
-              <a
-                href={url}
-                className="jarbris-product-link-wrapper"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="jarbris-product-name">
-                  {name}
-                  <ExternalLinkIcon size={12} />
-                </h3>
-              </a>
-              <div className="jarbris-product-price-row">
-                <div className="jarbris-price-stack">
-                  {compareAtPrice > price && (
-                    <span className="jarbris-original-price">
-                      {formatPrice(compareAtPrice, currency)}
-                    </span>
-                  )}
-                  <span className="jarbris-current-price">{formatPrice(price, currency)}</span>
-                </div>
-                <button
-                  className="jarbris-product-details-toggle"
-                  onClick={toggleFlip}
-                  aria-label={t('product.show_description')}
+              }
+            }}
+          >
+            {image ? (
+              <img src={image.url || image} alt={product.name} loading="lazy" />
+            ) : (
+              <div className="jarbris-product-placeholder">
+                <ImagePlaceholderIcon size={32} />
+              </div>
+            )}
+            {(discountCode || isAutomatic || discountPercentage > 0) && (
+              <div className="jarbris-product-discount-badge">
+                {discountCode
+                  ? `${t('product.discount')}: ${discountCode}`
+                  : discountPercentage > 0
+                    ? `-${discountPercentage}%`
+                    : t('product.offer')}
+              </div>
+            )}
+            {(() => {
+              const badge = resolvePurchaseOptionBadge(
+                product.purchaseOptions,
+                product.requiresSellingPlan,
+              );
+              if (!badge) return null;
+              return (
+                <div
+                  className={`jarbris-product-subscription-badge${
+                    badge.namespace === 'only_badge'
+                      ? ' jarbris-product-subscription-badge--only'
+                      : ''
+                  }`}
                 >
-                  {t('product.details')}
-                </button>
+                  {t(`purchase_options.${badge.namespace}.${badge.type}`)}
+                </div>
+              );
+            })()}
+            {isAvailable && totalInventory > 0 && totalInventory <= 10 && (
+              <div className="jarbris-stock-status-badge-container">
+                <span className="jarbris-stock-urgency-badge">
+                  {t('product.only_left', { count: totalInventory })}
+                </span>
               </div>
+            )}
+            {product.merchantBadge && (
+              <div className="jarbris-merchant-badge-overlay">{product.merchantBadge.label}</div>
+            )}
+            {image && (
+              <div className="jarbris-image-zoom-overlay" aria-hidden="true">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  role="img"
+                  aria-label={t('product.zoom_image')}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  <line x1="11" y1="8" x2="11" y2="14"></line>
+                  <line x1="8" y1="11" x2="14" y2="11"></line>
+                </svg>
+              </div>
+            )}
+          </div>
 
-              {product.smartBadges?.length > 0 && (
-                <div className="jarbris-card-badges-wrapper">
-                  <SmartBadges badges={product.smartBadges} />
+          <div className="jarbris-product-info">
+            <a
+              href={url}
+              className="jarbris-product-link-wrapper"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="jarbris-product-name">
+                {name}
+                <ExternalLinkIcon size={12} />
+              </h3>
+            </a>
+            <div className="jarbris-product-price-row">
+              <div className="jarbris-price-stack">
+                {compareAtPrice > price && (
+                  <span className="jarbris-original-price">
+                    {formatPrice(compareAtPrice, currency)}
+                  </span>
+                )}
+                <span className="jarbris-current-price">{formatPrice(price, currency)}</span>
+              </div>
+              <button
+                className="jarbris-product-details-toggle"
+                onClick={toggleFlip}
+                aria-label={t('product.show_description')}
+              >
+                {t('product.details')}
+              </button>
+            </div>
+
+            {product.smartBadges?.length > 0 && (
+              <div className="jarbris-card-badges-wrapper">
+                <SmartBadges badges={product.smartBadges} />
+              </div>
+            )}
+          </div>
+
+          {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
+            <div className="jarbris-product-card-footer" onClick={(e) => e.stopPropagation()}>
+              {((isAvailable && (product.variants[0] || product.variantId)) || hasVariants) && (
+                <div className="jarbris-add-to-cart-wrapper" style={{ flex: 1, width: '100%' }}>
+                  {hasVariants ? (
+                    // Product has variants: open sheet (even if it has selling plans, we need variant first)
+                    <div className="jarbris-add-to-cart-container compact" style={{ flex: 1 }}>
+                      <button
+                        className="add-to-cart jarbris-add-to-cart-btn"
+                        aria-label={`${t('product.add_to_cart')} ${product.name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setActiveProduct({ ...product, searchId: searchId || null });
+                        }}
+                      >
+                        <span>{t('product.add_to_cart')}</span>
+                      </button>
+                    </div>
+                  ) : product.purchaseOptions?.allocations?.length > 0 ? (
+                    // No variants, but has selling plans: open subscription drawer directly
+                    <div className="jarbris-add-to-cart-container compact" style={{ flex: 1 }}>
+                      <button
+                        className="add-to-cart jarbris-add-to-cart-btn"
+                        id={`jarbris-open-purchase-drawer-${product.productId || product.id}`}
+                        aria-label={`${t('purchase_options.select_purchase_type')} - ${name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          onProductAction &&
+                            onProductAction('open_purchase_options_drawer', { product });
+                        }}
+                      >
+                        <span>{t('product.add_to_cart')}</span>
+                      </button>
+                    </div>
+                  ) : (
+                    // No variants, no selling plans: direct add
+                    <AddToCartButton
+                      variantId={product.variants[0]?.id || product.variantId}
+                      quantity={1}
+                      compact={true}
+                      searchId={searchId || null}
+                      productId={product.productId || product.id}
+                      onAnimationComplete={() =>
+                        onProductAction &&
+                        onProductAction('add_to_cart', { id: product.productId || product.id })
+                      }
+                    />
+                  )}
                 </div>
               )}
             </div>
+          ) : null}
+        </div>
 
-            {(isAvailable && (variants[0] || product.variantId)) || hasVariants ? (
-              <div className="jarbris-product-card-footer" onClick={(e) => e.stopPropagation()}>
-                {((isAvailable && (product.variants[0] || product.variantId)) || hasVariants) && (
-                  <div className="jarbris-add-to-cart-wrapper" style={{ flex: 1, width: '100%' }}>
-                    {hasVariants ? (
-                      // Product has variants: open sheet (even if it has selling plans, we need variant first)
-                      <div className="jarbris-add-to-cart-container compact" style={{ flex: 1 }}>
-                        <button
-                          className="add-to-cart jarbris-add-to-cart-btn"
-                          aria-label={`${t('product.add_to_cart')} ${product.name}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            onOpen({ ...product, searchId: searchId || null });
-                          }}
-                        >
-                          <span>{t('product.add_to_cart')}</span>
-                        </button>
-                      </div>
-                    ) : product.purchaseOptions?.allocations?.length > 0 ? (
-                      // No variants, but has selling plans: open subscription drawer directly
-                      <div className="jarbris-add-to-cart-container compact" style={{ flex: 1 }}>
-                        <button
-                          className="add-to-cart jarbris-add-to-cart-btn"
-                          id={`jarbris-open-purchase-drawer-${product.productId || product.id}`}
-                          aria-label={`${t('purchase_options.select_purchase_type')} - ${name}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            onProductAction &&
-                              onProductAction('open_purchase_options_drawer', { product });
-                          }}
-                        >
-                          <span>{t('product.add_to_cart')}</span>
-                        </button>
-                      </div>
-                    ) : (
-                      // No variants, no selling plans: direct add
-                      <AddToCartButton
-                        variantId={product.variants[0]?.id || product.variantId}
-                        shopDomain={shopDomain}
-                        quantity={1}
-                        compact={true}
-                        searchId={searchId || null}
-                        productId={product.productId || product.id}
-                        onAnimationComplete={() =>
-                          onProductAction &&
-                          onProductAction('add_to_cart', { id: product.productId || product.id })
-                        }
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </div>
-
-          {/* --- BACK SIDE --- */}
-          <div className="jarbris-product-side jarbris-card-back">
-            <div className="jarbris-back-content">
-              <div className="jarbris-back-header">
-                <div className="jarbris-back-title">{name}</div>
-              </div>
-
-              <div className="jarbris-product-details-list">
-                <div className="jarbris-detail-item">
-                  <p className="jarbris-product-description">
-                    {description || t('product.no_description')}
-                  </p>
-                </div>
-
-                <div className="jarbris-detail-grid">
-                  {vendor && (
-                    <div className="jarbris-detail-item">
-                      <span className="label">{t('product.brand')}</span>
-                      <span className="value">{vendor}</span>
-                    </div>
-                  )}
-
-                  {productType && (
-                    <div className="jarbris-detail-item">
-                      <span className="label">{t('product.type')}</span>
-                      <span className="value">{productType}</span>
-                    </div>
-                  )}
-                </div>
-
-                {product.tags && product.tags.length > 0 && (
-                  <div className="jarbris-detail-item">
-                    <span className="label">{t('product.tags')}</span>
-                    <div className="jarbris-product-tags">
-                      {product.tags.slice(0, 5).map((tag) => (
-                        <span key={tag} className="jarbris-tag-pill">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <a
-                href={url}
-                className="jarbris-view-in-store-btn"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {t('product.view_in_store')}
-                <ExternalLinkIcon size={12} />
-              </a>
+        {/* --- BACK SIDE --- */}
+        <div className="jarbris-product-side jarbris-card-back">
+          <div className="jarbris-back-content">
+            <div className="jarbris-back-header">
+              <div className="jarbris-back-title">{name}</div>
             </div>
 
-            <button className="jarbris-back-return-overlay-btn" onClick={toggleFlip}>
-              <CloseIcon size={16} />
-            </button>
+            <div className="jarbris-product-details-list">
+              <div className="jarbris-detail-item">
+                <p className="jarbris-product-description">
+                  {description || t('product.no_description')}
+                </p>
+              </div>
+
+              <div className="jarbris-detail-grid">
+                {vendor && (
+                  <div className="jarbris-detail-item">
+                    <span className="label">{t('product.brand')}</span>
+                    <span className="value">{vendor}</span>
+                  </div>
+                )}
+
+                {productType && (
+                  <div className="jarbris-detail-item">
+                    <span className="label">{t('product.type')}</span>
+                    <span className="value">{productType}</span>
+                  </div>
+                )}
+              </div>
+
+              {product.tags && product.tags.length > 0 && (
+                <div className="jarbris-detail-item">
+                  <span className="label">{t('product.tags')}</span>
+                  <div className="jarbris-product-tags">
+                    {product.tags.slice(0, 5).map((tag) => (
+                      <span key={tag} className="jarbris-tag-pill">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <a
+              href={url}
+              className="jarbris-view-in-store-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {t('product.view_in_store')}
+              <ExternalLinkIcon size={12} />
+            </a>
           </div>
-        </motion.div>
-      </div>
-    );
-  },
-);
 
-const ProductCards = memo(
-  ({ message, shopDomain, onOpen, onImageClick, chatColors, sendFeedback, onProductAction }) => {
-    const { products = [], message: displayMessage, searchId, query } = message;
-    const scrollRef = React.useRef(null);
-    const [showLeftArrow, setShowLeftArrow] = React.useState(false);
-    const [showRightArrow, setShowRightArrow] = React.useState(true);
-    const t = useI18n();
+          <button className="jarbris-back-return-overlay-btn" onClick={toggleFlip}>
+            <CloseIcon size={16} />
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+});
 
-    // Product Interaction Tracking V1: IntersectionObserver-based view tracking
-    const { observeCard, unobserveCard } = useProductViewTracker({
-      searchId,
-      rootRef: scrollRef,
-    });
+const ProductCards = memo(({ message, onImageClick, chatColors, sendFeedback }) => {
+  const { products = [], message: displayMessage, searchId, query } = message;
+  const scrollRef = React.useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = React.useState(false);
+  const [showRightArrow, setShowRightArrow] = React.useState(true);
+  const t = useI18n();
 
-    // Product Interaction Tracking V1: emit product_cards_rendered on mount
-    useEffect(() => {
-      if (products.length > 0) {
-        trackEvent('product_cards_rendered', {
-          searchId: searchId || null,
-          productIds: products.map((p) => p.productId || p.id).filter(Boolean),
-          renderedCount: products.length,
-        });
-      }
-      // Only emit once on mount — products array identity is stable per message
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchId]);
+  // Product Interaction Tracking V1: IntersectionObserver-based view tracking
+  const { observeCard, unobserveCard } = useProductViewTracker({
+    searchId,
+    rootRef: scrollRef,
+  });
 
-    const checkScroll = () => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        setShowLeftArrow(scrollLeft > 10);
-        setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-      }
-    };
-
-    React.useEffect(() => {
-      const el = scrollRef.current;
-      if (el) {
-        el.addEventListener('scroll', checkScroll);
-        // Initial check
-        checkScroll();
-        return () => el.removeEventListener('scroll', checkScroll);
-      }
-    }, [products]);
-
-    const scroll = (direction) => {
-      if (scrollRef.current) {
-        const container = scrollRef.current;
-        const cardWidth =
-          container.querySelector('.jarbris-product-card-minimal')?.offsetWidth || 240;
-        const gap = 12;
-        const scrollAmount = direction === 'next' ? cardWidth + gap : -(cardWidth + gap);
-
-        container.scrollBy({
-          left: scrollAmount,
-          behavior: 'smooth',
-        });
-      }
-    };
-
-    if (!Array.isArray(products) || products.length === 0) {
-      return <div className="jarbris-no-products">{t('product.no_products_found')}</div>;
+  // Product Interaction Tracking V1: emit product_cards_rendered on mount
+  useEffect(() => {
+    if (products.length > 0) {
+      trackEvent('product_cards_rendered', {
+        searchId: searchId || null,
+        productIds: products.map((p) => p.productId || p.id).filter(Boolean),
+        renderedCount: products.length,
+      });
     }
+    // Only emit once on mount — products array identity is stable per message
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchId]);
 
-    return (
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowLeftArrow(scrollLeft > 10);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (el) {
+      el.addEventListener('scroll', checkScroll);
+      // Initial check
+      checkScroll();
+      return () => el.removeEventListener('scroll', checkScroll);
+    }
+  }, [products]);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const cardWidth =
+        container.querySelector('.jarbris-product-card-minimal')?.offsetWidth || 240;
+      const gap = 12;
+      const scrollAmount = direction === 'next' ? cardWidth + gap : -(cardWidth + gap);
+
+      container.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  if (!Array.isArray(products) || products.length === 0) {
+    return <div className="jarbris-no-products">{t('product.no_products_found')}</div>;
+  }
+
+  return (
+    <ProductResultProvider
+      value={{ searchId: searchId || null, messageId: message.id || null, query: query || null }}
+    >
       <div className="jarbris-products-container">
         {displayMessage && (
           <MessageBubble
@@ -535,14 +528,9 @@ const ProductCards = memo(
                 key={product.id || index}
                 product={product}
                 index={index}
-                onOpen={onOpen}
                 onImageClick={onImageClick}
-                shopDomain={shopDomain}
-                onProductAction={onProductAction}
                 observeCard={observeCard}
                 unobserveCard={unobserveCard}
-                searchId={searchId}
-                query={query}
               />
             ))}
           </div>
@@ -564,8 +552,8 @@ const ProductCards = memo(
           )}
         </div>
       </div>
-    );
-  },
-);
+    </ProductResultProvider>
+  );
+});
 
 export default ProductCards;

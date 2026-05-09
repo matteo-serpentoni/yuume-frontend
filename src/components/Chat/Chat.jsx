@@ -4,6 +4,7 @@ import { useCheckout } from '../../hooks/useCheckout';
 import { useIdleNudge } from '../../hooks/useIdleNudge';
 import { useI18n } from '../../hooks/useI18n';
 import { usePurchaseOptions } from '../../hooks/usePurchaseOptions';
+import { ChatSessionProvider } from '../../contexts/ChatSessionContext';
 import PurchaseOptionsDrawer from '../Chat/PurchaseOptionsDrawer/PurchaseOptionsDrawer';
 import './Chat.css';
 
@@ -124,6 +125,23 @@ const Chat = ({
       }
     },
     [isPreview, liveChat, setHasActedOnProduct],
+  );
+
+  // Stable handler for product actions — lives in ChatSessionContext.
+  // Consumed by ProductCards, ProductCard, ProductSheet, CrossSellBlock.
+  const onProductAction = useCallback(
+    (action, payloadData) => {
+      if (action === 'add_to_cart') {
+        handleProductCartAction(payloadData?.id);
+      } else if (action === 'open_purchase_options_drawer') {
+        const defaultVariantId =
+          payloadData?.variantId ||
+          payloadData?.product?.variantId ||
+          payloadData?.product?.variants?.[0]?.id;
+        purchaseOptions.openDrawer(payloadData?.product, defaultVariantId);
+      }
+    },
+    [handleProductCartAction, purchaseOptions],
   );
 
   // B28: Handler for system chip actions (ADD_TO_CART, OPEN_VARIANT_DRAWER).
@@ -340,256 +358,239 @@ const Chat = ({
           colors={chatColors}
         />
       ) : (
-        <>
-          <div className="chat-content-wrapper">
-            <MessageList
-              chatBlocks={chatBlocks}
-              chatColors={chatColors}
-              loading={loading}
-              isThinking={isThinking}
-              thinkingIntent={thinkingIntent}
-              shopDomain={shopDomain}
-              sessionId={sessionId}
-              visitorId={liveChat.visitorId}
-              bootProfile={liveChat.bootProfile}
-              bootConsent={liveChat.bootConsent}
-              requiresReConsent={requiresReConsent}
-              handleProfileUpdate={liveChat.handleProfileUpdate}
-              activeProduct={activeProduct}
-              setActiveProduct={setActiveProduct}
-              activeOrder={activeOrder}
-              setActiveOrder={setActiveOrder}
-              sendMessage={sendMessage}
-              handleSuggestionClick={handleSuggestionClick}
-              sendFeedback={sendFeedback}
-              onImageClick={setActiveGallery}
-              onProductAction={(action, payloadData) => {
-                if (action === 'add_to_cart') {
-                  handleProductCartAction(payloadData?.id);
-                } else if (action === 'open_purchase_options_drawer') {
-                  const defaultVariantId =
-                    payloadData?.variantId ||
-                    payloadData?.product?.variantId ||
-                    payloadData?.product?.variants?.[0]?.id;
-                  purchaseOptions.openDrawer(payloadData?.product, defaultVariantId);
-                }
-              }}
-              onExpand={onExpand}
-            />
+        <ChatSessionProvider
+          value={{
+            shopDomain,
+            sessionId,
+            visitorId: liveChat.visitorId,
+            onProductAction,
+            setActiveProduct,
+          }}
+        >
+          <>
+            <div className="chat-content-wrapper">
+              <MessageList
+                chatBlocks={chatBlocks}
+                chatColors={chatColors}
+                loading={loading}
+                isThinking={isThinking}
+                thinkingIntent={thinkingIntent}
+                bootProfile={liveChat.bootProfile}
+                bootConsent={liveChat.bootConsent}
+                requiresReConsent={requiresReConsent}
+                handleProfileUpdate={liveChat.handleProfileUpdate}
+                activeProduct={activeProduct}
+                activeOrder={activeOrder}
+                setActiveOrder={setActiveOrder}
+                sendMessage={sendMessage}
+                handleSuggestionClick={handleSuggestionClick}
+                sendFeedback={sendFeedback}
+                onImageClick={setActiveGallery}
+                onExpand={onExpand}
+              />
 
-            {/* Conversation Ended Separator & Rating */}
-            {sessionStatus === 'completed' && (
-              <div className="conversation-ended-container">
-                <div className="conversation-ended-separator">
-                  <div className="separator-line" />
-                  <span className="separator-text">{t('chat.ended')}</span>
-                  <div className="separator-line" />
+              {/* Conversation Ended Separator & Rating */}
+              {sessionStatus === 'completed' && (
+                <div className="conversation-ended-container">
+                  <div className="conversation-ended-separator">
+                    <div className="separator-line" />
+                    <span className="separator-text">{t('chat.ended')}</span>
+                    <div className="separator-line" />
+                  </div>
+
+                  <StarRating
+                    onRate={(rating) => sendFeedback(null, rating, null, 'conversation')}
+                  />
                 </div>
+              )}
 
-                <StarRating onRate={(rating) => sendFeedback(null, rating, null, 'conversation')} />
-              </div>
-            )}
-
-            {/* Global Suggestions Area (Initial or Action-based) */}
-            {(initialSuggestions.length > 0 && messages.length <= 1 && !hasActedOnProduct) ||
-            showCheckoutSuggestion ? (
-              <div className="global-suggestions-container">
-                <AnimatePresence mode="wait">
-                  {showCheckoutSuggestion ? (
-                    <motion.div
-                      key="checkout-suggestion"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                    >
-                      <Suggestions
-                        suggestions={[
-                          {
-                            label: t('chat.checkout_cta', { count: cartCount }),
-                            value: 'Checkout',
-                            variant: 'checkout',
-                          },
-                        ]}
-                        onSuggestionClick={() => startCheckout()}
-                      />
-                    </motion.div>
-                  ) : (
-                    messages.length <= 1 && (
+              {/* Global Suggestions Area (Initial or Action-based) */}
+              {(initialSuggestions.length > 0 && messages.length <= 1 && !hasActedOnProduct) ||
+              showCheckoutSuggestion ? (
+                <div className="global-suggestions-container">
+                  <AnimatePresence mode="wait">
+                    {showCheckoutSuggestion ? (
                       <motion.div
-                        key="initial-suggestions"
+                        key="checkout-suggestion"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                       >
                         <Suggestions
-                          suggestions={initialSuggestions}
-                          onSuggestionClick={handleSuggestionClick}
+                          suggestions={[
+                            {
+                              label: t('chat.checkout_cta', { count: cartCount }),
+                              value: 'Checkout',
+                              variant: 'checkout',
+                            },
+                          ]}
+                          onSuggestionClick={() => startCheckout()}
                         />
                       </motion.div>
-                    )
-                  )}
-                </AnimatePresence>
-              </div>
-            ) : null}
+                    ) : (
+                      messages.length <= 1 && (
+                        <motion.div
+                          key="initial-suggestions"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                        >
+                          <Suggestions
+                            suggestions={initialSuggestions}
+                            onSuggestionClick={handleSuggestionClick}
+                          />
+                        </motion.div>
+                      )
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : null}
 
-            <MessageInput
-              onSendMessage={(text) => {
-                if (!loading) {
-                  sendMessage(text);
-                  if (onTyping) onTyping(false);
+              <MessageInput
+                onSendMessage={(text) => {
+                  if (!loading) {
+                    sendMessage(text);
+                    if (onTyping) onTyping(false);
+                  }
+                }}
+                loading={loading}
+                placeholder={
+                  sessionStatus === 'escalated' && !assignedTo
+                    ? t('chat.human_waiting')
+                    : t('chat.input_placeholder')
                 }
-              }}
-              loading={loading}
-              placeholder={
-                sessionStatus === 'escalated' && !assignedTo
-                  ? t('chat.human_waiting')
-                  : t('chat.input_placeholder')
-              }
-              connectionStatus={connectionStatus}
-              disabled={sessionStatus === 'escalated' && !assignedTo}
-              sendButtonColor={chatColors.sendButton}
-              inputBorderColor={chatColors.inputBorder}
-              inputFocusColor={chatColors.inputFocus}
-              previewMode={isPreview}
-              onProfileClick={isPreview ? null : () => setView('profile')}
-            />
+                connectionStatus={connectionStatus}
+                disabled={sessionStatus === 'escalated' && !assignedTo}
+                sendButtonColor={chatColors.sendButton}
+                inputBorderColor={chatColors.inputBorder}
+                inputFocusColor={chatColors.inputFocus}
+                previewMode={isPreview}
+                onProfileClick={isPreview ? null : () => setView('profile')}
+              />
 
-            {/* Legal Disclaimer */}
-            <div className="legal-disclaimer">
-              {t('chat.legal_prefix')}{' '}
-              <a
-                href="/policies/privacy-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="legal-link"
-              >
-                {t('chat.legal_privacy')}
-              </a>{' '}
-              {t('chat.legal_and')}{' '}
-              <a
-                href="/policies/cookie-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="legal-link"
-              >
-                {t('chat.legal_cookie')}
-              </a>
-              .
+              {/* Legal Disclaimer */}
+              <div className="legal-disclaimer">
+                {t('chat.legal_prefix')}{' '}
+                <a
+                  href="/policies/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="legal-link"
+                >
+                  {t('chat.legal_privacy')}
+                </a>{' '}
+                {t('chat.legal_and')}{' '}
+                <a
+                  href="/policies/cookie-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="legal-link"
+                >
+                  {t('chat.legal_cookie')}
+                </a>
+                .
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
 
-      <div id="jarbris-drawer-portal" className="drawer-portal-container" />
+          <div id="jarbris-drawer-portal" className="drawer-portal-container" />
 
-      {/* Close button - Hidden in profile view */}
-      {view !== 'profile' && (
-        <button
-          className="close-button"
-          aria-label={t('chat.minimize')}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isPreview && onMinimize) onMinimize();
-          }}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M18 6L6 18M6 6L18 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {/* Close button - Hidden in profile view */}
+          {view !== 'profile' && (
+            <button
+              className="close-button"
+              aria-label={t('chat.minimize')}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isPreview && onMinimize) onMinimize();
+              }}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
+
+          <AnimatePresence>
+            {activeProduct && (
+              <ProductDrawer
+                product={activeProduct}
+                searchId={activeProduct?.searchId}
+                onClose={() => setActiveProduct(null)}
+                isMobile={isMobile}
+                onProductAction={onProductAction}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Purchase Options Drawer — shown when a product with selling plans is added */}
+          {purchaseOptions.isDrawerOpen && (
+            <PurchaseOptionsDrawer
+              isOpen={purchaseOptions.isDrawerOpen}
+              requiresSellingPlan={purchaseOptions.requiresSellingPlan}
+              hasOneTimePurchase={purchaseOptions.hasOneTimePurchase}
+              availablePlans={purchaseOptions.availablePlans}
+              sellingPlanId={purchaseOptions.sellingPlanId}
+              variantId={purchaseOptions.variantId}
+              mode={purchaseOptions.mode}
+              onSelectPlan={purchaseOptions.selectPlan}
+              onSelectOneTime={purchaseOptions.selectOneTime}
+              addToCartBlocked={purchaseOptions.addToCartBlocked}
+              lng={activeLng}
+              onClose={purchaseOptions.closeDrawer}
+              onConfirm={() => {
+                // Called after AddToCartButton animation completes
+                handleProductCartAction(purchaseOptions.productId);
+                purchaseOptions.closeDrawer();
+              }}
             />
-          </svg>
-        </button>
-      )}
+          )}
 
-      <AnimatePresence>
-        {activeProduct && (
-          <ProductDrawer
-            product={activeProduct}
-            searchId={activeProduct?.searchId}
-            onClose={() => setActiveProduct(null)}
-            shopDomain={shopDomain}
-            isMobile={isMobile}
-            onProductAction={(action, payloadData) => {
-              if (action === 'add_to_cart') {
-                handleProductCartAction(payloadData?.id);
-              } else if (action === 'open_purchase_options_drawer') {
-                // Variant has been selected from ProductSheet, now open subscription drawer
-                setActiveProduct(null); // close variant sheet first
-                const defaultVariantId =
-                  payloadData?.variantId ||
-                  payloadData?.product?.variantId ||
-                  payloadData?.product?.variants?.[0]?.id;
-                purchaseOptions.openDrawer(payloadData?.product, defaultVariantId);
-              }
-            }}
+          <AnimatePresence>
+            {activeOrder && (
+              <Drawer
+                isOpen={!!activeOrder}
+                onClose={() => setActiveOrder(null)}
+                title={`Ordine #${normalizeOrderNumber(activeOrder.orderNumber)}`}
+              >
+                <OrderDetailCard order={activeOrder} theme="light" />
+              </Drawer>
+            )}
+          </AnimatePresence>
+
+          <ImageLightbox
+            isOpen={!!activeGallery}
+            images={activeGallery?.images}
+            currentIndex={activeGallery?.index || 0}
+            onClose={() => setActiveGallery(null)}
+            onNavigate={(newIndex) => setActiveGallery({ ...activeGallery, index: newIndex })}
           />
-        )}
-      </AnimatePresence>
 
-      {/* Purchase Options Drawer — shown when a product with selling plans is added */}
-      {purchaseOptions.isDrawerOpen && (
-        <PurchaseOptionsDrawer
-          isOpen={purchaseOptions.isDrawerOpen}
-          requiresSellingPlan={purchaseOptions.requiresSellingPlan}
-          hasOneTimePurchase={purchaseOptions.hasOneTimePurchase}
-          availablePlans={purchaseOptions.availablePlans}
-          sellingPlanId={purchaseOptions.sellingPlanId}
-          variantId={purchaseOptions.variantId}
-          shopDomain={shopDomain}
-          mode={purchaseOptions.mode}
-          onSelectPlan={purchaseOptions.selectPlan}
-          onSelectOneTime={purchaseOptions.selectOneTime}
-          addToCartBlocked={purchaseOptions.addToCartBlocked}
-          lng={activeLng}
-          onClose={purchaseOptions.closeDrawer}
-          onConfirm={() => {
-            // Called after AddToCartButton animation completes
-            handleProductCartAction(purchaseOptions.productId);
-            purchaseOptions.closeDrawer();
-          }}
-        />
+          {/* Checkout overlay — renders above chat when checkout is active */}
+          <AnimatePresence>
+            {checkoutState !== 'idle' && (
+              <CheckoutView
+                checkoutState={checkoutState}
+                checkoutMode={checkoutMode}
+                error={checkoutError}
+                onClose={closeCheckout}
+              />
+            )}
+          </AnimatePresence>
+        </ChatSessionProvider>
       )}
-
-      <AnimatePresence>
-        {activeOrder && (
-          <Drawer
-            isOpen={!!activeOrder}
-            onClose={() => setActiveOrder(null)}
-            title={`Ordine #${normalizeOrderNumber(activeOrder.orderNumber)}`}
-          >
-            <OrderDetailCard order={activeOrder} theme="light" />
-          </Drawer>
-        )}
-      </AnimatePresence>
-
-      <ImageLightbox
-        isOpen={!!activeGallery}
-        images={activeGallery?.images}
-        currentIndex={activeGallery?.index || 0}
-        onClose={() => setActiveGallery(null)}
-        onNavigate={(newIndex) => setActiveGallery({ ...activeGallery, index: newIndex })}
-      />
-
-      {/* Checkout overlay — renders above chat when checkout is active */}
-      <AnimatePresence>
-        {checkoutState !== 'idle' && (
-          <CheckoutView
-            checkoutState={checkoutState}
-            checkoutMode={checkoutMode}
-            error={checkoutError}
-            onClose={closeCheckout}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 };

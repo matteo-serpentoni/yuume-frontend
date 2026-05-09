@@ -13,6 +13,7 @@ import CartAction from '../Message/CartAction';
 import CrossSellBlock from '../Message/CrossSellBlock';
 import ErrorBoundary from '../UI/ErrorBoundary';
 import { useI18n } from '../../hooks/useI18n';
+import { useChatSession } from '../../contexts/useChatSession';
 import MessageFallback from './MessageFallback';
 import MessageBubble from './MessageBubble';
 import HumanThinking from './HumanThinking';
@@ -30,23 +31,19 @@ const MessageList = memo(
     loading,
     isThinking,
     thinkingIntent,
-    shopDomain,
-    sessionId,
-    visitorId,
     bootProfile,
     bootConsent,
     handleProfileUpdate,
     activeProduct,
-    setActiveProduct,
     activeOrder,
     setActiveOrder,
     sendMessage,
     handleSuggestionClick,
     sendFeedback,
     onImageClick,
-    onProductAction,
     onExpand,
   }) => {
+    const { shopDomain, sessionId, visitorId } = useChatSession();
     // Pre-compute the ID of the last message that has hasMore=true,
     // so the expand button is only rendered on the most recent product page.
     const lastExpandableId = (() => {
@@ -157,13 +154,9 @@ const MessageList = memo(
         return (
           <ProductCards
             message={msg}
-            shopDomain={shopDomain}
-            onOpen={setActiveProduct}
             onImageClick={onImageClick}
-            activeProduct={activeProduct}
             chatColors={chatColors}
             sendFeedback={sendFeedback}
-            onProductAction={onProductAction}
             sendMessage={sendMessage}
           />
         );
@@ -213,22 +206,14 @@ const MessageList = memo(
               successMessage={msg.message || msg.text}
               errorMessage={msg.errorMessage}
             />
-            {msg.crossSell && (
-              <CrossSellBlock
-                data={msg.crossSell}
-                shopDomain={shopDomain}
-                onOpen={setActiveProduct}
-              />
-            )}
+            {msg.crossSell && <CrossSellBlock data={msg.crossSell} />}
           </>
         );
       }
 
       // 5.7 Cross Sell Block (Standalone V2/V1 recommendations rendering)
       if (msg.type?.toLowerCase() === 'cross_sell_block') {
-        return msg.crossSell ? (
-          <CrossSellBlock data={msg.crossSell} shopDomain={shopDomain} onOpen={setActiveProduct} />
-        ) : null;
+        return msg.crossSell ? <CrossSellBlock data={msg.crossSell} /> : null;
       }
 
       // 6. Return Submitted (Final Step)

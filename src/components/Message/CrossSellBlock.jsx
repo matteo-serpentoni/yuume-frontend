@@ -12,9 +12,11 @@ import { ExternalLinkIcon, SparkleIcon, ChevronLeftIcon, ChevronRightIcon } from
 import { formatPrice } from '../../utils/messageHelpers';
 import { normalizeStorefrontProduct } from '../../utils/shopifyUtils';
 import { useI18n } from '../../hooks/useI18n';
+import { useChatSession } from '../../contexts/useChatSession';
 import './CrossSellBlock.css';
 
-const CrossSellCard = memo(({ product, shopDomain, index, onOpen }) => {
+const CrossSellCard = memo(({ product, index }) => {
+  const { setActiveProduct } = useChatSession();
   const t = useI18n();
   const normalized = normalizeStorefrontProduct(product);
   const {
@@ -67,7 +69,9 @@ const CrossSellCard = memo(({ product, shopDomain, index, onOpen }) => {
 
         <div className="jarbris-xs-price-row">
           {onSale && (
-            <span className="jarbris-xs-original-price">{formatPrice(compareAtPrice, currency)}</span>
+            <span className="jarbris-xs-original-price">
+              {formatPrice(compareAtPrice, currency)}
+            </span>
           )}
           <span className="jarbris-xs-price">{formatPrice(price, currency)}</span>
         </div>
@@ -79,7 +83,7 @@ const CrossSellCard = memo(({ product, shopDomain, index, onOpen }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (onOpen) onOpen(product);
+                if (setActiveProduct) setActiveProduct(product);
               }}
               aria-label={`View options for ${name}`}
             >
@@ -88,12 +92,7 @@ const CrossSellCard = memo(({ product, shopDomain, index, onOpen }) => {
           ) : (
             variants[0]?.id && (
               <div className="jarbris-xs-atc-wrapper">
-                <AddToCartButton
-                  variantId={variants[0].id}
-                  shopDomain={shopDomain}
-                  quantity={1}
-                  compact={true}
-                />
+                <AddToCartButton variantId={variants[0].id} quantity={1} compact={true} />
               </div>
             )
           )
@@ -112,7 +111,7 @@ CrossSellCard.displayName = 'CrossSellCard';
  *
  * @param {{ data: { title: string, vertical: string, products: Object[] }, shopDomain: string }} props
  */
-const CrossSellBlock = memo(({ data, shopDomain, onOpen }) => {
+const CrossSellBlock = memo(({ data }) => {
   const scrollRef = useRef(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -174,9 +173,7 @@ const CrossSellBlock = memo(({ data, shopDomain, onOpen }) => {
             <CrossSellCard
               key={product.id || product.productId || index}
               product={product}
-              shopDomain={shopDomain}
               index={index}
-              onOpen={onOpen}
             />
           ))}
         </div>
