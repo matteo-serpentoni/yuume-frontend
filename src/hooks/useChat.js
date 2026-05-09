@@ -4,6 +4,7 @@ import { sendMessage, ChatApiError, bootSession, submitFeedback } from '../servi
 import { reportError } from '../services/errorApi';
 import { predictIntent } from '../utils/messageHelpers';
 import { broadcastConsentChange } from '../utils/consentBridge';
+import { setContext as setTrackingContext, trackEvent } from '../services/trackingService.js';
 import storage from '../utils/storage';
 import { t, setLng } from '../i18n';
 
@@ -98,7 +99,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
   const [assignedTo, setAssignedTo] = useState(null);
   const [shopifyCustomer, setShopifyCustomer] = useState(null); // In-memory only (GDPR: PII not persisted to localStorage)
-  const [analyticsConsent, setAnalyticsConsent] = useState(false); // Controlled by storefront parent postMessage
   const [initialSuggestions, setInitialSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
@@ -245,9 +245,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
         }
 
         const customer = event.data.customer || event.data.shopifyCustomer;
-        if (typeof event.data.analyticsConsent === 'boolean') {
-          setAnalyticsConsent(event.data.analyticsConsent);
-        }
 
         if (customer) {
           setShopifyCustomer(customer);
@@ -259,6 +256,15 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
         // Mark identity as ready — triggers boot API call
         setIdentityReady(true);
+
+        // Product Interaction Tracking V1: set tracking context with resolved identity
+        setTrackingContext({
+          siteId: shopDomain || null,
+          sessionId: event.data.sessionId || sessionId,
+          visitorId: event.data.visitorId || visitorId || null,
+          shopifyCustomerId: customer?.id?.toString() || null,
+          widgetToken: new URLSearchParams(window.location.search).get('widgetToken') || '',
+        });
       }
 
       if (event.data?.type === 'JARBRIS:devResetSession') {
@@ -289,7 +295,7 @@ export const useChat = (devShopDomain, customer, options = {}) => {
     window.parent?.postMessage({ type: 'JARBRIS:getCart' }, '*');
 
     return () => window.removeEventListener('message', handleMessage);
-  }, [disabled, clearChat]);
+  }, [disabled, clearChat, sessionId, shopDomain, visitorId]);
 
   // Sync bootConsent when the user toggles the privacy preference in ProfileView.
   // broadcastConsentChange dispatches 'jarbris:analytics-consent-changed' so we
@@ -297,7 +303,6 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   useEffect(() => {
     const handleConsentChange = (e) => {
       setBootConsent((prev) => ({ ...(prev || {}), analytics: e.detail.analyticsConsent }));
-      setAnalyticsConsent(e.detail.analyticsConsent);
     };
     window.addEventListener('jarbris:analytics-consent-changed', handleConsentChange);
     return () =>
@@ -501,35 +506,18 @@ export const useChat = (devShopDomain, customer, options = {}) => {
   }, [identityReady, sessionId, visitorId, disabled, shopDomain]);
 
   // Widget Event Emitter
+  // Product Interaction Tracking V1: delegates to centralized trackingService.
+  // Kept as a wrapper for backward compatibility with existing callers.
   const trackWidgetEvent = useCallback(
     (eventType, properties = {}) => {
-      const isTechnical = CONSENT_EXEMPT_EVENTS.has(eventType);
-      if (!isTechnical && (!analyticsConsent || disabled)) return;
-      if (disabled) return; // Even technical events are suppressed in preview/disabled mode
-      // B23: suppress events until identity is ready — prevents null sessionId/anonId 500s
+      if (disabled) return;
+      // B23: suppress events until identity is ready
       if (!identityReady) return;
 
-      const payload = {
-        siteId: shopDomain || 'unknown', // Proxy used by middleware
-        sessionId,
-        source: 'widget',
-        identity: {
-          anonId: visitorId || sessionId, // B22: visitorId is persistent, sessionId is fallback
-          shopifyCustomerId: shopifyCustomer?.id?.toString() || undefined,
-        },
-        events: [{ eventType, ...properties }],
-      };
-
-      fetch(`${API_URL}/api/events`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Widget-Token': new URLSearchParams(window.location.search).get('widgetToken') || '',
-        },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
+      // Delegate to trackingService (handles consent, sendBeacon, etc.)
+      trackEvent(eventType, properties.eventData || properties);
     },
-    [analyticsConsent, disabled, identityReady, shopDomain, sessionId, visitorId, shopifyCustomer],
+    [disabled, identityReady],
   );
 
   const sendChatMessage = useCallback(
@@ -696,7 +684,10 @@ export const useChat = (devShopDomain, customer, options = {}) => {
       const queryText = suggestion.value || suggestion.label;
 
       // B28: Intercept client-only system chip actions
-      if (queryText?.startsWith('_SYS_ADD_TO_CART_:') || queryText?.startsWith('_SYS_OPEN_DRAWER_:')) {
+      if (
+        queryText?.startsWith('_SYS_ADD_TO_CART_:') ||
+        queryText?.startsWith('_SYS_OPEN_DRAWER_:')
+      ) {
         if (onSystemChipAction) {
           onSystemChipAction(suggestion.action, suggestion.payload || {});
         }

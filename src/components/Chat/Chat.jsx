@@ -151,7 +151,11 @@ const Chat = ({
         const numericVariantId = extractVariantId(resolvedVariantId);
         if (numericVariantId) {
           window.parent?.postMessage(
-            { type: 'JARBRIS:addToCart', variantId: numericVariantId, quantity: payload.quantity || 1 },
+            {
+              type: 'JARBRIS:addToCart',
+              variantId: numericVariantId,
+              quantity: payload.quantity || 1,
+            },
             '*',
           );
         }
@@ -510,6 +514,7 @@ const Chat = ({
         {activeProduct && (
           <ProductDrawer
             product={activeProduct}
+            searchId={activeProduct?.searchId}
             onClose={() => setActiveProduct(null)}
             shopDomain={shopDomain}
             isMobile={isMobile}

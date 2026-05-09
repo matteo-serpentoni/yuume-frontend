@@ -8,6 +8,7 @@ import {
   monitorPopup,
   ensureBridgeListener,
 } from '../services/checkoutService';
+import { trackEvent } from '../services/trackingService.js';
 
 /**
  * useCheckout — Manages the Shopify checkout lifecycle.
@@ -162,6 +163,11 @@ export function useCheckout({ onCartReset, onAddMessage } = {}) {
         setCheckoutMode('popup');
         setCheckoutState('presenting');
 
+        // Product Interaction Tracking V1: checkout_clicked
+        trackEvent('checkout_clicked', {
+          cartItemCount: urlResult.itemCount || null,
+        });
+
         // Monitor popup for closure
         popupCleanupRef.current = monitorPopup(popup, handlePopupClosed);
       } else {
@@ -169,6 +175,11 @@ export function useCheckout({ onCartReset, onAddMessage } = {}) {
         setCheckoutMode('newtab');
         setCheckoutState('presenting');
         openCheckoutNewTab();
+
+        // Product Interaction Tracking V1: checkout_clicked (newtab fallback)
+        trackEvent('checkout_clicked', {
+          cartItemCount: urlResult.itemCount || null,
+        });
 
         // Return to idle after a brief moment (user is in another tab)
         completionTimerRef.current = setTimeout(() => {

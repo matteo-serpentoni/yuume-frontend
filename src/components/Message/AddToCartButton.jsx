@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, memo } from 'react';
 import { extractVariantId } from '../../utils/shopifyUtils';
 import { useI18n } from '../../hooks/useI18n';
+import { trackEvent } from '../../services/trackingService.js';
 import './AddToCartButton.css';
 
 import { BRIDGE_CONFIG } from '../../config/bridge';
@@ -15,6 +16,8 @@ const AddToCartButton = memo(
     onError,
     onAnimationComplete,
     compact = false,
+    searchId = null,
+    productId = null,
   }) => {
     const t = useI18n();
     const buttonRef = useRef(null);
@@ -32,12 +35,35 @@ const AddToCartButton = memo(
         const numericVariantId = extractVariantId(variantId);
 
         if (!numericVariantId) {
+          trackEvent('add_to_cart_failed', {
+            searchId,
+            productId,
+            variantId: variantId || null,
+            quantity,
+            reason: 'missing_variant_selection',
+          });
           throw new Error('Variant ID non valido');
         }
 
         if (!shopDomain) {
+          trackEvent('add_to_cart_failed', {
+            searchId,
+            productId,
+            variantId: numericVariantId,
+            quantity,
+            reason: 'shopify_cart_error',
+            errorCode: 'missing_shop_domain',
+          });
           throw new Error('Shop domain non disponibile');
         }
+
+        // Product Interaction Tracking V1: add_to_cart_clicked
+        trackEvent('add_to_cart_clicked', {
+          searchId,
+          productId,
+          variantId: numericVariantId,
+          quantity,
+        });
 
         // Invece di fare la fetch, invia un messaggio al parent
         const cartPayload = {
@@ -57,8 +83,25 @@ const AddToCartButton = memo(
             window.removeEventListener('message', handleResponse);
 
             if (event.data.success) {
+              // Product Interaction Tracking V1: add_to_cart_success
+              trackEvent('add_to_cart_success', {
+                searchId,
+                productId,
+                variantId: numericVariantId,
+                quantity,
+                cartItemCount: event.data.data?.item_count || null,
+              });
               if (onSuccess) onSuccess(event.data.data);
             } else {
+              // Product Interaction Tracking V1: add_to_cart_failed
+              trackEvent('add_to_cart_failed', {
+                searchId,
+                productId,
+                variantId: numericVariantId,
+                quantity,
+                reason: 'shopify_cart_error',
+                errorCode: event.data.error || null,
+              });
               if (onError) onError(new Error(event.data.error));
             }
           }
@@ -285,7 +328,10 @@ const AddToCartButton = memo(
 
     return (
       <div className={`jarbris-add-to-cart-container ${compact ? 'compact' : ''}`}>
-        <button className={`add-to-cart ${compact ? 'jarbris-add-to-cart-btn' : ''}`} ref={buttonRef}>
+        <button
+          className={`add-to-cart ${compact ? 'jarbris-add-to-cart-btn' : ''}`}
+          ref={buttonRef}
+        >
           <span>{t('product.add_to_cart_chip')}</span>
           <svg className="morph" viewBox="0 0 64 13">
             <path d="M0 12C6 12 17 12 32 12C47.9024 12 58 12 64 12V13H0V12Z" />

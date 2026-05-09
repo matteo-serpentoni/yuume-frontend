@@ -1,4 +1,4 @@
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState, useMemo, useEffect, useRef } from 'react';
 // eslint-disable-next-line no-unused-vars -- motion.div used in JSX
 import { motion } from 'framer-motion';
 import AddToCartButton from './AddToCartButton';
@@ -17,6 +17,8 @@ import {
   InfoIcon,
   ImagePlaceholderIcon,
 } from '../UI/Icons';
+import { trackEvent, sanitizeQuery } from '../../services/trackingService.js';
+import { useProductViewTracker } from '../../hooks/useProductViewTracker.js';
 
 // Re-export ProductDrawer from ProductSheet for backward-compatible imports in Chat.jsx
 export { default as ProductDrawer } from './ProductSheet';
@@ -58,9 +60,36 @@ function resolvePurchaseOptionBadge(purchaseOptions, requiresSellingPlan) {
 }
 
 const ProductCard = memo(
-  ({ product, index, onOpen, onImageClick, shopDomain, onProductAction }) => {
+  ({
+    product,
+    index,
+    onOpen,
+    onImageClick,
+    shopDomain,
+    onProductAction,
+    observeCard,
+    unobserveCard,
+    searchId,
+    query,
+  }) => {
     const [isFlipped, setIsFlipped] = useState(false);
     const t = useI18n();
+    const cardRef = useRef(null);
+
+    // Register card with IntersectionObserver for view tracking
+    useEffect(() => {
+      const el = cardRef.current;
+      if (el && observeCard) {
+        observeCard(el, {
+          productId: product.productId || product.id,
+          position: index,
+          query: query || null,
+        });
+      }
+      return () => {
+        if (el && unobserveCard) unobserveCard(el);
+      };
+    }, [product.productId, product.id, index, query, observeCard, unobserveCard]);
 
     // 2c: Memoize normalization — normalizeStorefrontProduct is a non-trivial transform
     // and ProductCard re-renders when the parent carousel re-renders (scroll events).
@@ -99,7 +128,7 @@ const ProductCard = memo(
     const galleryImages = allImages && allImages.length > 0 ? allImages : image ? [image] : [];
 
     return (
-      <div className="jarbris-product-card-perspective">
+      <div className="jarbris-product-card-perspective" ref={cardRef}>
         <motion.div
           className={`jarbris-product-card-minimal ${isFlipped ? 'is-flipped' : ''} clickable`}
           role="button"
@@ -118,11 +147,29 @@ const ProductCard = memo(
             rotateY: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
           }}
           style={{ transformStyle: 'preserve-3d' }}
-          onClick={!isFlipped && hasVariants ? () => onOpen(product) : undefined}
+          onClick={
+            !isFlipped && hasVariants
+              ? () => {
+                  trackEvent('product_card_clicked', {
+                    searchId: searchId || null,
+                    productId: product.productId || product.id,
+                    position: index,
+                    query: sanitizeQuery(query),
+                  });
+                  onOpen({ ...product, searchId: searchId || null });
+                }
+              : undefined
+          }
           onKeyDown={(e) => {
             if (!isFlipped && hasVariants && (e.key === 'Enter' || e.key === ' ')) {
               e.preventDefault();
-              onOpen(product);
+              trackEvent('product_card_clicked', {
+                searchId: searchId || null,
+                productId: product.productId || product.id,
+                position: index,
+                query: sanitizeQuery(query),
+              });
+              onOpen({ ...product, searchId: searchId || null });
             }
           }}
         >
@@ -275,7 +322,7 @@ const ProductCard = memo(
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
-                            onOpen(product);
+                            onOpen({ ...product, searchId: searchId || null });
                           }}
                         >
                           <span>{t('product.add_to_cart')}</span>
@@ -305,6 +352,8 @@ const ProductCard = memo(
                         shopDomain={shopDomain}
                         quantity={1}
                         compact={true}
+                        searchId={searchId || null}
+                        productId={product.productId || product.id}
                         onAnimationComplete={() =>
                           onProductAction &&
                           onProductAction('add_to_cart', { id: product.productId || product.id })
@@ -384,11 +433,30 @@ const ProductCard = memo(
 
 const ProductCards = memo(
   ({ message, shopDomain, onOpen, onImageClick, chatColors, sendFeedback, onProductAction }) => {
-    const { products = [], message: displayMessage } = message;
+    const { products = [], message: displayMessage, searchId, query } = message;
     const scrollRef = React.useRef(null);
     const [showLeftArrow, setShowLeftArrow] = React.useState(false);
     const [showRightArrow, setShowRightArrow] = React.useState(true);
     const t = useI18n();
+
+    // Product Interaction Tracking V1: IntersectionObserver-based view tracking
+    const { observeCard, unobserveCard } = useProductViewTracker({
+      searchId,
+      rootRef: scrollRef,
+    });
+
+    // Product Interaction Tracking V1: emit product_cards_rendered on mount
+    useEffect(() => {
+      if (products.length > 0) {
+        trackEvent('product_cards_rendered', {
+          searchId: searchId || null,
+          productIds: products.map((p) => p.productId || p.id).filter(Boolean),
+          renderedCount: products.length,
+        });
+      }
+      // Only emit once on mount — products array identity is stable per message
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchId]);
 
     const checkScroll = () => {
       if (scrollRef.current) {
@@ -448,7 +516,13 @@ const ProductCards = memo(
           {showLeftArrow && (
             <button
               className="jarbris-carousel-nav-btn prev"
-              onClick={() => scroll('prev')}
+              onClick={() => {
+                trackEvent('carousel_prev_clicked', {
+                  searchId: searchId || null,
+                  currentIndex: Math.max(0, Math.round((scrollRef.current?.scrollLeft || 0) / 252)),
+                });
+                scroll('prev');
+              }}
               aria-label="Prodotto precedente"
             >
               <ChevronLeftIcon size={16} />
@@ -465,6 +539,10 @@ const ProductCards = memo(
                 onImageClick={onImageClick}
                 shopDomain={shopDomain}
                 onProductAction={onProductAction}
+                observeCard={observeCard}
+                unobserveCard={unobserveCard}
+                searchId={searchId}
+                query={query}
               />
             ))}
           </div>
@@ -472,7 +550,13 @@ const ProductCards = memo(
           {showRightArrow && products.length > 1 && (
             <button
               className="jarbris-carousel-nav-btn next"
-              onClick={() => scroll('next')}
+              onClick={() => {
+                trackEvent('carousel_next_clicked', {
+                  searchId: searchId || null,
+                  currentIndex: Math.round((scrollRef.current?.scrollLeft || 0) / 252),
+                });
+                scroll('next');
+              }}
               aria-label="Prodotto successivo"
             >
               <ChevronRightIcon size={16} />
