@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
-import { sendMessage, ChatApiError, bootSession, submitFeedback } from '../services/chatApi';
+import {
+  sendMessage,
+  ChatApiError,
+  bootSession,
+  submitFeedback,
+  updateProfile,
+} from '../services/chatApi';
 import { reportError } from '../services/errorApi';
 import { predictIntent } from '../utils/messageHelpers';
 import { broadcastConsentChange } from '../utils/consentBridge';
@@ -360,6 +366,34 @@ export const useChat = (devShopDomain, customer, options = {}) => {
 
         if (bootData.requiresReConsent) {
           setRequiresReConsent(true);
+        }
+
+        // Auto-recovery: if backend lost the profile (DB restore, data loss) but
+        // localStorage still has it, re-sync to re-establish the identity link.
+        // Fire-and-forget — failure is non-critical (user can still save manually).
+        if (!bootData.profile?.email) {
+          const cachedProfile = storage.getProfile();
+          if (cachedProfile?.email) {
+            const currentSid = bootData.resolvedSessionId || sessionId;
+            updateProfile(currentSid, shopDomain, {
+              name: cachedProfile.name || '',
+              email: cachedProfile.email,
+              visitorId,
+            })
+              .then((result) => {
+                if (result?.profile) {
+                  setBootProfile(result.profile);
+                  storage.setProfile(result.profile);
+                }
+                if (result?.consent) {
+                  setBootConsent(result.consent);
+                  broadcastConsentChange(result.consent.analytics === true);
+                }
+              })
+              .catch(() => {
+                /* non-critical — user can save manually */
+              });
+          }
         }
 
         // Sync message history if available

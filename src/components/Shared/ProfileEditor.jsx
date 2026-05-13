@@ -46,6 +46,13 @@ const ProfileEditor = ({
     if (initialProfile?.isIdentified && !isIdentified) setIsIdentified(true);
   }, [initialProfile]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Sync consent toggle when boot data arrives after mount
+  useEffect(() => {
+    if (initialConsent?.analytics !== undefined) {
+      setAnalyticsConsent(initialConsent.analytics);
+    }
+  }, [initialConsent?.analytics]);
+
   useEffect(() => {
     return () => {
       if (privacyErrorTimerRef.current) clearTimeout(privacyErrorTimerRef.current);
@@ -273,9 +280,7 @@ const ProfileEditor = ({
           <div className="profile-editor-privacy-row">
             <div className="profile-editor-privacy-label-wrapper">
               <p className="profile-editor-privacy-title">{t('profile.privacy_title')}</p>
-              <p className="profile-editor-privacy-desc">
-                {t('profile.privacy_desc')}
-              </p>
+              <p className="profile-editor-privacy-desc">{t('profile.privacy_desc')}</p>
             </div>
 
             <button

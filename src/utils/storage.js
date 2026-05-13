@@ -84,10 +84,11 @@ function clearSession() {
   try {
     const preserve = new Set([
       PREFIX + 'profile',
+      PREFIX + 'analytics_consent',
       PREFIX + 'dev_shop_domain',
       PREFIX + 'dev_show_storefront',
       PREFIX + 'dev_storefront_theme',
-      PREFIX + 'dev_lng_override'
+      PREFIX + 'dev_lng_override',
     ]);
     Object.keys(localStorage).forEach((key) => {
       if (key.startsWith(PREFIX) && !preserve.has(key)) {
