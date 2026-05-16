@@ -18,7 +18,7 @@
  * @module utils/consentBridge
  */
 
-export const CONSENT_STORAGE_KEY = 'jarbris_analytics_consent';
+const CONSENT_STORAGE_KEY = 'jarbris_analytics_consent';
 
 /**
  * Read the boot-time consent value from localStorage.
