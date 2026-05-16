@@ -1,9 +1,12 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
-      "source": "/widget/assets/(.*)",
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -12,7 +15,7 @@
       ]
     },
     {
-      "source": "/widget/(index.html|jarbris-tracker.js)",
+      "source": "/(index.html|jarbris-tracker.js)",
       "headers": [
         {
           "key": "Cache-Control",

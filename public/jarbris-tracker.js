@@ -16,7 +16,7 @@
 
   const CONFIG = window.JarbrisConfig || {};
   const SITE_ID = CONFIG.siteId;
-  const API_BASE = CONFIG.apiBase || 'https://api.yuume.ai';
+  const API_BASE = CONFIG.apiBase || 'https://api.jarbris.com';
 
   if (!SITE_ID) {
     console.warn('[Jarbris] Missing siteId in configuration');

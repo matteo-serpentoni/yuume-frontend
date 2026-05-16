@@ -9,10 +9,10 @@ export const BRIDGE_CONFIG = {
   whitelist: [
     'http://localhost:5173', // Local Dev
     'http://localhost:5001', // Local API
-    'https://yuumechat.com',
-    'https://widget.yuumechat.com',
+    'https://app.jarbris.com',
+    'https://widget.jarbris.com',
     'https://jarbris-widget.vercel.app',
-    'https://jarbris-dashboard.vercel.app',
+    'https://jarbris-app.vercel.app',
     'https://cdn.shopify.com', // Shopify Previews
   ],
 
