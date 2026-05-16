@@ -6,6 +6,22 @@ import AppInstalled from './components/AppInstalled/AppInstalled';
 const ORB_STATE_KEY = 'jarbris_orb_enlarged';
 
 function App() {
+  // Detect if running in proper embedded context
+  const isEmbedded = (() => {
+    try {
+      return window.self !== window.top;
+    } catch {
+      return true; // cross-origin iframe = embedded
+    }
+  })();
+
+  const params = new URLSearchParams(window.location.search);
+  const hasEmbedParam = params.has('embed');
+  const isAllowedRoute = ['/orb-preview', '/widget/orb-preview', '/app/installed'].includes(
+    window.location.pathname,
+  );
+  const isDirectAccess = !isEmbedded && !hasEmbedParam && !isAllowedRoute && import.meta.env.PROD;
+
   const [enlarged, setEnlarged] = useState(() => {
     try {
       return localStorage.getItem(ORB_STATE_KEY) === 'true';
@@ -109,6 +125,8 @@ function App() {
       ? import('./components/Dev/MockStorefront')
       : Promise.resolve({ default: () => null }),
   );
+
+  if (isDirectAccess) return null;
 
   return (
     <Router basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
