@@ -1,11 +1,24 @@
+import process from 'node:process';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Upload source maps to Sentry on production builds
+    mode === 'production' &&
+      sentryVitePlugin({
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT || 'jarbris-widget',
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        release: { name: process.env.SENTRY_RELEASE },
+      }),
+  ].filter(Boolean),
   base: '/',
   build: {
+    sourcemap: 'hidden', // Generate source maps for Sentry but don't expose to browser
     minify: 'esbuild',
     rollupOptions: {
       output: {

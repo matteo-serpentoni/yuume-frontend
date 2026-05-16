@@ -1,4 +1,6 @@
-import './wdyr'; // Must be first — patches React for re-render tracking (dev only)
+// Sentry must be initialized before any other imports
+import './instrument';
+import './wdyr'; // Must be second — patches React for re-render tracking (dev only)
 import './config/bridgeMock.dev'; // Dev-only: simulates Shopify cart bridge
 import ReactDOM from 'react-dom/client';
 import './index.css';

@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Sentry from '@sentry/react';
 import { reportError } from '../../services/errorApi';
 
 /**
@@ -17,6 +18,11 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
+    // Report to Sentry
+    Sentry.captureException(error, {
+      contexts: { react: { componentStack: errorInfo?.componentStack } },
+    });
+
     // Report to server via service
     reportError({
       message: error?.message || 'Unknown error',
